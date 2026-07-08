@@ -3,3 +3,8 @@ dist
 .env
 .env.local
 .DS_Store
+
+# gerado localmente (regenera com scripts/gen-seed-sql.mjs) — não versionar
+supabase/seed.sql
+# notas de trabalho locais
+CONTEXTO.md
