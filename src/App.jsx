@@ -492,21 +492,29 @@ function PomodoroView({ pomo, setPomo, disciplines, discById, registerStudy }) {
 /* ============================ RAIO-X ============================ */
 function RaioXView({ disciplines }) {
   const C = useC();
+  if (!disciplines.length) return <div><PageTitle>Raio-X da prova</PageTitle><Empty msg="Edital ainda não carregado." /></div>;
   const byPeso = [...disciplines].sort((a, b) => b.peso - a.peso);
-  const ti = disciplines.find((d) => d.name.startsWith("Tecnologia"));
+  const total = disciplines.reduce((a, d) => a + d.peso, 0);
+  const maxPeso = byPeso[0].peso || 1;
+  const top = byPeso[0];
+  const topPct = total ? Math.round((top.peso / total) * 100) : 0;
+  const top3 = byPeso.slice(0, 3);
+  const maxHit = Math.max(1, ...(top.topics || []).map((t) => t.hits || 0));
   return (
     <div>
-      <PageTitle sub="Raio-x inicial da trilha Dataprev com foco em Arquitetura, usando prova real e assuntos de maior recorrência.">Raio-X da prova</PageTitle>
+      <PageTitle sub="Raio-X do edital: peso de cada disciplina e os assuntos de maior incidência, para priorizar o estudo.">Raio-X da prova</PageTitle>
       <Card className="mb-4">
-        <div className="text-sm font-semibold mb-1">Peso de cada disciplina (100 pontos)</div>
-        <p className="text-xs mb-4" style={{ color: C.muted }}>Só a prova de <b>Tecnologia da Informação</b> vale 52,5 pontos — mais que todo o resto somado.</p>
-        {byPeso.map((d) => (<div key={d.id} className="py-1.5"><div className="flex justify-between text-sm mb-1"><span className="font-medium flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full" style={{ background: d.color }} />{d.name}</span><span style={{ color: C.muted }}>{d.peso} pts · {d.q}q</span></div><div className="h-2 rounded-full overflow-hidden" style={{ background: C.line }}><div className="h-full rounded-full" style={{ width: `${(d.peso / 52.5) * 100}%`, background: d.color }} /></div></div>))}
+        <div className="text-sm font-semibold mb-1">Peso de cada disciplina ({total} pontos)</div>
+        <p className="text-xs mb-4" style={{ color: C.muted }}>A disciplina de maior peso é <b>{top.name}</b>: {top.peso} de {total} pontos ({topPct}%).</p>
+        {byPeso.map((d) => (<div key={d.id} className="py-1.5"><div className="flex justify-between text-sm mb-1"><span className="font-medium flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full" style={{ background: d.color }} />{d.name}</span><span style={{ color: C.muted }}>{d.peso} pts · {d.q}q</span></div><div className="h-2 rounded-full overflow-hidden" style={{ background: C.line }}><div className="h-full rounded-full" style={{ width: `${(d.peso / maxPeso) * 100}%`, background: d.color }} /></div></div>))}
       </Card>
-      {ti && (<Card className="mb-4"><div className="text-sm font-semibold mb-1 flex items-center gap-2"><Crosshair size={16} color={C.gold} /> Dentro de TI — o que mais caiu (70 questões analisadas)</div><p className="text-xs mb-4" style={{ color: C.muted }}>Banco de Dados e as linguagens (Python, Java, TypeScript) dominam. Priorize por aqui.</p>{[...ti.topics].sort((a, b) => b.hits - a.hits).map((t) => (<div key={t.id} className="py-1.5"><div className="flex justify-between text-sm mb-1"><span className="flex-1 min-w-0 pr-2">{t.name}</span><span className="shrink-0 font-semibold" style={{ color: t.hits >= 8 ? C.red : t.hits >= 4 ? C.gold : C.muted }}>{t.hits} q</span></div><div className="h-2 rounded-full overflow-hidden" style={{ background: C.line }}><div className="h-full rounded-full" style={{ width: `${(t.hits / 20) * 100}%`, background: t.hits >= 8 ? C.red : t.hits >= 4 ? C.gold : C.ink }} /></div></div>))}</Card>)}
-      <Card><div className="text-sm font-semibold mb-2">Estratégia sugerida</div><ul className="text-sm space-y-2" style={{ color: C.inkSoft }}><li>• <b>TI é prioridade absoluta</b> (52,5%). Dentro dela: Banco de Dados, depois Python/Java/TypeScript e estrutura de dados.</li><li>• <b>Português</b> vale 15 pts — foque interpretação, concordância, crase, pontuação e colocação pronominal.</li><li>• <b>Corte de 50%:</b> ≥50% no total, ≥50% nos Básicos e ≥50% nos Específicos, sem zerar nenhuma disciplina.</li><li>• Bancários e Estatística (7,5 pts cada) têm padrão repetitivo — bom custo-benefício.</li></ul></Card>
+      {top.topics && top.topics.length > 0 && (<Card className="mb-4"><div className="text-sm font-semibold mb-1 flex items-center gap-2"><Crosshair size={16} color={C.gold} /> Dentro de {top.name} — assuntos por incidência</div><p className="text-xs mb-4" style={{ color: C.muted }}>É a disciplina que mais vale pontos. Priorize os assuntos do topo.</p>{[...top.topics].sort((a, b) => b.hits - a.hits).map((t) => (<div key={t.id} className="py-1.5"><div className="flex justify-between text-sm mb-1"><span className="flex-1 min-w-0 pr-2">{t.name}</span><span className="shrink-0 font-semibold" style={{ color: t.hits >= 8 ? C.red : t.hits >= 4 ? C.gold : C.muted }}>{t.hits} q</span></div><div className="h-2 rounded-full overflow-hidden" style={{ background: C.line }}><div className="h-full rounded-full" style={{ width: `${(t.hits / maxHit) * 100}%`, background: t.hits >= 8 ? C.red : t.hits >= 4 ? C.gold : C.ink }} /></div></div>))}</Card>)}
+      <Card><div className="text-sm font-semibold mb-2">Estratégia sugerida</div><ul className="text-sm space-y-2" style={{ color: C.inkSoft }}><li>• <b>{top.name}</b> é prioridade: {topPct}% dos {total} pontos.</li><li>• Maiores pesos: {top3.map((d) => `${d.name} (${d.peso} pts)`).join(", ")}.</li><li>• Busque <b>≥50%</b> no total e não zere nenhuma disciplina.</li><li>• Comece pelos assuntos de maior incidência (marcados em vermelho/dourado no edital).</li></ul></Card>
     </div>
   );
 }
+
+
 
 /* ============================ CICLO ============================ */
 function CicloView({ cycle, setCycle, disciplines, discById, registerStudy }) {
