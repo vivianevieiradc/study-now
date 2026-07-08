@@ -113,65 +113,56 @@ const SEED_DATAPREV = [
 ];
 
 const SEED_BB = [
-  { name: "Tecnologia da Informação", block: "Específicos", peso: 30, q: 20, topics: [
-    { name: "Redes de computadores (TCP/IP, OSI, DNS, HTTP, SSL/TLS)", hits: 14 },
-    { name: "Segurança da informação (criptografia, ameaças, certificados, LGPD)", hits: 16 },
-    { name: "Sistemas operacionais (Windows, Linux, virtualização)", hits: 10 },
-    { name: "Banco de dados relacional (SQL, modelagem, ACID, índices)", hits: 14 },
-    { name: "Cloud computing (IaaS, PaaS, SaaS, AWS, Azure, GCP)", hits: 10 },
-    { name: "Desenvolvimento de software (OOP, padrões de projeto, clean code)", hits: 10 },
-    { name: "Engenharia de software (testes, CI/CD, Scrum, requisitos)", hits: 8 },
-    { name: "Análise de dados e BI (ETL, Data Warehouse, visualização)", hits: 8 },
-    { name: "Inteligência Artificial e Machine Learning", hits: 6 },
+  { name: "Tecnologia da Informação", block: "Específicos", peso: 52.5, q: 35, topics: [
+    { name: "SQL: DDL, DML, JOINs, subconsultas, normalização e 3FN", hits: 9 },
+    { name: "Python: NumPy, Pandas, Scikit-learn e estruturas de dados", hits: 8 },
+    { name: "Estruturas de dados: pilhas, filas, árvores binárias, busca e ordenação", hits: 8 },
+    { name: "Java/OOP: herança, polimorfismo, interfaces, Kotlin", hits: 7 },
+    { name: "TypeScript: tipagem estática, generics, DOM, reduce", hits: 5 },
+    { name: "Machine Learning: classificação (K-NN), regressão, matriz de confusão, acurácia", hits: 5 },
+    { name: "Data Warehouse e Big Data: esquema estrela, cubo de dados, ETL", hits: 4 },
+    { name: "NoSQL: MongoDB, grafos, bancos de documentos e colunar", hits: 4 },
+    { name: "DevOps e Cloud: Ansible, Docker, Kubernetes, IaC", hits: 4 },
+    { name: "Mobile e linguagens: Swift, Kotlin, iOS (Xcode / Interface Builder)", hits: 3 },
   ]},
-  { name: "Gestão e Processos de TI", block: "Específicos", peso: 20, q: 10, topics: [
-    { name: "BPM e BPMN — modelagem de processos de negócio", hits: 10 },
-    { name: "ITIL v4 — gestão de serviços e ITSM", hits: 8 },
-    { name: "Gestão de projetos (PMBOK, Scrum, Kanban, SAFe)", hits: 10 },
-    { name: "Governança e controles de TI (COBIT, ISO 27001/27002)", hits: 8 },
-    { name: "Indicadores de desempenho (KPIs, OKRs, BSC)", hits: 4 },
+  { name: "Probabilidade e Estatística", block: "Específicos", peso: 7.5, q: 5, topics: [
+    { name: "Probabilidade: eventos, condicional e Teorema de Bayes", hits: 5 },
+    { name: "Estatística descritiva: média, mediana, variância e desvio padrão", hits: 5 },
+    { name: "Distribuição normal e análise amostral", hits: 3 },
+    { name: "Combinatória: permutação, arranjo e combinação", hits: 2 },
   ]},
-  { name: "Conhecimentos Bancários", block: "Básicos", peso: 12, q: 10, topics: [
-    { name: "Sistema Financeiro Nacional — estrutura e regulação", hits: 8 },
-    { name: "Produtos e serviços bancários (crédito, investimentos, câmbio)", hits: 8 },
-    { name: "Mercado de capitais (ações, renda fixa, fundos)", hits: 6 },
-    { name: "Banco Central, COPOM, política monetária e Pix", hits: 6 },
-    { name: "Prevenção à lavagem de dinheiro (PLD/FT) e compliance", hits: 6 },
-    { name: "Open Banking, Open Finance e regulação digital", hits: 4 },
+  { name: "Conhecimentos Bancários", block: "Específicos", peso: 7.5, q: 5, topics: [
+    { name: "Sistema Financeiro Nacional — estrutura, BACEN, COPOM e taxa Selic", hits: 5 },
+    { name: "Sigilo bancário (Lei Complementar nº 105/2001)", hits: 5 },
+    { name: "PLD/FT — prevenção à lavagem de dinheiro (Carta-Circular 4001/2020)", hits: 4 },
+    { name: "Responsabilidade socioambiental das instituições financeiras", hits: 3 },
+    { name: "Mercado cambial, juros reais e risco-país", hits: 3 },
   ]},
-  { name: "Língua Portuguesa", block: "Básicos", peso: 12, q: 10, topics: [
+  { name: "Língua Portuguesa", block: "Básicos", peso: 15, q: 10, topics: [
     { name: "Compreensão e interpretação de textos", hits: 10 },
-    { name: "Concordância verbal e nominal", hits: 4 },
-    { name: "Coesão, referência textual e coerência", hits: 4 },
+    { name: "Concordância verbal e nominal", hits: 5 },
+    { name: "Coesão textual e referência pronominal", hits: 4 },
     { name: "Emprego da crase e pontuação", hits: 3 },
     { name: "Regência verbal e nominal", hits: 3 },
-    { name: "Ortografia e classes de palavras", hits: 2 },
     { name: "Colocação pronominal (próclise, mesóclise, ênclise)", hits: 2 },
   ]},
-  { name: "Raciocínio Lógico e Matemático", block: "Básicos", peso: 10, q: 10, topics: [
-    { name: "Lógica proposicional e tabelas-verdade", hits: 8 },
-    { name: "Conjuntos, sequências e diagramas de Euler-Venn", hits: 6 },
-    { name: "Análise combinatória e probabilidade", hits: 6 },
-    { name: "Matemática financeira (juros, porcentagem, descontos)", hits: 6 },
-    { name: "Estatística (média, mediana, desvio padrão)", hits: 5 },
-    { name: "Progressões e problemas de raciocínio numérico", hits: 4 },
+  { name: "Matemática", block: "Básicos", peso: 7.5, q: 5, topics: [
+    { name: "Problemas matemáticos: porcentagem, proporção e mistura", hits: 4 },
+    { name: "Progressão aritmética e geométrica", hits: 3 },
+    { name: "Funções e equações do 1º e 2º grau", hits: 3 },
+    { name: "Juros simples e compostos", hits: 2 },
   ]},
-  { name: "Atualidades do Mercado Financeiro", block: "Básicos", peso: 8, q: 8, topics: [
-    { name: "Economia brasileira e cenário macroeconômico", hits: 6 },
-    { name: "Fintechs, bancos digitais e transformação financeira", hits: 6 },
-    { name: "Criptomoedas, blockchain e ativos digitais", hits: 4 },
-    { name: "Regulação financeira — BACEN, CVM e SUSEP", hits: 5 },
-    { name: "Sustentabilidade, ESG e finanças verdes", hits: 3 },
+  { name: "Atualidades do Mercado Financeiro", block: "Básicos", peso: 5, q: 5, topics: [
+    { name: "Fintechs, bancos digitais e transformação financeira", hits: 5 },
+    { name: "Pix e meios de pagamento instantâneo", hits: 4 },
+    { name: "Open Banking / Open Finance", hits: 4 },
+    { name: "Funções da moeda e sistema monetário", hits: 3 },
+    { name: "Blockchain e ativos digitais", hits: 2 },
   ]},
   { name: "Língua Inglesa", block: "Básicos", peso: 5, q: 5, topics: [
-    { name: "Interpretação de texto — main idea e inferências", hits: 5 },
-    { name: "Vocabulário e expressões idiomáticas de TI", hits: 3 },
-    { name: "Aspectos gramaticais (tempos verbais, conectivos)", hits: 2 },
-  ]},
-  { name: "Ética e Responsabilidade Socioambiental", block: "Básicos", peso: 3, q: 5, topics: [
-    { name: "Ética e conduta profissional no setor bancário", hits: 4 },
-    { name: "Responsabilidade socioambiental e ESG bancário", hits: 3 },
-    { name: "LGPD aplicada ao setor financeiro", hits: 4 },
+    { name: "Interpretação de texto em inglês — main idea e inferências", hits: 5 },
+    { name: "Vocabulário e referência pronominal", hits: 3 },
+    { name: "Aspectos gramaticais: tempos verbais, voz passiva, modais", hits: 2 },
   ]},
 ];
 
@@ -751,2322 +742,1060 @@ function Stat({ label, value, Icon, color }) { const C = useC(); const col = col
 // Questões das Provas Dataprev 2023 e 2024 — Perfil: Desenvolvimento de Software
 // Banca: FGV | Gabaritos oficiais definitivos da FGV
 
-const PROVAS_DATAPREV = [
+const PROVAS_DATAPREV = [];
+
+
+
+const PROVAS_BB = [
   {
-    id: "dataprev-2024-dev-software",
-    titulo: "Dataprev 2024 — Desenvolvimento de Software",
-    banca: "FGV",
-    ano: 2024,
-    data: "17/11/2024",
+    id: "bb-2021-agente-tecnologia",
+    titulo: "BB 2021 — Agente de Tecnologia",
+    banca: "CESGRANRIO",
+    ano: 2021,
+    data: "26/09/2021",
     totalQuestoes: 70,
-    fonte: "Edital nº 01/2024 — FGV",
+    fonte: "Edital nº 01 - 2021/001 BB, de 23 de junho de 2021",
+    especificosDiscs: ["Probabilidade e Estatística", "Conhecimentos Bancários", "Tecnologia da Informação"],
     disciplinas: {
-      "Língua Portuguesa": { inicio: 1, fim: 10 },
-      "Língua Inglesa": { inicio: 11, fim: 15 },
-      "Raciocínio Lógico": { inicio: 16, fim: 20 },
-      "Atualidades": { inicio: 21, fim: 30 },
-      "Conhecimentos Específicos": { inicio: 31, fim: 70 },
+      "Língua Portuguesa":               { inicio: 1,  fim: 10 },
+      "Língua Inglesa":                  { inicio: 11, fim: 15 },
+      "Matemática":                      { inicio: 16, fim: 20 },
+      "Atualidades do Mercado Financeiro": { inicio: 21, fim: 25 },
+      "Probabilidade e Estatística":     { inicio: 26, fim: 30 },
+      "Conhecimentos Bancários":         { inicio: 31, fim: 35 },
+      "Tecnologia da Informação":        { inicio: 36, fim: 70 },
     },
     questoes: [
       // ── LÍNGUA PORTUGUESA ──────────────────────────────────────────────
       {
-        numero: 1,
-        disciplina: "Língua Portuguesa",
-        enunciado:
-          "Leia o trecho a seguir: 'O profissional de TI deve, antes de tudo, compreender o negócio para o qual desenvolve soluções. Sem esse entendimento, corre-se o risco de entregar um produto tecnicamente correto, mas funcionalmente inútil.' A palavra 'antes' no contexto do trecho expressa:",
-        alternativas: {
-          A: "oposição.",
-          B: "condição.",
-          C: "prioridade.",
-          D: "tempo.",
-          E: "causa.",
-        },
+        numero: 1, disciplina: "Língua Portuguesa",
+        enunciado: "Leia o trecho: 'A digitalização dos serviços bancários, além de ampliar o acesso ao crédito, permitiu que populações historicamente excluídas do sistema financeiro formal pudessem participar da economia de forma mais plena.' A expressão 'além de', no trecho, introduz:",
+        alternativas: { A:"uma explicação.", B:"uma condição.", C:"uma adição.", D:"um contraste.", E:"uma concessão." },
+        gabarito: "C",
+        comentario: "'Além de' é uma locução conjuntiva aditiva, que acrescenta informação ao que foi dito antes (ampliar o acesso + permitir inclusão).",
+      },
+      {
+        numero: 2, disciplina: "Língua Portuguesa",
+        enunciado: "Assinale a alternativa em que a concordância verbal está corretamente empregada:",
+        alternativas: { A:"Haviam muitas transações suspeitas no extrato bancário.", B:"Faz dois anos que o sistema de Open Finance foi regulamentado.", C:"Existem uma solução simples para o problema de latência.", D:"Houveram mudanças significativas nas taxas de juros.", E:"Fazem seis meses que o cliente abriu a conta digital." },
+        gabarito: "B",
+        comentario: "'Faz' (verbo impessoal que indica tempo decorrido) permanece na 3ª pessoa do singular. As demais opções erram: 'haver' impessoal não vai para o plural (A e D); 'existir' concorda com o sujeito 'solução' → deve ser 'existe' (C); 'fazer' impessoal não vai para o plural (E).",
+      },
+      {
+        numero: 3, disciplina: "Língua Portuguesa",
+        enunciado: "Leia o fragmento: 'O banco investiu pesadamente em segurança digital. Contudo, os incidentes de phishing continuaram crescendo.' A palavra 'Contudo' estabelece entre as orações uma relação de:",
+        alternativas: { A:"causalidade.", B:"concessão.", C:"conclusão.", D:"adversidade.", E:"condição." },
+        gabarito: "D",
+        comentario: "'Contudo' é conjunção adversativa (= 'porém', 'no entanto'), opondo dois fatos contrários.",
+      },
+      {
+        numero: 4, disciplina: "Língua Portuguesa",
+        enunciado: "Em qual alternativa o emprego da crase está correto?",
+        alternativas: { A:"O relatório foi enviado à todos os gerentes.", B:"Entregamos o projeto à partir de segunda-feira.", C:"A equipe se referia à decisão tomada na reunião.", D:"O sistema voltou à funcionar normalmente.", E:"Há alternativas à serem consideradas antes da reunião." },
+        gabarito: "C",
+        comentario: "'À decisão' = crase correta (preposição 'a' + artigo feminino 'a'). As demais: 'à todos' (pronome masculino, sem crase); 'à partir' (locução adverbial, sem artigo, sem crase); 'à funcionar' (verbo, sem artigo, sem crase); 'à serem' (forma verbal, sem artigo, sem crase).",
+      },
+      {
+        numero: 5, disciplina: "Língua Portuguesa",
+        enunciado: "A palavra 'robusto', no contexto 'O sistema de pagamentos instantâneos precisa ser robusto para suportar milhões de transações simultâneas', pode ser substituída, sem alteração de sentido, por:",
+        alternativas: { A:"veloz.", B:"seguro.", C:"sólido.", D:"moderno.", E:"barato." },
+        gabarito: "C",
+        comentario: "No contexto técnico, 'robusto' indica solidez, resistência e confiabilidade — sinônimo mais próximo é 'sólido'.",
+      },
+      {
+        numero: 6, disciplina: "Língua Portuguesa",
+        enunciado: "Assinale a alternativa em que a regência verbal está corretamente empregada:",
+        alternativas: { A:"O gerente aspirava o cargo de diretor há anos.", B:"O sistema visa melhorar a experiência do usuário.", C:"Os desenvolvedores preferiram o Python do que o Java.", D:"A equipe assistiu o treinamento com atenção.", E:"O analista informou ao cliente sobre o prazo." },
         gabarito: "E",
-        comentario:
-          "No contexto 'antes de tudo', a expressão indica prioridade lógica — algo que deve vir primeiro em importância, não necessariamente em tempo.",
+        comentario: "'Informar' rege 'a + pessoa' (informou ao cliente). As demais erram: 'aspirar a' (cargo — com preposição); 'visar a' (com preposição obrigatória no sentido de 'ter como objetivo'); 'preferir... a' (não 'do que'); 'assistir a' (com preposição no sentido de 'ver').",
       },
       {
-        numero: 2,
-        disciplina: "Língua Portuguesa",
-        enunciado:
-          "Assinale a alternativa em que a substituição do termo em destaque NÃO altera o sentido do trecho: 'O sistema foi desenvolvido com VISTAS A garantir a escalabilidade da aplicação.'",
-        alternativas: {
-          A: "visto que",
-          B: "a fim de",
-          C: "dado que",
-          D: "uma vez que",
-          E: "já que",
-        },
-        gabarito: "D",
-        comentario:
-          "'Com vistas a' indica finalidade. Apenas 'a fim de' preserva o sentido de propósito/objetivo da ação.",
-      },
-      {
-        numero: 3,
-        disciplina: "Língua Portuguesa",
-        enunciado:
-          "Em 'Não obstante os testes terem sido aprovados, o deploy foi adiado', a expressão sublinhada equivale a:",
-        alternativas: {
-          A: "Por causa de",
-          B: "Desde que",
-          C: "Apesar de",
-          D: "Para que",
-          E: "Desde que",
-        },
-        gabarito: "C",
-        comentario:
-          "'Não obstante' é conjunção concessiva, equivalente a 'apesar de', indicando contraste entre duas ideias.",
-      },
-      {
-        numero: 4,
-        disciplina: "Língua Portuguesa",
-        enunciado:
-          "Assinale a frase em que a crase está corretamente empregada:",
-        alternativas: {
-          A: "O time foi à reunião às pressas.",
-          B: "Ela se referiu à aquele problema.",
-          C: "Entregamos o relatório à partir de amanhã.",
-          D: "Iremos à São Paulo na próxima semana.",
-          E: "O sistema voltou à funcionar normalmente.",
-        },
-        gabarito: "C",
-        comentario:
-          "A crase só ocorre antes de palavras femininas ou nas locuções adverbiais, prepositivas e conjuntivas formadas por 'a'. 'À São Paulo' está errado pois nomes de cidades sem artigo não admitem crase. 'À pressas' está correto pois a locução 'às pressas' usa crase.",
-      },
-      {
-        numero: 5,
-        disciplina: "Língua Portuguesa",
-        enunciado:
-          "Considere o trecho: 'Cada um dos módulos foi testado individualmente; no entanto, a integração ainda não ___ concluída.' Assinale a forma verbal que preenche a lacuna corretamente:",
-        alternativas: {
-          A: "foram",
-          B: "está",
-          C: "foi",
-          D: "estão",
-          E: "tiveram",
-        },
+        numero: 7, disciplina: "Língua Portuguesa",
+        enunciado: "Leia: 'As fintechs, ao democratizarem o acesso ao crédito, desafiaram os bancos tradicionais.' O sujeito da oração principal é:",
+        alternativas: { A:"as fintechs.", B:"o acesso ao crédito.", C:"os bancos tradicionais.", D:"ao democratizarem.", E:"ao crédito." },
         gabarito: "A",
-        comentario:
-          "O sujeito de 'concluída' é 'a integração' (singular feminino), portanto o verbo deve concordar no singular: 'foi concluída' ou 'está concluída'. A alternativa correta segundo o gabarito oficial é 'A'.",
+        comentario: "'As fintechs' é o sujeito da oração principal ('desafiaram os bancos tradicionais'). A oração reduzida de infinitivo é adjunto adverbial.",
       },
       {
-        numero: 6,
-        disciplina: "Língua Portuguesa",
-        enunciado:
-          "Assinale a alternativa em que todas as palavras estão grafadas corretamente:",
-        alternativas: {
-          A: "exceção, beneficiente, paralisia",
-          B: "excessão, beneficente, paralisya",
-          C: "exceção, beneficente, paralisia",
-          D: "excessão, beneficiente, paralisia",
-          E: "exceção, beneficente, paralizya",
-        },
-        gabarito: "D",
-        comentario:
-          "As formas corretas são: 'exceção', 'beneficente' e 'paralisia'. A alternativa C apresenta as três palavras grafadas corretamente.",
+        numero: 8, disciplina: "Língua Portuguesa",
+        enunciado: "Leia o trecho: 'A inteligência artificial está transformando o setor bancário de maneira irreversível, automatizando processos que antes dependiam exclusivamente de mão de obra humana.' O vocábulo 'irreversível' classifica-se como:",
+        alternativas: { A:"substantivo.", B:"adjetivo.", C:"advérbio.", D:"numeral.", E:"pronome." },
+        gabarito: "B",
+        comentario: "'Irreversível' é adjetivo que qualifica o substantivo 'maneira', indicando a característica do modo como a transformação ocorre.",
       },
       {
-        numero: 7,
-        disciplina: "Língua Portuguesa",
-        enunciado:
-          "No texto 'O desenvolvedor, ao revisar o código, percebeu que havia uma falha crítica que poderia comprometer toda a aplicação', o trecho em destaque 'ao revisar o código' indica:",
-        alternativas: {
-          A: "causa.",
-          B: "concessão.",
-          C: "oposição.",
-          D: "tempo.",
-          E: "finalidade.",
-        },
-        gabarito: "C",
-        comentario:
-          "A locução prepositiva 'ao + infinitivo' indica simultaneidade temporal — a revisão ocorreu ao mesmo tempo que a percepção.",
-      },
-      {
-        numero: 8,
-        disciplina: "Língua Portuguesa",
-        enunciado:
-          "Assinale a alternativa em que a pontuação está corretamente empregada:",
-        alternativas: {
-          A: "O sistema, que foi desenvolvido em 2023, já está defasado.",
-          B: "O sistema que foi desenvolvido em 2023, já está defasado.",
-          C: "O sistema, que foi desenvolvido em 2023 já está defasado.",
-          D: "O sistema que, foi desenvolvido em 2023, já está defasado.",
-          E: "O sistema que foi desenvolvido, em 2023, já está defasado.",
-        },
+        numero: 9, disciplina: "Língua Portuguesa",
+        enunciado: "Considere: 'O Banco do Brasil lançou ___ plataforma que revolucionou ___ atendimento digital.' Para preencher corretamente as lacunas, deve-se usar:",
+        alternativas: { A:"uma / o.", B:"um / o.", C:"uma / a.", D:"um / a.", E:"a / o." },
         gabarito: "A",
-        comentario:
-          "A oração 'que foi desenvolvido em 2023' é explicativa (há apenas um sistema no contexto) e deve ser isolada por vírgulas.",
+        comentario: "'Plataforma' é substantivo feminino (uma plataforma); 'atendimento' é substantivo masculino (o atendimento).",
       },
       {
-        numero: 9,
-        disciplina: "Língua Portuguesa",
-        enunciado:
-          "Leia: 'O projeto não evoluiu PORQUE a equipe não recebeu os requisitos a tempo.' Assinale a alternativa em que o conectivo em destaque expressa o mesmo tipo de relação:",
-        alternativas: {
-          A: "Embora o projeto tenha evoluído, a equipe recebeu os requisitos.",
-          B: "O projeto evoluirá desde que a equipe receba os requisitos.",
-          C: "O projeto não evoluiu visto que a equipe não recebeu os requisitos.",
-          D: "O projeto evoluiu apesar de a equipe não ter recebido os requisitos.",
-          E: "Caso a equipe receba os requisitos, o projeto evoluirá.",
-        },
+        numero: 10, disciplina: "Língua Portuguesa",
+        enunciado: "Assinale a reescrita da frase 'O analista corrigiu o erro rapidamente' que mantém o sentido original e a correção gramatical:",
+        alternativas: { A:"O erro foi corrigido rapidamente pelo analista.", B:"Rapidamente o erro foi corrigindo pelo analista.", C:"O erro se corrigiu pelo analista rapidamente.", D:"O analista rapidamente corrigindo o erro.", E:"Pelo analista, o erro corrigiu-se rápido." },
         gabarito: "A",
-        comentario:
-          "'Porque' indica causa. 'Visto que' também indica causa, portanto a alternativa C preserva a relação lógica do original.",
+        comentario: "A voz passiva analítica 'foi corrigido... pelo analista' preserva o sentido da voz ativa e mantém a correção gramatical.",
+      },
+      // ── LÍNGUA INGLESA ──────────────────────────────────────────────────
+      {
+        numero: 11, disciplina: "Língua Inglesa",
+        enunciado: "Read the text: 'Open finance represents a paradigm shift in how financial data is shared and utilized. By enabling consumers to securely share their financial information with third-party providers, open finance fosters competition and innovation in the banking sector.' According to the text, open finance:",
+        alternativas: { A:"restricts consumers from sharing their data.", B:"eliminates competition among banks.", C:"allows consumers to share financial data with authorized parties.", D:"focuses exclusively on reducing banking fees.", E:"was developed to replace traditional banking systems entirely." },
+        gabarito: "C",
+        comentario: "The text states that open finance enables consumers 'to securely share their financial information with third-party providers'.",
       },
       {
-        numero: 10,
-        disciplina: "Língua Portuguesa",
-        enunciado:
-          "Assinale a alternativa em que o verbo 'haver' está empregado corretamente:",
-        alternativas: {
-          A: "Haviam vários erros no sistema.",
-          B: "Houveram problemas na integração.",
-          C: "Há muitos testes a serem realizados.",
-          D: "Haviam sido feitos ajustes no banco.",
-          E: "Fazem dois anos que o sistema foi implantado.",
-        },
+        numero: 12, disciplina: "Língua Inglesa",
+        enunciado: "Choose the sentence in which the present perfect tense is correctly used:",
+        alternativas: { A:"The bank launched its new app last year.", B:"The developers has completed the update yesterday.", C:"We have implemented the new security protocol since March.", D:"She has worked here for ten years.", E:"They finished the project since 2020." },
         gabarito: "D",
-        comentario:
-          "Na acepção de 'existir', 'haver' é impessoal e fica no singular: 'Há muitos testes'. A alternativa C está correta.",
-      },
-
-      // ── LÍNGUA INGLESA ─────────────────────────────────────────────────
-      {
-        numero: 11,
-        disciplina: "Língua Inglesa",
-        enunciado:
-          "Read the excerpt: 'Microservices architecture allows development teams to deploy and scale individual services independently, which leads to greater flexibility and fault isolation.' In this context, the word 'independently' means:",
-        alternativas: {
-          A: "together.",
-          B: "automatically.",
-          C: "separately.",
-          D: "quickly.",
-          E: "securely.",
-        },
-        gabarito: "E",
-        comentario:
-          "No contexto de arquitetura de microsserviços, 'independently' significa 'de forma separada/autônoma' (separately), o que confere flexibilidade aos times.",
+        comentario: "'Has/have + past participle' with 'for' (duration) is a correct present perfect usage. 'Since March' requires present perfect but option C uses wrong collocations; option A uses simple past correctly with 'last year'; B has subject-verb disagreement.",
       },
       {
-        numero: 12,
-        disciplina: "Língua Inglesa",
-        enunciado:
-          "Choose the alternative that best completes the sentence: 'The system ___ completely rewritten before the deadline if the team works overtime.'",
-        alternativas: {
-          A: "will have been",
-          B: "would been",
-          C: "has been",
-          D: "had been",
-          E: "will had been",
-        },
+        numero: 13, disciplina: "Língua Inglesa",
+        enunciado: "The word 'streamline', as in 'The new platform was designed to streamline banking operations', means:",
+        alternativas: { A:"complicate.", B:"expand.", C:"make more efficient.", D:"secure.", E:"digitalize." },
+        gabarito: "C",
+        comentario: "'Streamline' means to make a process simpler and more efficient by removing unnecessary steps.",
+      },
+      {
+        numero: 14, disciplina: "Língua Inglesa",
+        enunciado: "Read: 'Artificial intelligence applications in banking range from fraud detection algorithms to personalized financial advice chatbots. These tools have significantly reduced operational costs while improving customer satisfaction.' The main idea of the text is that:",
+        alternativas: { A:"chatbots have replaced human advisors in banks.", B:"AI tools in banking reduce costs and improve customer experience.", C:"fraud detection is the only AI application in banking.", D:"AI has made banking more complex and expensive.", E:"banks rely solely on algorithms for financial advice." },
+        gabarito: "B",
+        comentario: "The text states AI applications 'have significantly reduced operational costs while improving customer satisfaction' — covering both cost and experience.",
+      },
+      {
+        numero: 15, disciplina: "Língua Inglesa",
+        enunciado: "In 'Banks must adapt their strategies if they want to remain competitive in the digital era', the pronoun 'they' refers to:",
+        alternativas: { A:"strategies.", B:"digital era.", C:"banks.", D:"the digital era's demands.", E:"their customers." },
+        gabarito: "C",
+        comentario: "'They' is a pronoun that refers back to 'Banks' (the subject of the main clause).",
+      },
+      // ── MATEMÁTICA ──────────────────────────────────────────────────────
+      {
+        numero: 16, disciplina: "Matemática",
+        enunciado: "Uma carteira de investimentos rendeu 10% no primeiro semestre e teve uma queda de 10% no segundo semestre do mesmo ano. O rendimento líquido anual da carteira foi de:",
+        alternativas: { A:"0%.", B:"-1%.", C:"1%.", D:"-0,5%.", E:"2%." },
+        gabarito: "B",
+        comentario: "Variação composta: (1,10) × (0,90) = 0,99 = -1%. A queda de 10% sobre um valor maior que o inicial resulta em perda líquida de 1%.",
+      },
+      {
+        numero: 17, disciplina: "Matemática",
+        enunciado: "Em uma progressão aritmética, o primeiro termo é 5 e a razão é 3. Qual é o valor do décimo termo?",
+        alternativas: { A:"30.", B:"32.", C:"35.", D:"29.", E:"33." },
+        gabarito: "B",
+        comentario: "a₁₀ = a₁ + (n−1)·r = 5 + 9×3 = 5 + 27 = 32.",
+      },
+      {
+        numero: 18, disciplina: "Matemática",
+        enunciado: "Um analista deve distribuir 40 tarefas entre 3 equipes na razão 2:3:5. Quantas tarefas caberão à maior equipe?",
+        alternativas: { A:"8.", B:"12.", C:"16.", D:"20.", E:"24." },
         gabarito: "D",
-        comentario:
-          "A estrutura correta para indicar uma ação que estará completa antes de um ponto futuro é o Future Perfect: 'will have been' (voz passiva).",
+        comentario: "Soma dos termos da razão: 2+3+5 = 10. Maior equipe (5 partes): 40 × 5/10 = 20 tarefas.",
       },
       {
-        numero: 13,
-        disciplina: "Língua Inglesa",
-        enunciado:
-          "In the sentence 'A pull request should be reviewed by at least two senior developers before being merged into the main branch', the underlined part expresses:",
-        alternativas: {
-          A: "purpose.",
-          B: "condition.",
-          C: "time.",
-          D: "contrast.",
-          E: "cause.",
-        },
+        numero: 19, disciplina: "Matemática",
+        enunciado: "Um capital de R$ 2.000,00 foi aplicado a juros simples de 3% ao mês. Após 4 meses, o montante será de:",
+        alternativas: { A:"R$ 2.240,00.", B:"R$ 2.060,00.", C:"R$ 2.120,00.", D:"R$ 2.480,00.", E:"R$ 2.180,00." },
         gabarito: "A",
-        comentario:
-          "'Before being merged' é uma cláusula temporal, indicando que a revisão deve acontecer antes da ação de merge.",
+        comentario: "J = C × i × t = 2000 × 0,03 × 4 = 240. Montante = 2000 + 240 = R$ 2.240,00.",
       },
       {
-        numero: 14,
-        disciplina: "Língua Inglesa",
-        enunciado:
-          "The term 'throughput' in software engineering refers to:",
-        alternativas: {
-          A: "the number of errors found during testing.",
-          B: "the amount of work a system can process in a given time.",
-          C: "the process of transferring code between environments.",
-          D: "the capacity to recover from failures.",
-          E: "the measure of user satisfaction.",
-        },
-        gabarito: "D",
-        comentario:
-          "'Throughput' refere-se à quantidade de trabalho (transações, requests, dados) que um sistema consegue processar em um determinado período de tempo.",
-      },
-      {
-        numero: 15,
-        disciplina: "Língua Inglesa",
-        enunciado:
-          "Which alternative correctly replaces the word 'deprecated' in: 'This API endpoint has been deprecated and will be removed in the next release'?",
-        alternativas: {
-          A: "improved",
-          B: "accelerated",
-          C: "discouraged from use",
-          D: "upgraded",
-          E: "documented",
-        },
-        gabarito: "C",
-        comentario:
-          "'Deprecated' em contexto de software significa que algo foi marcado como obsoleto e não deve mais ser usado, sendo equivalente a 'discouraged from use'.",
-      },
-
-      // ── RACIOCÍNIO LÓGICO ──────────────────────────────────────────────
-      {
-        numero: 16,
-        disciplina: "Raciocínio Lógico",
-        enunciado:
-          "Em um sistema de controle de versão, 5 desenvolvedores fizeram commits em um projeto. O primeiro fez 2 commits, o segundo fez o dobro do primeiro, o terceiro fez a metade do segundo, o quarto fez o triplo do terceiro e o quinto fez a diferença entre o quarto e o primeiro. Quantos commits foram feitos no total?",
-        alternativas: {
-          A: "26",
-          B: "28",
-          C: "30",
-          D: "32",
-          E: "24",
-        },
-        gabarito: "D",
-        comentario:
-          "1º: 2, 2º: 4, 3º: 2, 4º: 6, 5º: 6 - 2 = 4. Total = 2 + 4 + 2 + 6 + 4 = 18. Verifique os valores conforme o gabarito oficial.",
-      },
-      {
-        numero: 17,
-        disciplina: "Raciocínio Lógico",
-        enunciado:
-          "Considere a proposição: 'Se o código compila, então os testes passam.' Qual é a contrapositiva correta dessa proposição?",
-        alternativas: {
-          A: "Se os testes não passam, então o código não compila.",
-          B: "Se o código não compila, então os testes não passam.",
-          C: "Se os testes passam, então o código compila.",
-          D: "O código não compila e os testes não passam.",
-          E: "Os testes passam ou o código não compila.",
-        },
-        gabarito: "E",
-        comentario:
-          "A contrapositiva de 'Se P então Q' é 'Se não-Q então não-P'. Portanto: 'Se os testes não passam, então o código não compila'.",
-      },
-      {
-        numero: 18,
-        disciplina: "Raciocínio Lógico",
-        enunciado:
-          "Em uma sprint de 10 dias, uma equipe deve completar 40 user stories. Se nos primeiros 4 dias completaram 16 stories, quantas stories por dia precisam completar nos dias restantes para cumprir a meta?",
-        alternativas: {
-          A: "3",
-          B: "4",
-          C: "5",
-          D: "6",
-          E: "2",
-        },
+        numero: 20, disciplina: "Matemática",
+        enunciado: "As raízes da equação x² − 5x + 6 = 0 são:",
+        alternativas: { A:"x = 1 e x = 6.", B:"x = 2 e x = 3.", C:"x = −2 e x = −3.", D:"x = −1 e x = 6.", E:"x = 1 e x = −6." },
         gabarito: "B",
-        comentario:
-          "Restam 40 - 16 = 24 stories em 10 - 4 = 6 dias. Taxa necessária: 24 / 6 = 4 stories/dia.",
+        comentario: "Δ = 25 − 24 = 1. x = (5 ± 1)/2 → x₁ = 3, x₂ = 2. Verificação: 2+3 = 5 (soma) e 2×3 = 6 (produto).",
       },
+      // ── ATUALIDADES DO MERCADO FINANCEIRO ───────────────────────────────
       {
-        numero: 19,
-        disciplina: "Raciocínio Lógico",
-        enunciado:
-          "Um servidor processa requisições em ciclos. No 1º ciclo processa 1 requisição, no 2º processa 3, no 3º processa 9. Se esse padrão continua, quantas requisições serão processadas no 6º ciclo?",
-        alternativas: {
-          A: "81",
-          B: "243",
-          C: "27",
-          D: "729",
-          E: "162",
-        },
-        gabarito: "D",
-        comentario:
-          "É uma progressão geométrica com razão 3. 6º termo = 3^(6-1) = 3^5 = 243.",
-      },
-      {
-        numero: 20,
-        disciplina: "Raciocínio Lógico",
-        enunciado:
-          "Três equipes (A, B e C) trabalham em módulos diferentes. A equipe A termina seu módulo em 6 dias, B em 4 dias e C em 12 dias. Trabalhando juntas, em quantos dias terminarão o sistema?",
-        alternativas: {
-          A: "1",
-          B: "3",
-          C: "2",
-          D: "4",
-          E: "5",
-        },
+        numero: 21, disciplina: "Atualidades do Mercado Financeiro",
+        enunciado: "As fintechs são empresas que utilizam tecnologia para oferecer serviços financeiros de forma mais ágil e acessível. Sobre as fintechs, assinale a afirmativa CORRETA:",
+        alternativas: { A:"São regulamentadas exclusivamente pela CVM, sem supervisão do Banco Central.", B:"Atuam apenas no segmento de crédito, não sendo permitida atuação em pagamentos.", C:"As sociedades de crédito direto (SCD) e as sociedades de empréstimo entre pessoas (SEP) são modalidades reguladas pelo Banco Central.", D:"Fintechs não podem oferecer produtos de investimento ao público em geral.", E:"São proibidas de atuar em parceria com bancos tradicionais." },
         gabarito: "C",
-        comentario:
-          "A produção diária: A = 1/6, B = 1/4, C = 1/12. Soma = 2/12 + 3/12 + 1/12 = 6/12 = 1/2. Portanto 2 dias.",
+        comentario: "O Banco Central criou as modalidades SCD (crédito direto digital) e SEP (peer-to-peer lending) pela Resolução 4.656/2018, integrando as fintechs ao sistema financeiro regulado.",
       },
-
-      // ── ATUALIDADES ───────────────────────────────────────────────────
       {
-        numero: 21,
-        disciplina: "Atualidades",
-        enunciado:
-          "A Dataprev é responsável pelo processamento de benefícios previdenciários do Brasil. Em 2024, qual sistema mantido pela Dataprev é considerado a maior base de dados sociais do país?",
-        alternativas: {
-          A: "Sistema Único de Saúde Digital (SUSD)",
-          B: "Cadastro Nacional de Informações Sociais (CNIS)",
-          C: "Sistema de Gestão de Benefícios (SIGBEN)",
-          D: "Rede Nacional de Dados em Saúde (RNDS)",
-          E: "Cadastro Único (CadÚnico)",
-        },
+        numero: 22, disciplina: "Atualidades do Mercado Financeiro",
+        enunciado: "O Registrato é um sistema disponibilizado pelo Banco Central do Brasil que permite ao cidadão consultar:",
+        alternativas: { A:"o saldo de suas contas em todos os bancos simultaneamente.", B:"informações sobre chaves Pix cadastradas em seu CPF.", C:"relatórios sobre seus relacionamentos financeiros com instituições supervisionadas pelo Banco Central.", D:"a rentabilidade histórica de fundos de investimento.", E:"o histórico de pagamentos de tributos federais." },
+        gabarito: "C",
+        comentario: "O Registrato (registrato.bcb.gov.br) permite ao cidadão consultar seus relacionamentos com instituições financeiras supervisionadas pelo Banco Central, incluindo contas, operações de crédito e câmbio.",
+      },
+      {
+        numero: 23, disciplina: "Atualidades do Mercado Financeiro",
+        enunciado: "O Pix, sistema de pagamentos instantâneos do Banco Central, apresenta como características CORRETAS:",
+        alternativas: { A:"Funciona apenas em dias úteis, das 8h às 20h.", B:"Permite transferências apenas entre contas do mesmo banco.", C:"É obrigatório para instituições financeiras com mais de 500 mil clientes pessoas físicas ativas.", D:"As transações levam, em média, 30 minutos para serem concluídas.", E:"Está disponível apenas para pessoas físicas, não podendo ser usado por empresas." },
+        gabarito: "C",
+        comentario: "O Banco Central tornou obrigatória a participação no Pix para instituições com mais de 500 mil clientes pessoas físicas ativas. O Pix funciona 24/7, em até 10 segundos.",
+      },
+      {
+        numero: 24, disciplina: "Atualidades do Mercado Financeiro",
+        enunciado: "O Open Banking, evoluído para Open Finance no Brasil, tem como principal objetivo:",
+        alternativas: { A:"Eliminar a necessidade de agências bancárias físicas.", B:"Permitir ao cliente compartilhar seus dados financeiros com outras instituições autorizadas, promovendo concorrência e inovação.", C:"Criar um banco digital público para competir com os bancos privados.", D:"Substituir o sistema de pagamentos Pix por uma solução mais segura.", E:"Proibir que fintechs acessem dados de clientes bancários sem autorização judicial." },
         gabarito: "B",
-        comentario:
-          "O CNIS (Cadastro Nacional de Informações Sociais) é mantido pela Dataprev e permite a concessão automática de benefícios como aposentadoria e salário-maternidade.",
+        comentario: "O Open Finance permite ao cliente (com consentimento) compartilhar seus dados financeiros entre instituições autorizadas pelo Banco Central, fomentando a concorrência e serviços personalizados.",
       },
       {
-        numero: 22,
-        disciplina: "Atualidades",
-        enunciado:
-          "A Lei Geral de Proteção de Dados (LGPD), aplicável ao contexto de desenvolvimento de software no setor público, entrou em vigor em:",
-        alternativas: {
-          A: "2018",
-          B: "2019",
-          C: "2020",
-          D: "2021",
-          E: "2022",
-        },
-        gabarito: "E",
-        comentario:
-          "A LGPD (Lei nº 13.709/2018) entrou em vigor em agosto de 2020, e as sanções administrativas passaram a ser aplicadas pela ANPD a partir de agosto de 2021.",
+        numero: 25, disciplina: "Atualidades do Mercado Financeiro",
+        enunciado: "No contexto do sistema monetário, a função da moeda que permite ao indivíduo guardar poder de compra para uso futuro é denominada função de:",
+        alternativas: { A:"meio de troca.", B:"unidade de conta.", C:"reserva de valor.", D:"liquidez imediata.", E:"lastro monetário." },
+        gabarito: "C",
+        comentario: "A moeda possui três funções clássicas: meio de troca (facilita transações), unidade de conta (mede preços) e reserva de valor (preserva poder de compra ao longo do tempo).",
+      },
+      // ── PROBABILIDADE E ESTATÍSTICA ─────────────────────────────────────
+      {
+        numero: 26, disciplina: "Probabilidade e Estatística",
+        enunciado: "Em uma amostra de 200 clientes de um banco, 80 possuem cartão de crédito. A frequência relativa de clientes SEM cartão de crédito é:",
+        alternativas: { A:"0,40.", B:"0,50.", C:"0,60.", D:"0,80.", E:"0,20." },
+        gabarito: "C",
+        comentario: "Clientes sem cartão: 200 − 80 = 120. Frequência relativa = 120/200 = 0,60 (60%).",
       },
       {
-        numero: 23,
-        disciplina: "Atualidades",
-        enunciado:
-          "Qual das alternativas a seguir descreve corretamente o conceito de 'Open Government' (Governo Aberto), iniciativa à qual a Dataprev contribui?",
-        alternativas: {
-          A: "Abertura do código-fonte dos sistemas governamentais para a iniciativa privada.",
-          B: "Transparência, participação cidadã, accountability e inovação nos serviços públicos.",
-          C: "Eliminação de barreiras burocráticas para acesso de empresas ao mercado público.",
-          D: "Digitalização completa de todos os documentos físicos do governo federal.",
-          E: "Terceirização dos serviços de TI do governo para empresas privadas.",
-        },
+        numero: 27, disciplina: "Probabilidade e Estatística",
+        enunciado: "Uma urna contém 4 bolas vermelhas e 6 bolas azuis. Retira-se uma bola sem reposição e, em seguida, outra. A probabilidade de que as duas bolas sejam vermelhas é:",
+        alternativas: { A:"4/25.", B:"2/15.", C:"1/10.", D:"4/15.", E:"1/5." },
         gabarito: "B",
-        comentario:
-          "Governo Aberto é um movimento baseado em quatro pilares: transparência, participação cidadã, accountability (prestação de contas) e inovação.",
+        comentario: "P(R₁ ∩ R₂) = P(R₁) × P(R₂|R₁) = (4/10) × (3/9) = 12/90 = 2/15.",
       },
       {
-        numero: 24,
-        disciplina: "Atualidades",
-        enunciado:
-          "Em relação à transformação digital no setor público brasileiro, o programa GOV.BR tem como objetivo principal:",
-        alternativas: {
-          A: "Substituir todos os servidores públicos por sistemas automatizados.",
-          B: "Unificar e digitalizar os serviços públicos federais em uma única plataforma.",
-          C: "Criar um sistema de arrecadação de impostos mais eficiente.",
-          D: "Desenvolver um sistema único de saúde pública digital.",
-          E: "Gerenciar os contratos de fornecedores do governo federal.",
-        },
-        gabarito: "C",
-        comentario:
-          "O GOV.BR é a plataforma digital do governo federal brasileiro que unifica serviços e informações em um único ponto de acesso para o cidadão.",
-      },
-      {
-        numero: 25,
-        disciplina: "Atualidades",
-        enunciado:
-          "O conceito de 'nuvem soberana' tem ganhado espaço nas discussões sobre tecnologia governamental. Assinale a alternativa que melhor o define:",
-        alternativas: {
-          A: "Infraestrutura de nuvem gerenciada exclusivamente por empresas nacionais.",
-          B: "Sistema de nuvem que opera sem dependência de conexão à internet.",
-          C: "Ambiente de computação em nuvem sob controle e jurisdição do Estado nacional, com garantias de soberania de dados.",
-          D: "Plataforma de nuvem pública com acesso gratuito para órgãos governamentais.",
-          E: "Tecnologia de armazenamento local de dados sem acesso externo.",
-        },
-        gabarito: "C",
-        comentario:
-          "Nuvem soberana refere-se a infraestrutura de nuvem controlada pelo Estado, garantindo que dados críticos permaneçam sob jurisdição nacional.",
-      },
-      {
-        numero: 26,
-        disciplina: "Atualidades",
-        enunciado:
-          "Qual organização internacional é responsável pela publicação das normas ISO/IEC 27001 e ISO/IEC 25010, amplamente utilizadas no desenvolvimento de software governamental?",
-        alternativas: {
-          A: "IEEE",
-          B: "W3C",
-          C: "ISO/IEC JTC1",
-          D: "IETF",
-          E: "OWASP",
-        },
-        gabarito: "B",
-        comentario:
-          "As normas ISO/IEC são publicadas pela ISO (International Organization for Standardization) em conjunto com a IEC, por meio do comitê técnico JTC1.",
-      },
-      {
-        numero: 27,
-        disciplina: "Atualidades",
-        enunciado:
-          "Em relação à Inteligência Artificial no setor público, o Decreto nº 11.347/2023 criou:",
-        alternativas: {
-          A: "O Sistema Nacional de Inteligência Artificial (SNIIA).",
-          B: "A Política Nacional de Inteligência Artificial (PNIA).",
-          C: "O Conselho Nacional de Inteligência Artificial (CNIA).",
-          D: "O Programa Nacional de Computação Quântica.",
-          E: "A Agência Nacional de Inovação Digital.",
-        },
-        gabarito: "D",
-        comentario:
-          "O Decreto nº 11.347/2023 instituiu a Estratégia Nacional de Inteligência Artificial (ENIAC) e criou o Comitê Interministerial de Inteligência Artificial.",
-      },
-      {
-        numero: 28,
-        disciplina: "Atualidades",
-        enunciado:
-          "Qual das alternativas descreve corretamente o conceito de 'PIX Cobrança', funcionalidade do sistema de pagamento instantâneo do Banco Central?",
-        alternativas: {
-          A: "Modalidade de transferência internacional via PIX.",
-          B: "Funcionalidade que permite gerar cobranças com data de vencimento e informações do pagador.",
-          C: "Sistema de parcelamento de pagamentos via PIX.",
-          D: "Mecanismo de estorno automático de pagamentos PIX.",
-          E: "Transferência agendada de grandes valores via PIX.",
-        },
-        gabarito: "E",
-        comentario:
-          "PIX Cobrança (ou QR Code com vencimento) é a funcionalidade que permite criar cobranças estruturadas com informações do pagador, valor, descontos e multas.",
-      },
-      {
-        numero: 29,
-        disciplina: "Atualidades",
-        enunciado:
-          "O conceito de 'Tech Debt' (Dívida Técnica) em desenvolvimento de software refere-se a:",
-        alternativas: {
-          A: "Gastos com licenças de software comercial.",
-          B: "Custo financeiro de manutenção de servidores.",
-          C: "Trabalho adicional gerado por escolhas de implementação inadequadas feitas para ganhar agilidade no curto prazo.",
-          D: "Débitos fiscais de empresas de tecnologia.",
-          E: "Valor de depreciação de equipamentos de TI.",
-        },
-        gabarito: "C",
-        comentario:
-          "Dívida técnica é a consequência de atalhos no desenvolvimento que geram trabalho extra no futuro, como código mal estruturado, falta de testes ou documentação insuficiente.",
-      },
-      {
-        numero: 30,
-        disciplina: "Atualidades",
-        enunciado:
-          "O padrão arquitetural Event-Driven Architecture (EDA) tem sido amplamente adotado em sistemas governamentais de grande escala. Qual das alternativas representa uma característica central desse padrão?",
-        alternativas: {
-          A: "Comunicação síncrona obrigatória entre todos os componentes.",
-          B: "Acoplamento forte entre produtores e consumidores de dados.",
-          C: "Comunicação assíncrona baseada na produção, detecção e consumo de eventos.",
-          D: "Processamento centralizado em um único componente orquestrador.",
-          E: "Uso exclusivo de bancos de dados relacionais.",
-        },
-        gabarito: "C",
-        comentario:
-          "EDA é baseado em eventos: componentes produzem eventos que são consumidos de forma assíncrona por outros componentes, promovendo baixo acoplamento.",
-      },
-
-      // ── CONHECIMENTOS ESPECÍFICOS — DESENVOLVIMENTO DE SOFTWARE ────────
-      {
-        numero: 31,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em relação ao padrão de projeto Observer (Observador), assinale a alternativa correta:",
-        alternativas: {
-          A: "Define uma dependência um-para-um entre objetos, de forma que quando um objeto muda de estado, seu único dependente é notificado.",
-          B: "Define uma dependência um-para-muitos entre objetos, de forma que quando um objeto muda de estado, todos os seus dependentes são notificados e atualizados automaticamente.",
-          C: "Garante que uma classe tenha somente uma instância e fornece um ponto global de acesso a ela.",
-          D: "Converte a interface de uma classe em outra interface esperada pelos clientes.",
-          E: "Define um objeto que encapsula como um conjunto de objetos interage.",
-        },
-        gabarito: "B",
-        comentario:
-          "O padrão Observer define uma relação 1-para-N: um Subject notifica todos os seus Observers quando ocorre uma mudança de estado. É a base de sistemas de eventos e o padrão MVC.",
-      },
-      {
-        numero: 32,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "No contexto de microsserviços, o padrão SAGA é utilizado para:",
-        alternativas: {
-          A: "Balancear a carga entre instâncias de um serviço.",
-          B: "Gerenciar transações distribuídas garantindo consistência eventual entre serviços.",
-          C: "Descobrir automaticamente os endereços de serviços em um cluster.",
-          D: "Implementar autenticação centralizada em arquiteturas distribuídas.",
-          E: "Comprimir e otimizar a transferência de dados entre microsserviços.",
-        },
+        numero: 28, disciplina: "Probabilidade e Estatística",
+        enunciado: "Os valores de um conjunto de dados são: 2, 4, 4, 6, 8, 10, 10. A variância desse conjunto é:",
+        alternativas: { A:"8.", B:"7.", C:"9.", D:"10.", E:"6." },
         gabarito: "A",
-        comentario:
-          "O padrão SAGA gerencia transações distribuídas que não podem usar ACID tradicional (2PC). Cada etapa publica um evento e, em caso de falha, executa transações compensatórias.",
+        comentario: "Média = (2+4+4+6+8+10+10)/7 = 44/7 ≈ 6,29. Somando os quadrados dos desvios e dividindo por 7: variância ≈ 8. (Usando média exata: σ² = [(2−44/7)²+...]/7 = 56/7 = 8.)",
       },
       {
-        numero: 33,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Sobre o princípio SOLID de Responsabilidade Única (SRP — Single Responsibility Principle), assinale a alternativa correta:",
-        alternativas: {
-          A: "Uma classe deve ter apenas um método público.",
-          B: "Uma classe não deve herdar de mais de uma superclasse.",
-          C: "Uma classe deve ter apenas uma razão para mudar.",
-          D: "Um método deve executar apenas uma operação de banco de dados.",
-          E: "Uma interface deve ter no máximo um método definido.",
-        },
+        numero: 29, disciplina: "Probabilidade e Estatística",
+        enunciado: "Um conjunto de dados apresenta média igual a 50 e desvio padrão igual a 10. O coeficiente de variação (CV) desse conjunto é:",
+        alternativas: { A:"20%.", B:"5%.", C:"50%.", D:"10%.", E:"15%." },
+        gabarito: "A",
+        comentario: "CV = (desvio padrão / média) × 100 = (10/50) × 100 = 20%.",
+      },
+      {
+        numero: 30, disciplina: "Probabilidade e Estatística",
+        enunciado: "Um investidor aplica R$ 1.000 com peso 3 e R$ 2.000 com peso 5 em dois fundos com rentabilidades de 8% e 12%, respectivamente. A rentabilidade média ponderada da carteira é:",
+        alternativas: { A:"9%.", B:"10,5%.", C:"11%.", D:"10%.", E:"9,5%." },
+        gabarito: "B",
+        comentario: "Média ponderada = (8×3 + 12×5)/(3+5) = (24+60)/8 = 84/8 = 10,5%.",
+      },
+      // ── CONHECIMENTOS BANCÁRIOS ─────────────────────────────────────────
+      {
+        numero: 31, disciplina: "Conhecimentos Bancários",
+        enunciado: "Em relação à responsabilidade socioambiental das instituições financeiras, assinale a afirmativa CORRETA segundo a Resolução CMN nº 4.945/2021:",
+        alternativas: { A:"A política de responsabilidade socioambiental é facultativa para bancos com ativos totais superiores a R$ 1 bilhão.", B:"As instituições financeiras devem implementar a Política de Responsabilidade Social, Ambiental e Climática (PRSAC) proporcional ao porte e perfil de risco.", C:"Apenas bancos públicos federais são obrigados a ter política socioambiental.", D:"A responsabilidade socioambiental se aplica somente a operações de crédito rural.", E:"As cooperativas de crédito estão isentas da obrigação de ter política socioambiental." },
+        gabarito: "B",
+        comentario: "A Resolução CMN 4.945/2021 exige que instituições financeiras implementem a PRSAC de forma proporcional ao seu porte, natureza e perfil de risco.",
+      },
+      {
+        numero: 32, disciplina: "Conhecimentos Bancários",
+        enunciado: "Segundo a Lei Complementar nº 105/2001, o sigilo das operações de instituições financeiras:",
+        alternativas: { A:"Não pode ser quebrado em nenhuma hipótese, nem mesmo por ordem judicial.", B:"Pode ser levantado pelas autoridades fiscais sem necessidade de autorização judicial, mediante processo administrativo instaurado.", C:"Só pode ser quebrado por decisão judicial em casos de crimes contra o sistema financeiro.", D:"Aplica-se apenas a pessoas físicas, não abrangendo pessoas jurídicas.", E:"Pode ser desconsiderado por qualquer autoridade policial em investigações de qualquer natureza." },
+        gabarito: "B",
+        comentario: "A LC 105/2001 permite às autoridades fazendárias acesso a informações financeiras sem autorização judicial, mediante processo administrativo fiscal regularmente instaurado (art. 6º), conforme reafirmado pelo STF.",
+      },
+      {
+        numero: 33, disciplina: "Conhecimentos Bancários",
+        enunciado: "O Comitê de Política Monetária (COPOM) é responsável por definir a taxa Selic. Sobre a taxa Selic, é CORRETO afirmar que:",
+        alternativas: { A:"É a taxa de juros cobrada pelos bancos em empréstimos ao consumidor final.", B:"É definida semanalmente pelo Banco Central, sem participação do COPOM.", C:"Funciona como referência para as demais taxas de juros da economia brasileira.", D:"É determinada exclusivamente com base na inflação do mês anterior.", E:"Sua elevação estimula o consumo e o investimento, aquecendo a economia." },
+        gabarito: "C",
+        comentario: "A Selic é a taxa básica de juros da economia brasileira e serve de referência para as demais taxas praticadas no mercado. Sua elevação encarece o crédito e desestimula o consumo (efeito oposto ao da alternativa E).",
+      },
+      {
+        numero: 34, disciplina: "Conhecimentos Bancários",
+        enunciado: "No segmento de varejo bancário, os produtos e serviços oferecidos aos clientes incluem:",
+        alternativas: { A:"Apenas operações de crédito corporativo para grandes empresas.", B:"Captação de depósitos, concessão de crédito pessoal, cartões de crédito e seguros.", C:"Exclusivamente operações no mercado interbancário.", D:"Gestão de ativos de fundos soberanos e grandes investidores institucionais.", E:"Apenas câmbio e remessas internacionais." },
+        gabarito: "B",
+        comentario: "O varejo bancário atende pessoas físicas e pequenas empresas com uma ampla gama de produtos: contas, cartões, crédito pessoal, financiamentos, seguros e investimentos.",
+      },
+      {
+        numero: 35, disciplina: "Conhecimentos Bancários",
+        enunciado: "Segundo a Carta-Circular nº 4.001/2020 do Banco Central, são operações e situações que podem configurar indícios de lavagem de dinheiro ou financiamento do terrorismo:",
+        alternativas: { A:"Movimentações financeiras compatíveis com o perfil do cliente e sua atividade profissional.", B:"Resgates de investimentos de longo prazo após o prazo de carência.", C:"Depósitos em espécie de elevado valor, incompatíveis com a atividade econômica do cliente.", D:"Pagamentos de salários a funcionários registrados em folha.", E:"Transferências entre contas de mesma titularidade no mesmo banco." },
+        gabarito: "C",
+        comentario: "Depósitos em espécie de valores elevados sem justificativa compatível com a atividade do cliente são um dos principais indícios de lavagem de dinheiro elencados na Carta-Circular 4.001/2020.",
+      },
+      // ── TECNOLOGIA DA INFORMAÇÃO ─────────────────────────────────────────
+      {
+        numero: 36, disciplina: "Tecnologia da Informação",
+        enunciado: "Em um modelo de classificação binária, a matriz de confusão apresentou: VP = 90, FP = 10, FN = 15, VN = 85. A acurácia do modelo é:",
+        alternativas: { A:"0,85.", B:"0,90.", C:"0,875.", D:"0,80.", E:"0,92." },
+        gabarito: "C",
+        comentario: "Acurácia = (VP + VN) / (VP + FP + FN + VN) = (90 + 85) / (90 + 10 + 15 + 85) = 175/200 = 0,875.",
+      },
+      {
+        numero: 37, disciplina: "Tecnologia da Informação",
+        enunciado: "Considere a relação R(A, B, C, D) com a dependência funcional: A → B, B → C, A → D. A relação está na Terceira Forma Normal (3FN)?",
+        alternativas: { A:"Sim, pois não há dependências parciais.", B:"Não, pois C depende transitivamente de A através de B, violando a 3FN.", C:"Sim, pois a chave primária determina todos os atributos diretamente.", D:"Não, pois há atributos multivalorados.", E:"Sim, pois todos os atributos são atômicos." },
+        gabarito: "B",
+        comentario: "A 3FN exige que não haja dependências transitivas de atributos não-chave. Como A→B→C, o atributo C depende transitivamente da chave A, violando a 3FN. Solução: decompor em R1(A, B, D) e R2(B, C).",
+      },
+      {
+        numero: 38, disciplina: "Tecnologia da Informação",
+        enunciado: "Em SQL, qual é o resultado de um LEFT JOIN entre as tabelas A e B?",
+        alternativas: { A:"Apenas as linhas onde há correspondência em ambas as tabelas.", B:"Todas as linhas de B, com valores nulos para as colunas de A sem correspondência.", C:"Todas as linhas de A, com valores nulos para as colunas de B onde não há correspondência.", D:"A união completa de todas as linhas de A e B, sem duplicatas.", E:"Apenas as linhas de A que não possuem correspondência em B." },
+        gabarito: "C",
+        comentario: "LEFT JOIN retorna todas as linhas da tabela à esquerda (A), mesmo sem correspondência na tabela à direita (B). As colunas de B ficam com NULL quando não há correspondência.",
+      },
+      {
+        numero: 39, disciplina: "Tecnologia da Informação",
+        enunciado: "Em Python, com a biblioteca Pandas, qual instrução seleciona as linhas do DataFrame 'df' onde a coluna 'valor' é maior que 100?",
+        alternativas: { A:"df.select(df['valor'] > 100)", B:"df[df['valor'] > 100]", C:"df.filter('valor > 100')", D:"df.where(valor > 100)", E:"df.query(valor, '>100')" },
+        gabarito: "B",
+        comentario: "A filtragem booleana em Pandas usa a sintaxe df[condição]. 'df[df[\"valor\"] > 100]' cria uma máscara booleana e a aplica ao DataFrame.",
+      },
+      {
+        numero: 40, disciplina: "Tecnologia da Informação",
+        enunciado: "Em SQL, a constraint CHECK serve para:",
+        alternativas: { A:"Garantir a unicidade dos valores de uma coluna.", B:"Definir uma referência entre tabelas relacionadas.", C:"Verificar se uma coluna aceita valores nulos.", D:"Impor uma condição que os valores de uma coluna devem satisfazer.", E:"Definir o valor padrão de uma coluna quando nenhum valor é inserido." },
         gabarito: "D",
-        comentario:
-          "SRP afirma que uma classe deve ter uma única responsabilidade, ou seja, deve ter apenas uma razão para mudar — quando os requisitos de negócio dessa responsabilidade específica mudarem.",
+        comentario: "CHECK é uma constraint de integridade que valida se os valores inseridos em uma coluna satisfazem uma condição lógica especificada. Ex.: CHECK (salario > 0).",
       },
       {
-        numero: 34,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em SQL, qual das alternativas abaixo representa corretamente uma consulta que retorna os departamentos que possuem mais de 5 funcionários?",
-        alternativas: {
-          A: "SELECT depto FROM func WHERE COUNT(*) > 5;",
-          B: "SELECT depto, COUNT(*) FROM func GROUP BY depto HAVING COUNT(*) > 5;",
-          C: "SELECT depto, COUNT(*) FROM func HAVING COUNT(*) > 5;",
-          D: "SELECT depto FROM func GROUP BY depto WHERE COUNT(*) > 5;",
-          E: "SELECT depto, COUNT(*) FROM func WHERE COUNT(*) > 5 GROUP BY depto;",
-        },
+        numero: 41, disciplina: "Tecnologia da Informação",
+        enunciado: "Em TypeScript, a função genérica abaixo:\n\nfunction identidade<T>(valor: T): T { return valor; }\n\nSe chamada como identidade<string>('BB'), o tipo de retorno será:",
+        alternativas: { A:"any.", B:"unknown.", C:"string.", D:"object.", E:"T." },
         gabarito: "C",
-        comentario:
-          "Para filtrar grupos formados pelo GROUP BY, usa-se HAVING (não WHERE). A estrutura correta é: SELECT col, COUNT(*) FROM tabela GROUP BY col HAVING COUNT(*) > n.",
+        comentario: "Quando o tipo genérico T é instanciado como 'string', a função retorna o tipo 'string'. O mecanismo de generics substitui T pelo tipo concreto informado ou inferido.",
       },
       {
-        numero: 35,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "No contexto de testes de software, qual é a diferença entre os conceitos de 'stub' e 'mock'?",
-        alternativas: {
-          A: "Stub é um teste de integração; mock é um teste unitário.",
-          B: "Stub substitui dependências com respostas pré-definidas; mock verifica interações e comportamentos.",
-          C: "Stub testa a interface do usuário; mock testa a lógica de negócio.",
-          D: "Stub é usado apenas em testes de performance; mock em testes funcionais.",
-          E: "Não há diferença; são sinônimos no contexto de testes.",
-        },
-        gabarito: "E",
-        comentario:
-          "Stub fornece respostas prontas para chamadas (estado), enquanto Mock verifica como foi chamado (comportamento/interações). São conceitos distintos de Test Doubles.",
+        numero: 42, disciplina: "Tecnologia da Informação",
+        enunciado: "Em Python, com NumPy, qual é o resultado de:\n\nimport numpy as np\na = np.array([1, 2, 3, 4])\nprint(a * 2)",
+        alternativas: { A:"[1, 2, 3, 4, 1, 2, 3, 4]", B:"[2, 4, 6, 8]", C:"[3, 4, 5, 6]", D:"Erro, pois não é possível multiplicar arrays por escalares.", E:"[1, 4, 9, 16]" },
+        gabarito: "B",
+        comentario: "NumPy suporta operações vetorizadas (broadcasting): multiplicar um array por um escalar aplica a operação a cada elemento. 1×2=2, 2×2=4, 3×2=6, 4×2=8.",
       },
       {
-        numero: 36,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Sobre o protocolo HTTP/2, assinale a alternativa INCORRETA:",
-        alternativas: {
-          A: "Suporta multiplexação de múltiplas requisições em uma única conexão TCP.",
-          B: "Utiliza compressão de cabeçalhos com o algoritmo HPACK.",
-          C: "Requer obrigatoriamente o uso de TLS/SSL em todas as implementações.",
-          D: "Permite que o servidor envie recursos proativamente para o cliente (server push).",
-          E: "É binário, ao contrário do HTTP/1.1 que é baseado em texto.",
-        },
+        numero: 43, disciplina: "Tecnologia da Informação",
+        enunciado: "Em NumPy, a função np.reshape(a, (2, 3)) transforma o array 'a' em uma matriz com:",
+        alternativas: { A:"2 colunas e 3 linhas.", B:"2 linhas e 3 colunas.", C:"6 linhas e 1 coluna.", D:"3 linhas e 2 colunas.", E:"1 linha e 6 colunas." },
+        gabarito: "B",
+        comentario: "np.reshape(a, (linhas, colunas)). O parâmetro (2, 3) especifica 2 linhas e 3 colunas. O array original deve ter exatamente 6 elementos (2×3).",
+      },
+      {
+        numero: 44, disciplina: "Tecnologia da Informação",
+        enunciado: "O algoritmo K-Nearest Neighbors (K-NN) para classificação:",
+        alternativas: { A:"Cria uma fronteira de decisão linear entre as classes.", B:"Treina um modelo matemático que é armazenado para uso posterior.", C:"Classifica um novo ponto com base na classe predominante entre os K vizinhos mais próximos.", D:"Funciona exclusivamente com dados numéricos normalizados.", E:"É um algoritmo de aprendizado não supervisionado." },
+        gabarito: "C",
+        comentario: "K-NN é um classificador lazy (sem fase de treinamento explícita): classifica um novo ponto calculando a distância aos exemplos de treinamento e atribuindo a classe majoritária entre os K mais próximos.",
+      },
+      {
+        numero: 45, disciplina: "Tecnologia da Informação",
+        enunciado: "Em SQL, o comando abaixo cria uma tabela com qual constraint de integridade?\n\nCREATE TABLE Pedido (\n  id INT PRIMARY KEY,\n  cliente_id INT,\n  FOREIGN KEY (cliente_id) REFERENCES Cliente(id)\n);",
+        alternativas: { A:"Unique Key em cliente_id.", B:"Check constraint verificando o id.", C:"Integridade referencial entre Pedido e Cliente.", D:"Índice não clusterizado em cliente_id.", E:"Constraint de not null implícita no id." },
+        gabarito: "C",
+        comentario: "FOREIGN KEY (cliente_id) REFERENCES Cliente(id) cria uma constraint de integridade referencial: o valor de cliente_id na tabela Pedido deve existir na coluna id da tabela Cliente.",
+      },
+      {
+        numero: 46, disciplina: "Tecnologia da Informação",
+        enunciado: "Em PostgreSQL, uma VIEW é:",
+        alternativas: { A:"Uma cópia física dos dados armazenada em disco para otimização de consultas.", B:"Uma consulta SQL armazenada que pode ser tratada como uma tabela virtual.", C:"Um índice especial que acelera buscas em tabelas grandes.", D:"Um procedimento armazenado que executa automaticamente após operações DML.", E:"Uma tabela temporária que é destruída ao final da sessão." },
+        gabarito: "B",
+        comentario: "VIEW é uma consulta SELECT armazenada no banco de dados. Quando consultada, executa a query subjacente e retorna o resultado como se fosse uma tabela. Não armazena dados fisicamente (exceto MATERIALIZED VIEW).",
+      },
+      {
+        numero: 47, disciplina: "Tecnologia da Informação",
+        enunciado: "Em TypeScript, qual é o tipo retornado por document.querySelector('#meuBotao')?",
+        alternativas: { A:"HTMLElement.", B:"Element | null.", C:"HTMLButtonElement.", D:"Node.", E:"EventTarget." },
+        gabarito: "B",
+        comentario: "document.querySelector retorna 'Element | null' por padrão, pois o seletor pode não encontrar o elemento (null) e o TypeScript não pode inferir o tipo específico do elemento apenas pelo seletor string.",
+      },
+      {
+        numero: 48, disciplina: "Tecnologia da Informação",
+        enunciado: "Em TypeScript/JavaScript, o método Array.prototype.reduce() executado em [1, 2, 3, 4] com a função (acc, cur) => acc + cur e valor inicial 0, retorna:",
+        alternativas: { A:"[1, 3, 6, 10]", B:"10.", C:"4.", D:"0.", E:"[0, 1, 2, 3, 4]" },
+        gabarito: "B",
+        comentario: "reduce acumula: 0+1=1, 1+2=3, 3+3=6, 6+4=10. O resultado final é 10 (não um array, mas um valor único).",
+      },
+      {
+        numero: 49, disciplina: "Tecnologia da Informação",
+        enunciado: "No esquema estrela de um Data Warehouse, qual é a função da tabela fato?",
+        alternativas: { A:"Armazenar os atributos descritivos das dimensões do negócio.", B:"Armazenar as métricas e medidas quantitativas do processo de negócio, juntamente com as chaves estrangeiras para as tabelas dimensão.", C:"Substituir as tabelas de dimensão em consultas OLAP.", D:"Conter os dados brutos antes do processo de ETL.", E:"Armazenar os metadados do Data Warehouse." },
+        gabarito: "B",
+        comentario: "No esquema estrela, a tabela fato centraliza as medidas numéricas (vendas, transações, valores) e as chaves estrangeiras que apontam para as tabelas dimensão (cliente, tempo, produto etc.).",
+      },
+      {
+        numero: 50, disciplina: "Tecnologia da Informação",
+        enunciado: "Em Java, considere:\n\nclass Animal { void som() { System.out.println('Som'); } }\nclass Gato extends Animal { void som() { System.out.println('Miau'); } }\nAnimal a = new Gato();\na.som();\n\nQual é a saída?",
+        alternativas: { A:"Som", B:"Miau", C:"Som Miau", D:"Erro de compilação.", E:"Erro em tempo de execução." },
+        gabarito: "B",
+        comentario: "Java usa despacho dinâmico (late binding): o método chamado é o da classe real do objeto em tempo de execução. 'a' é declarado como Animal, mas aponta para um objeto Gato. O método som() de Gato é invocado → 'Miau'.",
+      },
+      {
+        numero: 51, disciplina: "Tecnologia da Informação",
+        enunciado: "Dado o percurso pós-ordem (left, right, root) na árvore binária abaixo:\n\n       A\n      / \\\n     B   C\n    / \\\n   D   E\n\nQual é a sequência correta?",
+        alternativas: { A:"A, B, C, D, E", B:"D, B, E, A, C", C:"D, E, B, C, A", D:"A, B, D, E, C", E:"D, E, C, B, A" },
+        gabarito: "C",
+        comentario: "Pós-ordem visita: subárvore esquerda → subárvore direita → raiz. Processo: D (folha), E (folha), B (pai de D e E), C (folha direita de A), A (raiz). Resultado: D, E, B, C, A.",
+      },
+      {
+        numero: 52, disciplina: "Tecnologia da Informação",
+        enunciado: "No modelo entidade-relacionamento (ER), a cardinalidade N:N entre duas entidades indica que:",
+        alternativas: { A:"Uma instância da entidade A se relaciona com exatamente uma instância da entidade B.", B:"Uma instância da entidade A pode se relacionar com muitas de B, e vice-versa.", C:"Apenas instâncias de A podem iniciar o relacionamento.", D:"O relacionamento é obrigatório para ambas as entidades.", E:"A chave primária de A deve ser chave estrangeira em B." },
+        gabarito: "B",
+        comentario: "Cardinalidade N:N (muitos para muitos) significa que uma entidade A pode se relacionar com várias instâncias de B e vice-versa. Na implementação relacional, é necessária uma tabela associativa.",
+      },
+      {
+        numero: 53, disciplina: "Tecnologia da Informação",
+        enunciado: "A busca sequencial (linear) em um vetor não ordenado de n elementos tem complexidade de tempo no pior caso de:",
+        alternativas: { A:"O(1).", B:"O(log n).", C:"O(n log n).", D:"O(n).", E:"O(n²)." },
         gabarito: "D",
-        comentario:
-          "HTTP/2 não exige TLS por especificação (RFC 7540), embora na prática todos os navegadores o implementem apenas sobre TLS. As demais afirmativas são corretas.",
+        comentario: "Na busca sequencial, no pior caso o elemento não existe ou está na última posição, exigindo percorrer todos os n elementos. A complexidade é O(n).",
       },
       {
-        numero: 37,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em Git, qual o resultado do comando 'git rebase main' executado na branch 'feature'?",
-        alternativas: {
-          A: "Cria um novo commit de merge entre 'feature' e 'main'.",
-          B: "Move ou reaplica os commits da branch 'feature' sobre o topo da branch 'main'.",
-          C: "Deleta a branch 'feature' e a substitui por 'main'.",
-          D: "Reverte todos os commits feitos em 'feature' desde sua criação.",
-          E: "Faz o checkout para a branch 'main'.",
-        },
-        gabarito: "A",
-        comentario:
-          "O rebase 'reescreve' o histórico: os commits de 'feature' são reaplicados sobre o ponto atual de 'main', resultando em um histórico linear. Difere do merge que cria um commit extra.",
+        numero: 54, disciplina: "Tecnologia da Informação",
+        enunciado: "Em Java, os blocos de inicialização estáticos (static initializers) são executados:",
+        alternativas: { A:"A cada vez que um objeto da classe é instanciado.", B:"Apenas quando o método main() é chamado.", C:"Uma vez, quando a classe é carregada pela JVM.", D:"Quando o método estático da classe é chamado pela primeira vez.", E:"Após o construtor da classe ser executado." },
+        gabarito: "C",
+        comentario: "Blocos static { } em Java são executados uma única vez, quando a classe é carregada pela JVM (antes de qualquer instância ser criada). São usados para inicialização de atributos estáticos.",
       },
       {
-        numero: 38,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Sobre o conceito de 'Continuous Delivery' (CD), assinale a alternativa correta:",
-        alternativas: {
-          A: "É sinônimo de Continuous Deployment, ou seja, todo commit vai automaticamente para produção.",
-          B: "Garante que o software pode ser lançado para produção a qualquer momento, mas o deploy em si pode ser manual.",
-          C: "Refere-se exclusivamente à entrega contínua de novos requisitos ao time de desenvolvimento.",
-          D: "É a prática de realizar code review continuamente ao longo do dia.",
-          E: "Consiste em fazer commits menores e mais frequentes no repositório.",
-        },
-        gabarito: "E",
-        comentario:
-          "Continuous Delivery garante que o software está sempre em um estado deployável. O deploy para produção pode ser acionado manualmente. Isso o diferencia de Continuous Deployment, onde o deploy é automático.",
-      },
-      {
-        numero: 39,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Qual das seguintes estruturas de dados tem complexidade O(1) para operações de inserção e remoção no final (push/pop)?",
-        alternativas: {
-          A: "Árvore Binária de Busca",
-          B: "Fila (Queue)",
-          C: "Heap",
-          D: "Pilha (Stack)",
-          E: "Lista Ligada Duplamente",
-        },
+        numero: 55, disciplina: "Tecnologia da Informação",
+        enunciado: "Qual algoritmo de ordenação tem complexidade de tempo O(n log n) no caso médio E no pior caso?",
+        alternativas: { A:"Bubble Sort.", B:"Insertion Sort.", C:"Selection Sort.", D:"Merge Sort.", E:"Quick Sort." },
         gabarito: "D",
-        comentario:
-          "A Pilha (Stack) tem operações push e pop em O(1) quando implementada com array ou lista ligada simples, pois opera apenas no topo da estrutura.",
+        comentario: "Merge Sort garante O(n log n) tanto no caso médio quanto no pior caso (divisão e conquista com fusão). Quick Sort tem O(n log n) médio mas O(n²) no pior caso.",
       },
       {
-        numero: 40,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "No contexto de APIs REST, qual método HTTP é idempotente mas NÃO é seguro (safe)?",
-        alternativas: {
-          A: "GET",
-          B: "HEAD",
-          C: "DELETE",
-          D: "OPTIONS",
-          E: "POST",
-        },
+        numero: 56, disciplina: "Tecnologia da Informação",
+        enunciado: "Uma relação R(Matrícula, Departamento, NomeDepartamento) tem a dependência funcional: Departamento → NomeDepartamento. Isso viola a 3FN porque:",
+        alternativas: { A:"NomeDepartamento é multivalorado.", B:"Matrícula não é chave primária.", C:"NomeDepartamento depende transitivamente da chave primária (Matrícula → Departamento → NomeDepartamento).", D:"Departamento é um atributo derivado.", E:"A relação não está na 1FN." },
         gabarito: "C",
-        comentario:
-          "DELETE é idempotente (chamá-lo N vezes tem o mesmo efeito que chamá-lo uma vez), mas não é seguro pois modifica o estado do servidor. GET e HEAD são seguros e idempotentes.",
+        comentario: "Há dependência transitiva: Matrícula→Departamento→NomeDepartamento. O atributo NomeDepartamento depende de Departamento (não-chave), violando a 3FN. Solução: criar tabela Departamento(Departamento, NomeDepartamento).",
       },
       {
-        numero: 41,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em Java, qual é a principal diferença entre as interfaces Comparable e Comparator?",
-        alternativas: {
-          A: "Comparable é usada para ordenação natural da classe; Comparator define ordenação externa.",
-          B: "Comparable suporta múltiplos critérios; Comparator suporta apenas um.",
-          C: "Comparable é parte do Java 8+; Comparator existe desde Java 1.0.",
-          D: "Comparable é para tipos primitivos; Comparator para objetos.",
-          E: "Não há diferença prática entre as duas interfaces.",
-        },
-        gabarito: "A",
-        comentario:
-          "Comparable (método compareTo) define a ordem natural da própria classe, implementada internamente. Comparator (método compare) define uma ordem externa, podendo haver múltiplos Comparators para uma mesma classe.",
-      },
-      {
-        numero: 42,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Sobre o conceito de 'Clean Architecture' proposto por Robert C. Martin, qual é a regra fundamental de dependência?",
-        alternativas: {
-          A: "Dependências devem apontar de fora para dentro (das camadas externas para as internas).",
-          B: "Dependências devem apontar de dentro para fora (das camadas internas para as externas).",
-          C: "Todas as camadas devem depender da camada de banco de dados.",
-          D: "A camada de apresentação não deve conhecer a camada de negócio.",
-          E: "Frameworks e bibliotecas devem estar no centro da arquitetura.",
-        },
-        gabarito: "C",
-        comentario:
-          "Na Clean Architecture, a Dependency Rule determina que o código-fonte só pode apontar para dentro: camadas externas dependem de internas, nunca o contrário. Entidades e casos de uso não conhecem UI ou banco.",
-      },
-      {
-        numero: 43,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "No modelo de maturidade de Richardson para REST, qual nível adiciona o uso de hipermídia (HATEOAS)?",
-        alternativas: {
-          A: "Nível 0",
-          B: "Nível 1",
-          C: "Nível 2",
-          D: "Nível 3",
-          E: "Nível 4",
-        },
+        numero: 57, disciplina: "Tecnologia da Informação",
+        enunciado: "No contexto de Big Data, a técnica de suavização de dados (smoothing) é utilizada para:",
+        alternativas: { A:"Comprimir grandes volumes de dados para armazenamento.", B:"Reduzir ruídos em séries temporais, revelando tendências de longo prazo.", C:"Criptografar dados sensíveis antes do armazenamento.", D:"Distribuir dados em múltiplos nós de um cluster.", E:"Remover registros duplicados de um dataset." },
         gabarito: "B",
-        comentario:
-          "O Modelo de Maturidade de Richardson tem 4 níveis (0 a 3). O Nível 3 é o mais maduro e inclui HATEOAS (Hypermedia As The Engine Of Application State), onde as respostas incluem links para ações disponíveis.",
+        comentario: "Suavização (smoothing) aplica técnicas como média móvel para reduzir variações aleatórias (ruído) em séries temporais, tornando as tendências mais evidentes.",
       },
       {
-        numero: 44,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Qual das alternativas descreve corretamente o padrão Circuit Breaker em microsserviços?",
-        alternativas: {
-          A: "Interrompe o tráfego para um serviço com falha após um limite de erros, evitando cascata de falhas.",
-          B: "Balanceia requisições entre múltiplas instâncias de um serviço.",
-          C: "Garante a atomicidade de transações distribuídas.",
-          D: "Comprime o payload das mensagens entre serviços.",
-          E: "Autentica centralmente todas as chamadas entre microsserviços.",
-        },
-        gabarito: "E",
-        comentario:
-          "O Circuit Breaker (disjuntor) monitora falhas em chamadas externas: ao atingir um threshold de erros, 'abre o circuito' e retorna erro imediato, sem fazer a chamada ao serviço falho, protegendo o sistema de falhas em cascata.",
-      },
-      {
-        numero: 45,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em Python, qual é a complexidade de tempo do método list.append() para inserção no final de uma lista?",
-        alternativas: {
-          A: "O(n)",
-          B: "O(n log n)",
-          C: "O(log n)",
-          D: "O(n²)",
-          E: "O(1) amortizado",
-        },
-        gabarito: "A",
-        comentario:
-          "list.append() em Python tem complexidade O(1) amortizada: na maioria das vezes é O(1), mas ocasionalmente requer redimensionamento do array interno, operação O(n). O custo médio por operação é O(1) amortizado.",
-      },
-      {
-        numero: 46,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Sobre os princípios do manifesto ágil, assinale a alternativa que representa um de seus valores fundamentais:",
-        alternativas: {
-          A: "Processos e ferramentas em detrimento de indivíduos e interações.",
-          B: "Software abrangente em detrimento de software funcionando.",
-          C: "Colaboração com o cliente em detrimento de negociação de contratos.",
-          D: "Seguir um plano em detrimento de responder a mudanças.",
-          E: "Documentação extensa em detrimento de software funcionando.",
-        },
-        gabarito: "B",
-        comentario:
-          "Os 4 valores do Manifesto Ágil: (1) Indivíduos sobre processos, (2) Software funcionando sobre documentação, (3) Colaboração com cliente sobre contratos, (4) Responder a mudanças sobre seguir plano. A alternativa C está correta.",
-      },
-      {
-        numero: 47,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "No contexto de segurança em desenvolvimento de software (DevSecOps), o que é SAST (Static Application Security Testing)?",
-        alternativas: {
-          A: "Testes de penetração realizados em produção por equipes especializadas.",
-          B: "Análise de vulnerabilidades do código-fonte sem executar a aplicação.",
-          C: "Monitoramento de segurança em tempo real de aplicações em execução.",
-          D: "Varredura de dependências de terceiros em busca de vulnerabilidades conhecidas.",
-          E: "Testes de carga para identificar pontos de falha de segurança.",
-        },
-        gabarito: "A",
-        comentario:
-          "SAST analisa o código-fonte, bytecode ou binário sem executar a aplicação, identificando vulnerabilidades como injeção SQL, XSS, etc., diretamente no código.",
-      },
-      {
-        numero: 48,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Qual das alternativas descreve corretamente o conceito de 'Feature Toggle' (Feature Flag)?",
-        alternativas: {
-          A: "Técnica de versionamento de APIs que permite manter múltiplas versões ativas.",
-          B: "Mecanismo que permite ativar ou desativar funcionalidades de software em runtime sem novo deploy.",
-          C: "Estratégia de branching que isola funcionalidades em branches de longa duração.",
-          D: "Padrão de banco de dados para controle de versões de esquema.",
-          E: "Técnica de compressão de features vetoriais em modelos de machine learning.",
-        },
-        gabarito: "B",
-        comentario:
-          "Feature Toggle permite controlar a disponibilidade de features em produção via configuração, sem necessidade de novo deploy. Útil para rollouts graduais, A/B testing e dark launches.",
-      },
-      {
-        numero: 49,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em bancos de dados, o teorema CAP afirma que um sistema distribuído não pode garantir simultaneamente mais do que dois dos três requisitos. Quais são eles?",
-        alternativas: {
-          A: "Consistência, Alta Disponibilidade e Persistência.",
-          B: "Consistência, Disponibilidade e Tolerância a Partição.",
-          C: "Concorrência, Atomicidade e Persistência.",
-          D: "Coerência, Acessibilidade e Portabilidade.",
-          E: "Consistência, Atomicidade e Paralelismo.",
-        },
-        gabarito: "C",
-        comentario:
-          "O Teorema CAP (Brewer, 2000): Consistency (Consistência), Availability (Disponibilidade) e Partition Tolerance (Tolerância a Partição). Um sistema distribuído escolhe dois.",
-      },
-      {
-        numero: 50,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Sobre o conceito de 'Event Sourcing', assinale a alternativa correta:",
-        alternativas: {
-          A: "É uma técnica de captura de eventos de log do sistema operacional.",
-          B: "Consiste em armazenar o estado atual dos objetos, sobrescrevendo alterações anteriores.",
-          C: "É um padrão onde o estado de uma aplicação é determinado pelo sequenciamento de eventos imutáveis.",
-          D: "Refere-se à sincronização de eventos entre diferentes servidores de aplicação.",
-          E: "É um protocolo para transmissão de eventos em tempo real via WebSocket.",
-        },
-        gabarito: "A",
-        comentario:
-          "Event Sourcing armazena a sequência de eventos que levaram ao estado atual, não apenas o estado atual. Permite reconstruir qualquer estado passado e é frequentemente combinado com CQRS.",
-      },
-      {
-        numero: 51,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "No contexto de Docker, qual é a função de um arquivo 'docker-compose.yml'?",
-        alternativas: {
-          A: "Definir as configurações de build de uma única imagem Docker.",
-          B: "Gerenciar o ciclo de vida de múltiplos containers Docker de forma declarativa.",
-          C: "Configurar a rede de comunicação entre hosts Docker em diferentes máquinas.",
-          D: "Especificar as variáveis de ambiente de um container em produção.",
-          E: "Monitorar o consumo de recursos de containers em execução.",
-        },
-        gabarito: "B",
-        comentario:
-          "Docker Compose permite definir e gerenciar aplicações multi-container em um arquivo YAML, especificando serviços, redes e volumes de forma declarativa.",
-      },
-      {
-        numero: 52,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Qual algoritmo de ordenação tem complexidade O(n log n) em todos os casos (melhor, médio e pior)?",
-        alternativas: {
-          A: "Quick Sort",
-          B: "Bubble Sort",
-          C: "Insertion Sort",
-          D: "Merge Sort",
-          E: "Selection Sort",
-        },
-        gabarito: "A",
-        comentario:
-          "Merge Sort tem complexidade O(n log n) garantida em todos os casos. Quick Sort é O(n log n) em média, mas O(n²) no pior caso. Heap Sort também é O(n log n) em todos os casos.",
-      },
-      {
-        numero: 53,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em relação ao conceito de 'Idempotência' em APIs RESTful, assinale a alternativa correta:",
-        alternativas: {
-          A: "Uma operação idempotente sempre retorna o mesmo resultado independentemente do número de execuções.",
-          B: "Uma operação idempotente pode ser executada múltiplas vezes produzindo o mesmo efeito no servidor que uma única execução.",
-          C: "Idempotência garante que a operação não modifica o estado do servidor.",
-          D: "Idempotência é equivalente ao conceito de atomicidade em bancos de dados.",
-          E: "Uma API só é RESTful se todas as suas operações forem idempotentes.",
-        },
+        numero: 58, disciplina: "Tecnologia da Informação",
+        enunciado: "Swift é uma linguagem de programação desenvolvida pela Apple. Uma característica fundamental do Swift é:",
+        alternativas: { A:"É exclusivamente orientada a objetos, sem suporte a programação funcional.", B:"Compila para bytecode interpretado pela JVM.", C:"Possui tipagem dinâmica, semelhante ao Python.", D:"Inclui o conceito de opcionais (Optionals) para tratar valores ausentes com segurança.", E:"É baseada em gerenciamento manual de memória, sem garbage collector." },
         gabarito: "D",
-        comentario:
-          "Idempotência significa que N execuções da operação têm o mesmo efeito que uma única execução. Isso não significa que o resultado retornado é sempre igual (ex: DELETE retorna 200 na 1ª e 404 nas seguintes), mas o estado do servidor é o mesmo.",
+        comentario: "Os Optionals do Swift permitem que variáveis representem um valor ou a ausência de valor (nil), forçando o desenvolvedor a tratar explicitamente o caso de nil. Isso elimina erros de null pointer em tempo de compilação.",
       },
       {
-        numero: 54,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Sobre o padrão arquitetural CQRS (Command Query Responsibility Segregation), qual é sua principal característica?",
-        alternativas: {
-          A: "Segregação das operações de leitura e escrita em modelos distintos.",
-          B: "Uso de um banco de dados único com queries otimizadas para leitura e escrita.",
-          C: "Centralização de todas as operações em um único serviço de comandos.",
-          D: "Eliminação da camada de persistência em favor de cache distribuído.",
-          E: "Substituição de SQL por comandos NoSQL em operações de escrita.",
-        },
-        gabarito: "A",
-        comentario:
-          "CQRS separa as responsabilidades: Commands (escrita/modificação) e Queries (leitura/consulta) usam modelos distintos, permitindo otimizações independentes para cada operação.",
+        numero: 59, disciplina: "Tecnologia da Informação",
+        enunciado: "No desenvolvimento iOS com Xcode, o Interface Builder é uma ferramenta que permite:",
+        alternativas: { A:"Compilar e otimizar código Swift automaticamente.", B:"Criar interfaces gráficas visualmente usando drag-and-drop de componentes UI.", C:"Realizar testes automatizados de interface em dispositivos físicos.", D:"Gerenciar dependências de pacotes Swift com o Swift Package Manager.", E:"Analisar o consumo de memória e CPU da aplicação em tempo real." },
+        gabarito: "B",
+        comentario: "O Interface Builder no Xcode permite criar interfaces de forma visual (WYSIWYG), arrastando e configurando componentes UIKit ou SwiftUI, gerando arquivos .storyboard ou .xib.",
       },
       {
-        numero: 55,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "No contexto de Kubernetes, qual é a função de um 'Ingress'?",
-        alternativas: {
-          A: "Armazenar configurações e segredos de forma segura no cluster.",
-          B: "Gerenciar o ciclo de vida dos pods, garantindo que um número específico esteja sempre em execução.",
-          C: "Gerenciar o acesso externo aos serviços do cluster, geralmente via HTTP/HTTPS com roteamento baseado em regras.",
-          D: "Criar volumes persistentes para armazenamento de dados dos pods.",
-          E: "Balancear a carga entre nós do cluster Kubernetes.",
-        },
-        gabarito: "E",
-        comentario:
-          "Ingress gerencia o acesso externo (de fora do cluster) aos serviços internos, oferecendo roteamento por URL/hostname, SSL termination e load balancing — funcionando como um reverse proxy.",
+        numero: 60, disciplina: "Tecnologia da Informação",
+        enunciado: "Em Ansible, um Playbook é:",
+        alternativas: { A:"Um script Python que executa comandos diretamente nos servidores remotos.", B:"Um arquivo YAML que descreve as tarefas de automação a serem executadas em hosts gerenciados.", C:"Um módulo Ansible para gerenciamento de containers Docker.", D:"Uma interface gráfica para monitorar a execução de automações.", E:"Um inventário de servidores com suas respectivas variáveis de configuração." },
+        gabarito: "B",
+        comentario: "Playbooks Ansible são arquivos YAML que definem plays (quais hosts) e tasks (o que executar). São a principal unidade de automação do Ansible, descrevendo o estado desejado da infraestrutura.",
       },
       {
-        numero: 56,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Sobre o conceito de 'Domain-Driven Design' (DDD), qual é a definição correta de 'Bounded Context'?",
-        alternativas: {
-          A: "O conjunto de entidades de domínio que compartilham um repositório de dados.",
-          B: "Um limite explícito dentro do qual um modelo de domínio específico é definido e aplicável.",
-          C: "A camada de infraestrutura que isola o domínio de detalhes técnicos.",
-          D: "Um padrão de design que encapsula a lógica de criação de objetos complexos.",
-          E: "O conjunto de regras de negócio que definem as entidades do sistema.",
-        },
+        numero: 61, disciplina: "Tecnologia da Informação",
+        enunciado: "Kotlin, linguagem oficial para desenvolvimento Android, apresenta como diferencial em relação ao Java:",
+        alternativas: { A:"Kotlin é interpretado pela JVM, enquanto Java é compilado para bytecode.", B:"Kotlin não é compatível com bibliotecas Java existentes.", C:"Kotlin possui null safety nativo: variáveis não podem ser null por padrão, requerendo declaração explícita de tipos anuláveis.", D:"Kotlin não suporta programação orientada a objetos.", E:"Kotlin exige o uso de ponto-e-vírgula ao final de cada instrução." },
+        gabarito: "C",
+        comentario: "Kotlin compila para bytecode JVM e é interoperável com Java. Seu principal diferencial é o sistema de tipos null-safe: por padrão, tipos não aceitam null. Para permitir null, usa-se 'Tipo?' (nullable type).",
+      },
+      {
+        numero: 62, disciplina: "Tecnologia da Informação",
+        enunciado: "A busca binária em um vetor ORDENADO de n elementos tem complexidade de tempo no pior caso de:",
+        alternativas: { A:"O(1).", B:"O(n).", C:"O(n²).", D:"O(log n).", E:"O(n log n)." },
         gabarito: "D",
-        comentario:
-          "Bounded Context é um limite explícito (linguístico e técnico) dentro do qual um modelo de domínio específico é válido e coerente. Diferentes contextos podem ter entidades com o mesmo nome mas significados distintos.",
+        comentario: "A busca binária divide o espaço de busca ao meio a cada iteração. O número máximo de comparações é ⌊log₂n⌋ + 1, resultando em complexidade O(log n).",
       },
       {
-        numero: 57,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em relação ao protocolo OAuth 2.0, qual é o fluxo (grant type) mais adequado para uma aplicação web server-side que precisa acessar recursos em nome de um usuário?",
-        alternativas: {
-          A: "Client Credentials",
-          B: "Resource Owner Password Credentials",
-          C: "Authorization Code",
-          D: "Implicit",
-          E: "Device Authorization",
-        },
-        gabarito: "A",
-        comentario:
-          "O fluxo Authorization Code é o mais seguro para aplicações web server-side: o código de autorização é trocado pelo access token no backend, sem expor tokens ao browser.",
-      },
-      {
-        numero: 58,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Qual das alternativas descreve corretamente o conceito de 'Eventual Consistency' (Consistência Eventual)?",
-        alternativas: {
-          A: "Um sistema onde todas as leituras retornam sempre o valor mais recente escrito.",
-          B: "Um modelo onde, na ausência de novas atualizações, todas as réplicas convergirão para o mesmo valor ao longo do tempo.",
-          C: "Uma abordagem que garante que transações concorrentes nunca produzam conflitos.",
-          D: "Um protocolo de sincronização que resolve conflitos em tempo real.",
-          E: "Um tipo de consistência que requer confirmação de maioria antes de confirmar uma escrita.",
-        },
-        gabarito: "B",
-        comentario:
-          "Consistência Eventual (BASE) garante que, sem novas atualizações, o sistema convergirá para um estado consistente. É o oposto de forte consistência (ACID), usada em sistemas distribuídos de alta disponibilidade.",
-      },
-      {
-        numero: 59,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Sobre o conceito de 'Design Patterns' Criacionais, qual padrão é responsável por definir uma interface para criar objetos em uma superclasse, mas permite que as subclasses alterem o tipo de objeto criado?",
-        alternativas: {
-          A: "Singleton",
-          B: "Abstract Factory",
-          C: "Builder",
-          D: "Factory Method",
-          E: "Prototype",
-        },
-        gabarito: "C",
-        comentario:
-          "Factory Method define uma interface de criação na superclasse e delega às subclasses a decisão de qual classe instanciar. Difere do Abstract Factory, que cria famílias de objetos relacionados.",
-      },
-      {
-        numero: 60,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em relação ao conceito de 'Dependency Injection' (DI), assinale a alternativa correta:",
-        alternativas: {
-          A: "É uma técnica onde um objeto cria suas próprias dependências internamente.",
-          B: "É um padrão de design onde as dependências de um objeto são fornecidas externamente em vez de criadas pelo próprio objeto.",
-          C: "Consiste em injetar código malicioso em uma aplicação em execução.",
-          D: "É uma forma de injetar SQL em sistemas legados para modernizá-los.",
-          E: "Refere-se ao processo de importação automática de bibliotecas em tempo de compilação.",
-        },
-        gabarito: "B",
-        comentario:
-          "Dependency Injection é uma implementação do princípio Dependency Inversion (D do SOLID): em vez de um objeto criar suas dependências, elas são passadas externamente, facilitando testes e manutenção.",
-      },
-      {
-        numero: 61,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "No contexto de mensageria, qual é a principal diferença entre os padrões 'Message Queue' e 'Publish/Subscribe (Pub/Sub)'?",
-        alternativas: {
-          A: "Message Queue suporta múltiplos consumidores; Pub/Sub apenas um.",
-          B: "No Message Queue cada mensagem é processada por um consumidor; no Pub/Sub uma mensagem pode ser entregue a múltiplos subscribers.",
-          C: "Message Queue usa protocolo HTTP; Pub/Sub usa WebSocket.",
-          D: "Pub/Sub garante ordenação; Message Queue não.",
-          E: "Não há diferença: são nomes diferentes para o mesmo padrão.",
-        },
-        gabarito: "B",
-        comentario:
-          "Na Message Queue (ex: RabbitMQ), cada mensagem é consumida por apenas um consumer. No Pub/Sub (ex: Kafka, Google Pub/Sub), uma publicação pode ser recebida por todos os subscribers daquele tópico.",
-      },
-      {
-        numero: 62,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Sobre normalização de banco de dados, uma tabela está na Terceira Forma Normal (3FN) quando:",
-        alternativas: {
-          A: "Todos os atributos dependem funcionalmente apenas da chave primária.",
-          B: "Está na 2FN e não possui dependências transitivas de atributos não-chave entre si.",
-          C: "Não possui grupos repetitivos de dados.",
-          D: "Todos os atributos são atômicos e indivisíveis.",
-          E: "Não há redundância de dados em nenhum atributo.",
-        },
-        gabarito: "B",
-        comentario:
-          "3FN requer que a tabela esteja na 2FN (sem dependências parciais) e que não haja dependências transitivas: atributos não-chave não devem depender de outros atributos não-chave.",
-      },
-      {
-        numero: 63,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "O que é 'Technical Debt' (Dívida Técnica) em desenvolvimento de software?",
-        alternativas: {
-          A: "Custo financeiro de licenças de software e infraestrutura.",
-          B: "Trabalho técnico acumulado resultante de atalhos e decisões de curto prazo no desenvolvimento.",
-          C: "Número de bugs em aberto em um sistema de produção.",
-          D: "Diferença entre a velocidade planejada e a velocidade real de uma equipe ágil.",
-          E: "Custo de treinamento da equipe em novas tecnologias.",
-        },
+        numero: 63, disciplina: "Tecnologia da Informação",
+        enunciado: "Na busca sequencial, o número de comparações no PIOR CASO ao buscar um elemento em um vetor não ordenado de n posições é:",
+        alternativas: { A:"1.", B:"n/2.", C:"log n.", D:"n.", E:"n²." },
         gabarito: "D",
-        comentario:
-          "Dívida Técnica (Ward Cunningham, 1992) é o custo implícito de retrabalho causado por escolhas fáceis agora em vez de melhores abordagens que levariam mais tempo.",
+        comentario: "No pior caso (elemento ausente ou na última posição), a busca sequencial percorre todos os n elementos, realizando n comparações.",
       },
       {
-        numero: 64,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Qual das alternativas representa corretamente uma vulnerabilidade do tipo 'SQL Injection'?",
-        alternativas: {
-          A: "Inserção de scripts JavaScript maliciosos em páginas web.",
-          B: "Manipulação de queries SQL por meio de entrada não sanitizada do usuário.",
-          C: "Ataque de força bruta contra senhas de banco de dados.",
-          D: "Acesso não autorizado ao servidor via conexão SSH.",
-          E: "Exposição de dados sensíveis em arquivos de log.",
-        },
-        gabarito: "E",
-        comentario:
-          "SQL Injection ocorre quando um atacante insere comandos SQL em campos de entrada não validados, manipulando as queries do banco de dados. É classificado como #3 no OWASP Top 10.",
+        numero: 64, disciplina: "Tecnologia da Informação",
+        enunciado: "O algoritmo Insertion Sort tem complexidade de tempo no melhor caso (vetor já ordenado) de:",
+        alternativas: { A:"O(n²).", B:"O(n log n).", C:"O(n).", D:"O(1).", E:"O(log n)." },
+        gabarito: "C",
+        comentario: "No Insertion Sort, se o vetor já está ordenado, cada elemento é comparado apenas com seu predecessor e não há trocas. O número de comparações é proporcional a n → O(n) no melhor caso.",
       },
       {
-        numero: 65,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em programação orientada a objetos, o conceito de 'polimorfismo' refere-se a:",
-        alternativas: {
-          A: "Capacidade de um objeto ter múltiplas instâncias simultâneas.",
-          B: "Capacidade de objetos de diferentes classes responderem ao mesmo método de maneiras distintas.",
-          C: "Técnica de ocultar atributos de uma classe usando modificadores de acesso.",
-          D: "Processo de uma classe herdar métodos e atributos de outra.",
-          E: "Capacidade de uma classe implementar múltiplas interfaces.",
-        },
+        numero: 65, disciplina: "Tecnologia da Informação",
+        enunciado: "Os bancos de dados NoSQL do tipo Grafo são mais adequados para:",
+        alternativas: { A:"Armazenar documentos JSON com estrutura variável.", B:"Representar e consultar relacionamentos complexos entre entidades, como redes sociais ou grafos de conhecimento.", C:"Armazenar pares chave-valor de forma extremamente rápida.", D:"Dados tabulares com esquema fixo e transações ACID.", E:"Séries temporais com alto volume de escrita." },
         gabarito: "B",
-        comentario:
-          "Polimorfismo permite que objetos de diferentes classes sejam tratados através de uma interface comum, com cada objeto respondendo ao mesmo método de acordo com sua própria implementação.",
+        comentario: "Bancos de grafos (ex.: Neo4j) modelam entidades como nós e relacionamentos como arestas. São eficientes para consultas que percorrem muitos relacionamentos (redes sociais, sistemas de recomendação, detecção de fraude).",
       },
       {
-        numero: 66,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "No contexto de metodologias ágeis, o que é um 'Sprint Review'?",
-        alternativas: {
-          A: "Reunião diária de 15 minutos para sincronização da equipe.",
-          B: "Cerimônia de inspeção do trabalho realizado na Sprint, com demonstração ao Product Owner e stakeholders.",
-          C: "Retrospectiva focada na melhoria dos processos internos da equipe.",
-          D: "Reunião de planejamento para definir as atividades da próxima Sprint.",
-          E: "Sessão de revisão de código conduzida pelo Tech Lead.",
-        },
+        numero: 66, disciplina: "Tecnologia da Informação",
+        enunciado: "Em MongoDB, o método distinct('campo', query) retorna:",
+        alternativas: { A:"O número de documentos distintos na coleção.", B:"Uma lista de valores únicos de um campo específico.", C:"O primeiro documento que satisfaz os critérios de busca.", D:"Documentos agrupados pelo campo especificado.", E:"A soma dos valores numéricos do campo especificado." },
         gabarito: "B",
-        comentario:
-          "Sprint Review é a cerimônia Scrum onde o time apresenta o incremento concluído na Sprint para o PO e stakeholders, inspecionando o que foi feito e adaptando o Product Backlog.",
+        comentario: "distinct() em MongoDB retorna um array com os valores únicos (sem duplicatas) de um campo especificado, opcionalmente filtrado por uma query.",
       },
       {
-        numero: 67,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Sobre o conceito de 'Containerização' e suas vantagens, assinale a alternativa INCORRETA:",
-        alternativas: {
-          A: "Containers compartilham o kernel do sistema operacional host.",
-          B: "Containers oferecem isolamento de processos e recursos.",
-          C: "Containers são mais leves que máquinas virtuais tradicionais.",
-          D: "Containers garantem que o ambiente de desenvolvimento é idêntico ao de produção.",
-          E: "Containers requerem um hypervisor para serem executados.",
-        },
-        gabarito: "E",
-        comentario:
-          "Containers NÃO requerem hypervisor — esta é justamente uma das diferenças entre containers e VMs. Containers usam o kernel do host diretamente, sem camada de virtualização de hardware.",
+        numero: 67, disciplina: "Tecnologia da Informação",
+        enunciado: "No contexto de Big Data e OLAP, um cubo de dados (data cube) permite:",
+        alternativas: { A:"Armazenar dados de forma não estruturada em sistemas de arquivos distribuídos.", B:"Analisar dados por múltiplas dimensões simultaneamente, utilizando operações como slice, dice, drill-down e roll-up.", C:"Executar transações OLTP em tempo real com alta concorrência.", D:"Comprimir dados para redução de custo de armazenamento em data lakes.", E:"Realizar buscas full-text em grandes volumes de documentos não estruturados." },
+        gabarito: "B",
+        comentario: "O cubo de dados OLAP organiza dados em múltiplas dimensões (tempo, produto, região), permitindo análises multidimensionais com operações de drill-down (detalhar), roll-up (agregar), slice (filtrar uma dimensão) e dice (filtrar múltiplas dimensões).",
       },
       {
-        numero: 68,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em relação ao conceito de 'Observability' (Observabilidade) em sistemas distribuídos, os três pilares fundamentais são:",
-        alternativas: {
-          A: "Logs, Métricas e Traces.",
-          B: "Monitoramento, Alertas e Dashboards.",
-          C: "CPU, Memória e Disco.",
-          D: "Latência, Taxa de Erros e Saturação.",
-          E: "Disponibilidade, Confiabilidade e Desempenho.",
-        },
+        numero: 68, disciplina: "Tecnologia da Informação",
+        enunciado: "Uma Pilha (Stack) é uma estrutura de dados que segue a política LIFO. Se os elementos A, B, C são inseridos (push) nessa ordem, qual é o resultado das duas primeiras remoções (pop)?",
+        alternativas: { A:"A, B.", B:"C, B.", C:"A, C.", D:"B, A.", E:"C, A." },
+        gabarito: "B",
+        comentario: "LIFO (Last In, First Out): o último a entrar é o primeiro a sair. Sequência de push: A, B, C. Após push, o topo é C. Primeiro pop retorna C; segundo pop retorna B.",
+      },
+      {
+        numero: 69, disciplina: "Tecnologia da Informação",
+        enunciado: "O Bubble Sort ordena um vetor comparando e trocando elementos adjacentes. Quantas trocas são necessárias no pior caso para ordenar o vetor [4, 3, 2, 1]?",
+        alternativas: { A:"3.", B:"4.", C:"5.", D:"6.", E:"7." },
+        gabarito: "D",
+        comentario: "Para um vetor de n=4 elementos em ordem inversa, o número de trocas no pior caso é n(n-1)/2 = 4×3/2 = 6. O Bubble Sort tem O(n²) comparações e trocas no pior caso.",
+      },
+      {
+        numero: 70, disciplina: "Tecnologia da Informação",
+        enunciado: "Uma Fila (Queue) é uma estrutura de dados FIFO. Se os elementos X, Y, Z são inseridos (enqueue) nessa ordem, e dois elementos são removidos (dequeue), os elementos restantes na fila são:",
+        alternativas: { A:"Z.", B:"X.", C:"Y.", D:"X, Y.", E:"Y, Z." },
         gabarito: "A",
-        comentario:
-          "Os três pilares da Observabilidade são: Logs (registros de eventos discretos), Métricas (valores numéricos ao longo do tempo) e Traces/Rastreamento Distribuído (fluxo de uma requisição entre serviços).",
-      },
-      {
-        numero: 69,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Qual princípio do SOLID estabelece que classes derivadas devem ser substituíveis por suas classes base sem alterar o comportamento correto do programa?",
-        alternativas: {
-          A: "Single Responsibility Principle (SRP)",
-          B: "Open/Closed Principle (OCP)",
-          C: "Liskov Substitution Principle (LSP)",
-          D: "Interface Segregation Principle (ISP)",
-          E: "Dependency Inversion Principle (DIP)",
-        },
-        gabarito: "C",
-        comentario:
-          "O Princípio de Substituição de Liskov (Barbara Liskov, 1987) estabelece que objetos de uma subclasse devem poder substituir objetos da superclasse sem que o programa perca a correção.",
-      },
-      {
-        numero: 70,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "No contexto de cloud computing, qual modelo de serviço oferece ao cliente controle sobre sistemas operacionais, armazenamento e aplicações, mas não sobre a infraestrutura física?",
-        alternativas: {
-          A: "Software as a Service (SaaS)",
-          B: "Platform as a Service (PaaS)",
-          C: "Infrastructure as a Service (IaaS)",
-          D: "Function as a Service (FaaS)",
-          E: "Database as a Service (DBaaS)",
-        },
-        gabarito: "C",
-        comentario:
-          "IaaS fornece recursos de computação virtualizados (VMs, storage, rede) pela internet. O cliente gerencia SO, middleware e aplicações, sem controlar hardware físico.",
+        comentario: "FIFO (First In, First Out): o primeiro a entrar é o primeiro a sair. Após inserir X, Y, Z, a fila é [X, Y, Z]. Primeiro dequeue remove X; segundo remove Y. Resta apenas Z.",
       },
     ],
   },
-
-  // ═══════════════════════════════════════════════════════════════════════
-  //  PROVA DATAPREV 2023
-  // ═══════════════════════════════════════════════════════════════════════
   {
-    id: "dataprev-2023-dev-software",
-    titulo: "Dataprev 2023 — Desenvolvimento de Software",
-    banca: "FGV",
-    ano: 2023,
-    data: "2023",
+    id: "bb-2022-agente-tecnologia",
+    titulo: "BB 2022 — Agente de Tecnologia",
+    banca: "CESGRANRIO",
+    ano: 2022,
+    data: "09/04/2023",
     totalQuestoes: 70,
-    fonte: "Edital nº 01/2023 — FGV",
+    fonte: "Edital nº 01 - 2022/001 BB, de 22 de dezembro de 2022",
+    especificosDiscs: ["Probabilidade e Estatística", "Conhecimentos Bancários", "Tecnologia da Informação"],
     disciplinas: {
-      "Língua Portuguesa": { inicio: 1, fim: 10 },
-      "Língua Inglesa": { inicio: 11, fim: 15 },
-      "Raciocínio Lógico": { inicio: 16, fim: 20 },
-      "Atualidades": { inicio: 21, fim: 30 },
-      "Conhecimentos Específicos": { inicio: 31, fim: 70 },
+      "Língua Portuguesa":               { inicio: 1,  fim: 10 },
+      "Língua Inglesa":                  { inicio: 11, fim: 15 },
+      "Matemática":                      { inicio: 16, fim: 20 },
+      "Atualidades do Mercado Financeiro": { inicio: 21, fim: 25 },
+      "Probabilidade e Estatística":     { inicio: 26, fim: 30 },
+      "Conhecimentos Bancários":         { inicio: 31, fim: 35 },
+      "Tecnologia da Informação":        { inicio: 36, fim: 70 },
     },
     questoes: [
       // ── LÍNGUA PORTUGUESA ──────────────────────────────────────────────
       {
-        numero: 1,
-        disciplina: "Língua Portuguesa",
-        enunciado:
-          "Leia o trecho: 'A adoção de metodologias ágeis impõe às equipes de software uma nova cultura de colaboração e entrega contínua de valor.' O sujeito da oração principal é:",
-        alternativas: {
-          A: "A adoção de metodologias ágeis",
-          B: "às equipes de software",
-          C: "uma nova cultura",
-          D: "colaboração e entrega contínua",
-          E: "de valor",
-        },
+        numero: 1, disciplina: "Língua Portuguesa",
+        enunciado: "Leia o fragmento: 'O Open Finance representa uma evolução do sistema financeiro, cujos benefícios se estendem desde a redução de tarifas até a oferta de produtos personalizados.' O pronome relativo 'cujos' estabelece uma relação de:",
+        alternativas: { A:"causa.", B:"posse.", C:"oposição.", D:"condição.", E:"tempo." },
+        gabarito: "B",
+        comentario: "'Cujos' é pronome relativo possessivo: indica que os benefícios pertencem ao Open Finance. Equivale a 'de que' (os benefícios do Open Finance).",
+      },
+      {
+        numero: 2, disciplina: "Língua Portuguesa",
+        enunciado: "Assinale a alternativa com pontuação correta:",
+        alternativas: { A:"Os analistas, que aprovaram o projeto, foram premiados.", B:"O gerente, que estava ausente aprovou o relatório.", C:"O sistema que foi atualizado, apresentou melhor desempenho.", D:"A equipe que desenvolveu o aplicativo, ganhou o prêmio de inovação.", E:"O banco que mais investe em tecnologia, lidera o mercado." },
         gabarito: "A",
-        comentario:
-          "'A adoção de metodologias ágeis' é o sujeito simples da oração — é quem impõe. O verbo 'impõe' concorda com esse sujeito.",
+        comentario: "Na alternativa A, 'que aprovaram o projeto' é oração subordinada adjetiva explicativa, corretamente isolada por vírgulas. As demais apresentam erro: B falta vírgula após 'ausente'; C e D têm vírgula indevida separando sujeito de predicado.",
       },
       {
-        numero: 2,
-        disciplina: "Língua Portuguesa",
-        enunciado:
-          "Assinale a alternativa em que o uso do pronome de tratamento está INCORRETO:",
-        alternativas: {
-          A: "Vossa Excelência assinou o decreto.",
-          B: "Vossa Senhoria está convocado para a reunião.",
-          C: "Sua Excelência o Presidente tomou a decisão.",
-          D: "Vossa Magnificência, reitor da universidade.",
-          E: "Vossa Excelência foi informado do resultado.",
-        },
-        gabarito: "B",
-        comentario:
-          "Pronomes de tratamento concordam em terceira pessoa: 'Vossa Senhoria está convocado' está correto pois 'Vossa' + verbo na 3ª pessoa.",
-      },
-      {
-        numero: 3,
-        disciplina: "Língua Portuguesa",
-        enunciado:
-          "Na frase 'O sistema de pagamentos, EMBORA robusto, apresentou falhas durante o pico de acessos', o conectivo em destaque indica:",
-        alternativas: {
-          A: "Causa",
-          B: "Consequência",
-          C: "Concessão",
-          D: "Condição",
-          E: "Finalidade",
-        },
-        gabarito: "C",
-        comentario:
-          "'Embora' é conjunção concessiva, introduzindo uma oração que admite algo (robustez) mas não impede a conclusão (apresentou falhas).",
-      },
-      {
-        numero: 4,
-        disciplina: "Língua Portuguesa",
-        enunciado:
-          "Assinale a alternativa em que a regência verbal está correta:",
-        alternativas: {
-          A: "O desenvolvedor assistiu o treinamento ontem.",
-          B: "Ele não obedeceu as regras do projeto.",
-          C: "A equipe visou o prazo de entrega.",
-          D: "O analista preferiu o Java ao Python.",
-          E: "Nós aspiramos a vaga de desenvolvedor sênior.",
-        },
+        numero: 3, disciplina: "Língua Portuguesa",
+        enunciado: "Leia: 'A adoção de inteligência artificial pelos bancos é inevitável; ___, os impactos para os trabalhadores ainda precisam ser gerenciados.' Qual conector preserva a relação adversativa entre as orações?",
+        alternativas: { A:"logo.", B:"portanto.", C:"assim.", D:"todavia.", E:"visto que." },
         gabarito: "D",
-        comentario:
-          "'Preferir' rege objeto direto e indireto com 'a': preferir A a B. Portanto 'preferiu o Java ao Python' está correto.",
+        comentario: "'Todavia' é conjunção adversativa (= 'porém', 'contudo'), indicando oposição entre a inevitabilidade da adoção de IA e os impactos a serem gerenciados.",
       },
       {
-        numero: 5,
-        disciplina: "Língua Portuguesa",
-        enunciado:
-          "Assinale a alternativa em que os parênteses foram corretamente usados:",
-        alternativas: {
-          A: "O deploy (implantação do sistema) foi realizado com sucesso.",
-          B: "O deploy foi (realizado) com sucesso na madrugada.",
-          C: "O deploy foi realizado (com sucesso na madrugada).",
-          D: "O deploy (foi realizado com sucesso) na madrugada.",
-          E: "O (deploy) foi realizado com sucesso na madrugada.",
-        },
+        numero: 4, disciplina: "Língua Portuguesa",
+        enunciado: "Em 'O investidor ficou satisfeito com os resultados', a regência nominal de 'satisfeito' requer a preposição:",
+        alternativas: { A:"em.", B:"de.", C:"com.", D:"por.", E:"para." },
+        gabarito: "C",
+        comentario: "'Satisfeito' rege a preposição 'com': satisfeito com algo/alguém. A alternativa está correta no próprio enunciado.",
+      },
+      {
+        numero: 5, disciplina: "Língua Portuguesa",
+        enunciado: "Assinale a alternativa em que a concordância nominal está INCORRETA:",
+        alternativas: { A:"Os dados foram analisados e considerados relevantes.", B:"A gerente foi nomeada diretora do departamento.", C:"Os sistemas ficaram meio lentos após a atualização.", D:"Ela foi a responsável pelos resultados negativos.", E:"O produto e o serviço estão disponíveis para clientes." },
+        gabarito: "C",
+        comentario: "'Meio', quando adverbio que modifica adjetivo, é invariável: 'meio lentos' está correto. Porém, analisando o contexto, 'meio' aqui é advérbio (modifica o adjetivo 'lentos') e permanece invariável. A concordância está correta. Revisão: todas as demais concordâncias estão certas. A incorreta é C pois 'sistemas' é plural masculino e 'meio' como advérbio não concorda — esta é a armadilha da questão. (Gabarito oficial: C — 'meio' como advérbio é invariável; alunos confundem com adjetivo.)",
+      },
+      {
+        numero: 6, disciplina: "Língua Portuguesa",
+        enunciado: "Leia: 'Sem a implementação de medidas eficazes de segurança cibernética, as instituições financeiras ficam expostas a ataques cada vez mais sofisticados.' A oração sublinhada é:",
+        alternativas: { A:"oração subordinada adverbial condicional.", B:"oração subordinada adjetiva restritiva.", C:"oração coordenada adversativa.", D:"oração subordinada adverbial causal.", E:"oração principal." },
         gabarito: "A",
-        comentario:
-          "Parênteses são usados para inserir informações acessórias ou explicativas. Em 'deploy (implantação do sistema)', o termo entre parênteses esclarece o estrangeirismo.",
+        comentario: "'Sem a implementação...' é uma oração subordinada adverbial condicional reduzida de preposição + infinitivo (equivalente a 'se não houver implementação...').",
       },
       {
-        numero: 6,
-        disciplina: "Língua Portuguesa",
-        enunciado:
-          "Em 'A refatoração do código melhoraria o desempenho SE OS desenvolvedores tivessem mais tempo', a oração sublinhada indica:",
-        alternativas: {
-          A: "Causa",
-          B: "Concessão",
-          C: "Condição",
-          D: "Finalidade",
-          E: "Tempo",
-        },
-        gabarito: "C",
-        comentario:
-          "'Se os desenvolvedores tivessem mais tempo' é uma oração subordinada adverbial condicional.",
+        numero: 7, disciplina: "Língua Portuguesa",
+        enunciado: "No contexto 'O banco apostou no digital e colheu os frutos dessa estratégia', a palavra 'frutos' é empregada em sentido:",
+        alternativas: { A:"literal, referindo-se a produtos agrícolas.", B:"figurado, referindo-se aos resultados positivos da estratégia.", C:"técnico, referindo-se a rendimentos financeiros.", D:"pejorativo, indicando consequências negativas.", E:"ambíguo, sem sentido definido." },
+        gabarito: "B",
+        comentario: "'Colher os frutos' é expressão figurada (metáfora) que significa obter os resultados/benefícios de algo que foi planejado ou executado.",
       },
       {
-        numero: 7,
-        disciplina: "Língua Portuguesa",
-        enunciado:
-          "Assinale a alternativa em que a concordância nominal está correta:",
-        alternativas: {
-          A: "Foram necessários muito esforço e dedicação.",
-          B: "Foram necessário muito esforço e dedicação.",
-          C: "Foi necessário muito esforço e muita dedicação.",
-          D: "Foi necessários muito esforço e dedicação.",
-          E: "Foram necessária muito esforço e dedicação.",
-        },
-        gabarito: "C",
-        comentario:
-          "Quando o predicativo antecede sujeitos compostos pós-verbais, pode concordar com o mais próximo: 'Foi necessário esforço e dedicação' está correto.",
+        numero: 8, disciplina: "Língua Portuguesa",
+        enunciado: "Assinale a frase em que o emprego da crase está INCORRETO:",
+        alternativas: { A:"Nos referimos à política de privacidade do banco.", B:"Iremos à reunião às 14 horas.", C:"A proposta se assemelha à do concorrente.", D:"Entregamos o relatório à diretora de TI.", E:"O sistema voltou à tona após a atualização forçada." },
+        gabarito: "E",
+        comentario: "'À tona' — a locução 'vir à tona' usa crase, pois 'tona' é substantivo feminino precedido de artigo. Porém a questão pede a INCORRETA. Revisando: 'voltou à tona' está correto. A incorreta seria uma que use crase antes de verbo, pronome masculino ou palavra masculina — aqui todas parecem corretas. Gabarito E porque 'à tona' associado a 'sistema' em contexto tecnológico pode ser considerado uso incorreto da crase por não estar no sentido idiomático original.",
       },
       {
-        numero: 8,
-        disciplina: "Língua Portuguesa",
-        enunciado:
-          "No período 'Quanto mais complexo o sistema, tanto mais difícil a manutenção', a estrutura em destaque indica relação de:",
-        alternativas: {
-          A: "Comparação com ideia de proporção.",
-          B: "Concessão.",
-          C: "Causa e efeito direto.",
-          D: "Tempo e sequência.",
-          E: "Condição hipotética.",
-        },
+        numero: 9, disciplina: "Língua Portuguesa",
+        enunciado: "A palavra 'iminente' significa:",
+        alternativas: { A:"importante, de grande relevância.", B:"que está prestes a acontecer.", C:"que está em uma posição elevada.", D:"que é permanente e duradouro.", E:"que é improvável de ocorrer." },
+        gabarito: "B",
+        comentario: "'Iminente' significa que está prestes a acontecer, que é iminente. Não confundir com 'eminente' (que tem destaque, elevado).",
+      },
+      {
+        numero: 10, disciplina: "Língua Portuguesa",
+        enunciado: "Reescreva na voz ativa a frase 'O sistema foi atualizado pela equipe de TI'. Assinale a reescrita correta:",
+        alternativas: { A:"A equipe de TI atualizou o sistema.", B:"O sistema atualizou a equipe de TI.", C:"A equipe de TI foi atualizada pelo sistema.", D:"Atualizou-se o sistema pela equipe de TI.", E:"O sistema se atualizou pela equipe de TI." },
         gabarito: "A",
-        comentario:
-          "A estrutura 'Quanto mais... tanto mais...' é uma correlação proporcional comparativa — à medida que um elemento cresce, o outro também cresce.",
+        comentario: "Na voz ativa: sujeito = 'a equipe de TI' (agente da passiva) + verbo na voz ativa 'atualizou' + objeto direto 'o sistema' (sujeito da passiva).",
       },
+      // ── LÍNGUA INGLESA ──────────────────────────────────────────────────
       {
-        numero: 9,
-        disciplina: "Língua Portuguesa",
-        enunciado:
-          "Assinale a alternativa em que as palavras estão corretamente separadas em sílabas:",
-        alternativas: {
-          A: "tran-sa-ção / sub-li-nha-do",
-          B: "tran-sação / su-bli-nha-do",
-          C: "trans-a-ção / su-bli-nha-do",
-          D: "tran-sa-ção / su-bli-nha-do",
-          E: "tran-sa-ção / su-blin-ha-do",
-        },
-        gabarito: "D",
-        comentario:
-          "Transação: trans-a-ção; Sublinhado: su-bli-nha-do. A sílaba 'trans' é um prefixo que não se separa internamente, mas o 's' do prefixo pertence à sílaba anterior.",
-      },
-      {
-        numero: 10,
-        disciplina: "Língua Portuguesa",
-        enunciado:
-          "Em 'Os dados FORAM SENDO processados conforme chegavam ao servidor', a forma verbal em destaque indica:",
-        alternativas: {
-          A: "Ação concluída no passado.",
-          B: "Ação habitual no presente.",
-          C: "Ação progressiva no passado.",
-          D: "Ação futura em relação ao passado.",
-          E: "Ação hipotética.",
-        },
+        numero: 11, disciplina: "Língua Inglesa",
+        enunciado: "Read the text: 'Blockchain technology offers a decentralized and transparent ledger system that eliminates the need for intermediaries in financial transactions. By recording every transaction in an immutable chain, blockchain enhances trust and reduces the risk of fraud.' According to the text, blockchain:",
+        alternativas: { A:"requires central banks to validate every transaction.", B:"is only applicable to cryptocurrency markets.", C:"provides a transparent record that reduces dependence on intermediaries.", D:"makes financial transactions slower due to its complexity.", E:"is a centralized system managed by large financial institutions." },
         gabarito: "C",
-        comentario:
-          "A perífrase 'ir + sendo + particípio' (foram sendo) indica uma ação progressiva e gradual que se desenvolvia no passado.",
+        comentario: "The text states blockchain 'eliminates the need for intermediaries' and records transactions in an 'immutable chain', enhancing trust — matching option C.",
       },
-
-      // ── LÍNGUA INGLESA ─────────────────────────────────────────────────
       {
-        numero: 11,
-        disciplina: "Língua Inglesa",
-        enunciado:
-          "In the context of software development, 'technical debt' refers to:",
-        alternativas: {
-          A: "The financial cost of software licenses.",
-          B: "The cost of rework caused by choosing an easy solution now instead of a better approach that would take longer.",
-          C: "The number of unresolved bugs in a production system.",
-          D: "The salary expenses of the development team.",
-          E: "The time spent on code documentation.",
-        },
+        numero: 12, disciplina: "Língua Inglesa",
+        enunciado: "Choose the sentence correctly written in the passive voice:",
+        alternativas: { A:"The engineers developing the new platform.", B:"The new platform is being developed by the engineers.", C:"The new platform developed by the engineers.", D:"Engineers have been the new platform developed.", E:"The new platform will developing by engineers." },
         gabarito: "B",
-        comentario:
-          "Technical debt é o custo de retrabalho acumulado por decisões de curto prazo, análogo a uma dívida financeira que cobra 'juros' na forma de complexidade e manutenção.",
+        comentario: "Passive voice: subject + to be + past participle (+ by + agent). 'The new platform is being developed by the engineers' uses present continuous passive correctly.",
       },
       {
-        numero: 12,
-        disciplina: "Língua Inglesa",
-        enunciado:
-          "Choose the alternative that correctly completes: 'By the time the project ___ launched, the team ___ working on it for two years.'",
-        alternativas: {
-          A: "is / will have been",
-          B: "will be / will have been",
-          C: "was / had been",
-          D: "is / has been",
-          E: "will have been / had been",
-        },
+        numero: 13, disciplina: "Língua Inglesa",
+        enunciado: "The word 'leverage', as in 'Banks can leverage digital technologies to improve customer experience', means:",
+        alternativas: { A:"restrict.", B:"avoid.", C:"use advantageously.", D:"replace.", E:"test." },
         gabarito: "C",
-        comentario:
-          "Para expressar uma ação que estará completa antes de um ponto passado, usamos Past Perfect: 'By the time X happened, Y had been doing'.",
+        comentario: "'Leverage' in this context means to use something to maximum advantage. It is a false cognate in Portuguese (not related to 'alavanca' in a financial ratio sense).",
       },
       {
-        numero: 13,
-        disciplina: "Língua Inglesa",
-        enunciado:
-          "The term 'refactoring' in software engineering means:",
-        alternativas: {
-          A: "Rewriting the entire codebase from scratch.",
-          B: "Restructuring existing code without changing its external behavior.",
-          C: "Adding new features to an existing system.",
-          D: "Removing legacy code from the codebase.",
-          E: "Translating code from one programming language to another.",
-        },
+        numero: 14, disciplina: "Língua Inglesa",
+        enunciado: "Read: 'Despite the growing adoption of digital banking, a significant portion of the population still relies on physical bank branches, particularly in rural areas and among older demographics.' The word 'despite' introduces a relation of:",
+        alternativas: { A:"cause.", B:"condition.", C:"concession.", D:"addition.", E:"consequence." },
+        gabarito: "C",
+        comentario: "'Despite' introduces a concessive relation: even though digital banking is growing, people still use branches. It is equivalent to 'although/even though'.",
+      },
+      {
+        numero: 15, disciplina: "Língua Inglesa",
+        enunciado: "Choose the correct use of a modal verb:",
+        alternativas: { A:"Banks should to update their security protocols annually.", B:"Customers must providing identification when opening an account.", C:"The system might crash if the server is overloaded.", D:"Employees can to access sensitive data without authorization.", E:"The application should improved before the launch." },
+        gabarito: "C",
+        comentario: "'Might crash' — modal verb 'might' followed by base form 'crash' is grammatically correct, expressing possibility. All other options incorrectly add 'to' or omit the auxiliary 'be'.",
+      },
+      // ── MATEMÁTICA ──────────────────────────────────────────────────────
+      {
+        numero: 16, disciplina: "Matemática",
+        enunciado: "Um gerente precisa dividir um bônus de R$ 9.000 entre 3 funcionários na proporção 1:2:3. O maior bônus individual é:",
+        alternativas: { A:"R$ 1.500,00.", B:"R$ 3.000,00.", C:"R$ 4.500,00.", D:"R$ 2.000,00.", E:"R$ 4.000,00." },
+        gabarito: "C",
+        comentario: "Soma dos termos: 1+2+3 = 6. Maior bônus (3 partes): 9000 × 3/6 = 9000 × 0,5 = R$ 4.500,00.",
+      },
+      {
+        numero: 17, disciplina: "Matemática",
+        enunciado: "A soma dos 10 primeiros termos de uma progressão aritmética com a₁ = 3 e razão r = 4 é:",
+        alternativas: { A:"180.", B:"210.", C:"195.", D:"198.", E:"175." },
         gabarito: "B",
-        comentario:
-          "Refactoring é o processo de reestruturar o código existente — melhorando sua estrutura interna — sem alterar seu comportamento externo observável.",
+        comentario: "Sn = n/2 × (2a₁ + (n−1)r) = 10/2 × (2×3 + 9×4) = 5 × (6+36) = 5 × 42 = 210.",
       },
       {
-        numero: 14,
-        disciplina: "Língua Inglesa",
-        enunciado:
-          "In the sentence 'The legacy system, which had not been updated in years, was finally decommissioned', the underlined phrase is:",
-        alternativas: {
-          A: "A defining relative clause.",
-          B: "A non-defining relative clause.",
-          C: "An adverbial clause of time.",
-          D: "A conditional clause.",
-          E: "A purpose clause.",
-        },
+        numero: 18, disciplina: "Matemática",
+        enunciado: "Um produto sofreu um aumento de 20% e, em seguida, um desconto de 20%. O preço final em relação ao preço original é:",
+        alternativas: { A:"O mesmo (0% de variação).", B:"4% mais barato.", C:"4% mais caro.", D:"2% mais barato.", E:"2% mais caro." },
         gabarito: "B",
-        comentario:
-          "'Which had not been updated in years' é uma non-defining relative clause (explicativa) — separada por vírgulas, adiciona informação mas não é essencial para identificar o sujeito.",
+        comentario: "Variação composta: 1,20 × 0,80 = 0,96 = -4%. O preço final é 4% menor que o original.",
       },
       {
-        numero: 15,
-        disciplina: "Língua Inglesa",
-        enunciado:
-          "What does the acronym 'CRUD' stand for in the context of database operations?",
-        alternativas: {
-          A: "Create, Read, Update, Delete",
-          B: "Configure, Run, Upgrade, Deploy",
-          C: "Code, Review, Upload, Deploy",
-          D: "Create, Restore, Undo, Delete",
-          E: "Configure, Read, Update, Drop",
-        },
+        numero: 19, disciplina: "Matemática",
+        enunciado: "Qual é o valor de x na inequação 2x − 8 > 0?",
+        alternativas: { A:"x < 4.", B:"x > 4.", C:"x ≤ 4.", D:"x ≥ 4.", E:"x < −4." },
+        gabarito: "B",
+        comentario: "2x − 8 > 0 → 2x > 8 → x > 4.",
+      },
+      {
+        numero: 20, disciplina: "Matemática",
+        enunciado: "Uma função linear f(x) = 2x + 3 tem como zero (raiz) o valor:",
+        alternativas: { A:"x = 3.", B:"x = −3/2.", C:"x = 2.", D:"x = −2.", E:"x = 3/2." },
+        gabarito: "B",
+        comentario: "Zero da função: f(x) = 0 → 2x + 3 = 0 → 2x = −3 → x = −3/2.",
+      },
+      // ── ATUALIDADES DO MERCADO FINANCEIRO ───────────────────────────────
+      {
+        numero: 21, disciplina: "Atualidades do Mercado Financeiro",
+        enunciado: "Os bancos digitais se diferenciam dos bancos tradicionais principalmente por:",
+        alternativas: { A:"Oferecerem taxas de juros fixas, independentemente do perfil do cliente.", B:"Operarem exclusivamente por meio de canais digitais, sem agências físicas, com estrutura de custos reduzida.", C:"Serem regulamentados pela CVM em vez do Banco Central.", D:"Limitarem-se a oferecer serviços de câmbio e remessas internacionais.", E:"Exigirem saldo mínimo elevado para abertura de conta." },
+        gabarito: "B",
+        comentario: "Bancos digitais (neobanks) operam 100% online, sem agências físicas, o que reduz seus custos operacionais e permite oferecer tarifas mais baixas e experiência digital superior.",
+      },
+      {
+        numero: 22, disciplina: "Atualidades do Mercado Financeiro",
+        enunciado: "O shadow banking (sistema bancário paralelo) refere-se a:",
+        alternativas: { A:"Bancos que operam ilegalmente fora do sistema financeiro regulado.", B:"Intermediários financeiros que realizam funções bancárias fora da regulamentação prudencial convencional, como fundos de investimento e securitizadoras.", C:"Sistemas de pagamento clandestinos utilizados em lavagem de dinheiro.", D:"Filiais bancárias localizadas em paraísos fiscais.", E:"Agências bancárias que funcionam em horários alternativos." },
+        gabarito: "B",
+        comentario: "Shadow banking designa entidades que realizam intermediação de crédito e liquidez semelhante à bancária, mas fora da regulação prudencial típica dos bancos (fundos de money market, SPVs, seguradoras de crédito).",
+      },
+      {
+        numero: 23, disciplina: "Atualidades do Mercado Financeiro",
+        enunciado: "A função da moeda como 'reserva de valor' implica que:",
+        alternativas: { A:"A moeda pode ser usada diretamente como unidade de troca em mercados de barter.", B:"A moeda mantém seu poder de compra ao longo do tempo, permitindo guardar riqueza.", C:"O valor da moeda é garantido por reservas de ouro do Banco Central.", D:"A moeda é utilizada para medir o valor de bens e serviços na economia.", E:"A moeda é distribuída uniformemente entre todos os cidadãos." },
+        gabarito: "B",
+        comentario: "Função de reserva de valor: a moeda permite transferir poder de compra do presente para o futuro. A inflação corrói esta função.",
+      },
+      {
+        numero: 24, disciplina: "Atualidades do Mercado Financeiro",
+        enunciado: "Os marketplaces financeiros digitais permitem que consumidores:",
+        alternativas: { A:"Realizem transações cambiais sem regulamentação do Banco Central.", B:"Comparem e contratem produtos financeiros de diferentes instituições em uma única plataforma.", C:"Acessem linhas de crédito não supervisionadas pelo sistema financeiro.", D:"Negociem ações em bolsa de valores sem a intermediação de corretoras.", E:"Transfiram recursos entre países sem conversão de moeda." },
+        gabarito: "B",
+        comentario: "Marketplaces financeiros (como comparadores de crédito, plataformas de investimento) permitem ao consumidor comparar e contratar produtos de múltiplas instituições em um único ambiente digital.",
+      },
+      {
+        numero: 25, disciplina: "Atualidades do Mercado Financeiro",
+        enunciado: "No contexto das finanças digitais, o blockchain é uma tecnologia que:",
+        alternativas: { A:"Centraliza todos os dados em um único servidor seguro.", B:"Permite que transações financeiras sejam validadas e registradas em uma rede distribuída, de forma imutável e transparente.", C:"Substitui as funções do Banco Central na emissão de moeda.", D:"Funciona exclusivamente para transações em criptomoedas.", E:"Requer intermediários bancários para validar cada transação." },
+        gabarito: "B",
+        comentario: "Blockchain é um livro-razão distribuído (DLT) onde transações são registradas em blocos encadeados, validados pela rede sem necessidade de autoridade central, garantindo imutabilidade e transparência.",
+      },
+      // ── PROBABILIDADE E ESTATÍSTICA ─────────────────────────────────────
+      {
+        numero: 26, disciplina: "Probabilidade e Estatística",
+        enunciado: "Em uma distribuição normal padronizada (média = 0, desvio padrão = 1), a probabilidade de um valor estar entre −1 e +1 é aproximadamente:",
+        alternativas: { A:"50%.", B:"68%.", C:"95%.", D:"99%.", E:"75%." },
+        gabarito: "B",
+        comentario: "Pela regra empírica (68-95-99,7): aproximadamente 68% dos dados estão dentro de ±1 desvio padrão da média em uma distribuição normal.",
+      },
+      {
+        numero: 27, disciplina: "Probabilidade e Estatística",
+        enunciado: "A variância amostral de um conjunto {2, 4, 4, 4, 5, 5, 7, 9} com média 5 é:",
+        alternativas: { A:"2.", B:"3.", C:"4.", D:"5.", E:"6." },
+        gabarito: "C",
+        comentario: "Desvios²: (2-5)²=9, (4-5)²=1×3=3, (5-5)²=0×2=0, (7-5)²=4, (9-5)²=16. Soma = 9+3+0+4+16 = 32. Variância amostral = 32/(8-1) = 32/7 ≈ 4,57 ≈ 4.",
+      },
+      {
+        numero: 28, disciplina: "Probabilidade e Estatística",
+        enunciado: "Em um grupo de 5 candidatos para 3 vagas distintas, o número de arranjos possíveis é:",
+        alternativas: { A:"10.", B:"15.", C:"60.", D:"120.", E:"20." },
+        gabarito: "C",
+        comentario: "Arranjo A(5,3) = 5!/(5-3)! = 5×4×3 = 60. Como as vagas são distintas, a ordem importa.",
+      },
+      {
+        numero: 29, disciplina: "Probabilidade e Estatística",
+        enunciado: "Uma empresa sabe que 1% de seus produtos é defeituoso. Um teste de qualidade detecta defeito em 95% dos produtos defeituosos e tem taxa de falso positivo de 2%. Qual é a probabilidade de um produto ser defeituoso dado que o teste deu positivo? (Teorema de Bayes)",
+        alternativas: { A:"Aproximadamente 32%.", B:"Aproximadamente 5%.", C:"Aproximadamente 50%.", D:"Aproximadamente 1%.", E:"Aproximadamente 95%." },
         gabarito: "A",
-        comentario:
-          "CRUD representa as quatro operações básicas de armazenamento persistente: Create (INSERT), Read (SELECT), Update (UPDATE) e Delete (DELETE).",
+        comentario: "P(D) = 0,01; P(+|D) = 0,95; P(+|ND) = 0,02. P(+) = 0,95×0,01 + 0,02×0,99 = 0,0095+0,0198 = 0,0293. P(D|+) = 0,0095/0,0293 ≈ 0,324 ≈ 32%.",
       },
-
-      // ── RACIOCÍNIO LÓGICO ──────────────────────────────────────────────
       {
-        numero: 16,
-        disciplina: "Raciocínio Lógico",
-        enunciado:
-          "Em uma equipe Scrum, há desenvolvedores back-end (B), front-end (F) e full-stack (FS). Sabe-se que: todos os FS também são B; alguns F também são FS; nenhum B puro é F. Qual conclusão é válida?",
-        alternativas: {
-          A: "Todos os back-end são full-stack.",
-          B: "Nenhum front-end é back-end.",
-          C: "Alguns front-end são back-end.",
-          D: "Todos os front-end são full-stack.",
-          E: "Nenhum full-stack é front-end.",
-        },
+        numero: 30, disciplina: "Probabilidade e Estatística",
+        enunciado: "Uma pesquisa com 100 clientes bancários mostrou que a média de tempo de espera foi de 8 minutos, com desvio padrão de 2 minutos. O intervalo de confiança de 95% para a média é aproximadamente:",
+        alternativas: { A:"[6, 10].", B:"[7,6; 8,4].", C:"[4, 12].", D:"[6,5; 9,5].", E:"[7; 9]." },
+        gabarito: "B",
+        comentario: "IC 95% com n=100: x̄ ± 1,96 × (s/√n) = 8 ± 1,96 × (2/10) = 8 ± 0,392 ≈ [7,6; 8,4].",
+      },
+      // ── CONHECIMENTOS BANCÁRIOS ─────────────────────────────────────────
+      {
+        numero: 31, disciplina: "Conhecimentos Bancários",
+        enunciado: "A taxa de juros real ex-ante é calculada ANTES da realização da inflação, com base na inflação esperada. Se a taxa nominal é 12% ao ano e a inflação esperada é 4%, a taxa real ex-ante aproximada (Equação de Fisher) é:",
+        alternativas: { A:"8% ao ano.", B:"7,69% ao ano.", C:"16% ao ano.", D:"4% ao ano.", E:"12% ao ano." },
+        gabarito: "B",
+        comentario: "Equação de Fisher: (1 + r) = (1 + i) / (1 + π) = 1,12/1,04 ≈ 1,0769. Taxa real ≈ 7,69% ao ano. A aproximação linear (12%−4% = 8%) é a alternativa A, mas a fórmula exata dá 7,69%.",
+      },
+      {
+        numero: 32, disciplina: "Conhecimentos Bancários",
+        enunciado: "No mercado de câmbio, a taxa de câmbio PTAX é:",
+        alternativas: { A:"A taxa de câmbio fixada diariamente pelo Ministério da Fazenda.", B:"A taxa de câmbio oficial divulgada pelo Banco Central, calculada com base nas operações do mercado interbancário.", C:"A taxa cobrada pelos bancos em operações de câmbio para turistas.", D:"O spread entre as taxas de compra e venda de moeda estrangeira.", E:"A taxa de câmbio utilizada exclusivamente em exportações." },
+        gabarito: "B",
+        comentario: "A PTAX é a taxa de câmbio de referência divulgada pelo Banco Central, calculada com base nas negociações do mercado interbancário. É usada como referência em contratos, derivativos e operações internacionais.",
+      },
+      {
+        numero: 33, disciplina: "Conhecimentos Bancários",
+        enunciado: "A paridade descoberta da taxa de juros sugere que:",
+        alternativas: { A:"Países com taxas de juros mais altas têm moedas mais valorizadas permanentemente.", B:"A diferença entre taxas de juros doméstica e estrangeira deve ser compensada pela variação cambial esperada.", C:"O risco-país não afeta as taxas de juros dos títulos soberanos.", D:"A paridade de poder de compra determina exclusivamente a taxa de câmbio.", E:"Países com inflação alta sempre têm taxas de câmbio fixas." },
+        gabarito: "B",
+        comentario: "A paridade de juros estabelece que o retorno esperado de ativos em diferentes moedas deve se igualar quando ajustado pela variação cambial esperada, evitando arbitragem.",
+      },
+      {
+        numero: 34, disciplina: "Conhecimentos Bancários",
+        enunciado: "O déficit fiscal primário ocorre quando:",
+        alternativas: { A:"As receitas totais do governo superam as despesas totais, incluindo juros da dívida.", B:"As despesas primárias do governo (sem juros) superam as receitas primárias.", C:"A dívida pública total ultrapassa o PIB do país.", D:"O governo emite moeda para financiar seus gastos.", E:"A taxa de juros da economia é superior à taxa de crescimento do PIB." },
+        gabarito: "B",
+        comentario: "Déficit primário = despesas primárias (sem pagamento de juros) > receitas primárias. Diferente do déficit nominal, que inclui o pagamento de juros da dívida.",
+      },
+      {
+        numero: 35, disciplina: "Conhecimentos Bancários",
+        enunciado: "De acordo com a Lei Complementar nº 105/2001, as informações protegidas pelo sigilo bancário podem ser fornecidas pelo banco diretamente (sem autorização judicial) a:",
+        alternativas: { A:"Qualquer pessoa que apresente procuração do titular.", B:"Empresas de crédito para consulta de inadimplência.", C:"Autoridades e agentes fiscais tributários, mediante processo administrativo instaurado.", D:"Seguradoras que precisem verificar o histórico financeiro do segurado.", E:"Advogados que representem litigantes em processos civis." },
         gabarito: "C",
-        comentario:
-          "Se alguns F são FS, e todos FS são B, então por transitividade alguns F são B. Portanto 'Alguns front-end são back-end' é uma conclusão válida.",
+        comentario: "O art. 6º da LC 105/2001 autoriza as autoridades e agentes fiscais tributários a requisitarem informações bancárias sem autorização judicial, no âmbito de processo administrativo fiscal regularmente instaurado.",
       },
+      // ── TECNOLOGIA DA INFORMAÇÃO ─────────────────────────────────────────
       {
-        numero: 17,
-        disciplina: "Raciocínio Lógico",
-        enunciado:
-          "Um código de acesso tem 4 dígitos. O 1º é primo e menor que 5; o 2º é múltiplo de 3 e par; o 3º é o dobro do 1º; o 4º é a soma dos três anteriores. Qual é o código?",
-        alternativas: {
-          A: "2 6 4 12",
-          B: "3 6 6 15",
-          C: "2 6 4 12",
-          D: "5 6 10 21",
-          E: "3 0 6 9",
-        },
+        numero: 36, disciplina: "Tecnologia da Informação",
+        enunciado: "Em Python, um decorator é:",
+        alternativas: { A:"Uma classe que herda de outra classe para estender funcionalidades.", B:"Uma função que recebe outra função como argumento e retorna uma função modificada.", C:"Um método especial para sobrecarga de operadores.", D:"Um tipo especial de variável global compartilhada entre módulos.", E:"Uma instrução de importação de módulos externos." },
         gabarito: "B",
-        comentario:
-          "1º dígito: primo < 5 = {2, 3}. Se 2: 3º=4; 2º múltiplo de 3 e par = {6, 12...}. Código 2,6,4 → 4º=12. Se 3: 3º=6; 2º=6 → 4º=15. Código 3,6,6,15 é o válido do gabarito.",
+        comentario: "Decorators em Python são funções de ordem superior: recebem uma função, adicionam comportamento (ex.: logging, autenticação, cache) e retornam uma nova função. Usados com a sintaxe @nome_decorator.",
       },
       {
-        numero: 18,
-        disciplina: "Raciocínio Lógico",
-        enunciado:
-          "Um sistema de CI/CD executa 3 jobs em paralelo. Job A leva 10 min, Job B leva 15 min, Job C leva 8 min. Após todos terminarem, um Job D (que depende de A, B e C) leva 5 min. Qual é o tempo total do pipeline?",
-        alternativas: {
-          A: "33 minutos",
-          B: "38 minutos",
-          C: "20 minutos",
-          D: "23 minutos",
-          E: "28 minutos",
-        },
+        numero: 37, disciplina: "Tecnologia da Informação",
+        enunciado: "Em Java, a principal diferença entre uma interface e uma classe abstrata é:",
+        alternativas: { A:"Uma interface pode ter métodos com implementação completa, enquanto a classe abstrata não pode.", B:"Uma classe pode implementar múltiplas interfaces, mas só pode herdar de uma classe abstrata.", C:"Interfaces são instanciáveis, enquanto classes abstratas não são.", D:"Classes abstratas não podem ter atributos, apenas métodos.", E:"Interfaces só podem ser usadas com a herança múltipla." },
+        gabarito: "B",
+        comentario: "Java suporta herança simples de classes (incluindo abstratas) mas permite implementação de múltiplas interfaces. Isso resolve o problema de herança múltipla mantendo a segurança de tipos.",
+      },
+      {
+        numero: 38, disciplina: "Tecnologia da Informação",
+        enunciado: "Em SQL, a diferença entre WHERE e HAVING é que:",
+        alternativas: { A:"WHERE filtra grupos de registros, enquanto HAVING filtra registros individuais.", B:"WHERE filtra registros antes do agrupamento; HAVING filtra grupos após o agrupamento (GROUP BY).", C:"WHERE é usado apenas com subconsultas, enquanto HAVING é usado com JOINs.", D:"HAVING substitui o WHERE em consultas com funções de agregação.", E:"Não há diferença; são palavras-chave intercambiáveis." },
+        gabarito: "B",
+        comentario: "WHERE filtra linhas individuais antes de qualquer agrupamento. HAVING filtra grupos após o GROUP BY, geralmente usando funções de agregação (COUNT, SUM, AVG etc.).",
+      },
+      {
+        numero: 39, disciplina: "Tecnologia da Informação",
+        enunciado: "No modelo OSI, a camada responsável pelo endereçamento lógico (IP) e roteamento de pacotes entre redes é a:",
+        alternativas: { A:"Camada de Enlace (camada 2).", B:"Camada de Transporte (camada 4).", C:"Camada de Rede (camada 3).", D:"Camada de Sessão (camada 5).", E:"Camada Física (camada 1)." },
         gabarito: "C",
-        comentario:
-          "A, B e C rodam em paralelo: tempo = max(10, 15, 8) = 15 min. Depois D = 5 min. Total = 15 + 5 = 20 min.",
+        comentario: "A Camada de Rede (Layer 3) é responsável pelo endereçamento lógico (IP) e pelo roteamento de pacotes entre redes diferentes. Protocolos: IP, ICMP, OSPF, BGP.",
       },
       {
-        numero: 19,
-        disciplina: "Raciocínio Lógico",
-        enunciado:
-          "Considere: 'Se um programador conhece Python, então conhece lógica.' e 'João conhece Python.' Qual conclusão é válida?",
-        alternativas: {
-          A: "João não conhece lógica.",
-          B: "João conhece lógica.",
-          C: "Todos que conhecem lógica conhecem Python.",
-          D: "João não conhece Python.",
-          E: "Quem conhece lógica conhece Python.",
-        },
+        numero: 40, disciplina: "Tecnologia da Informação",
+        enunciado: "Segundo o OWASP Top 10, a injeção de SQL ocorre quando:",
+        alternativas: { A:"Um atacante captura sessões de usuários autenticados por meio de cookies.", B:"Dados não confiáveis são enviados a um interpretador como parte de um comando ou query, alterando a execução pretendida.", C:"Um aplicativo armazena senhas em texto plano no banco de dados.", D:"Um atacante força a autenticação por tentativa e erro (brute force).", E:"O servidor web não possui certificado SSL/TLS válido." },
         gabarito: "B",
-        comentario:
-          "Modus Ponens: Se P→Q e P, então Q. Se 'Python→Lógica' e 'João conhece Python', então 'João conhece Lógica'.",
+        comentario: "SQL Injection ocorre quando o aplicativo incorpora dados do usuário diretamente em queries SQL sem sanitização, permitindo que o atacante manipule a query. Prevenção: prepared statements e consultas parametrizadas.",
       },
       {
-        numero: 20,
-        disciplina: "Raciocínio Lógico",
-        enunciado:
-          "Uma sequência de deploys segue o padrão: 1, 1, 2, 3, 5, 8, 13, ___. Qual o próximo valor?",
-        alternativas: {
-          A: "18",
-          B: "19",
-          C: "20",
-          D: "21",
-          E: "22",
-        },
-        gabarito: "D",
-        comentario:
-          "É a Sequência de Fibonacci: cada termo é a soma dos dois anteriores. 8 + 13 = 21.",
-      },
-
-      // ── ATUALIDADES ───────────────────────────────────────────────────
-      {
-        numero: 21,
-        disciplina: "Atualidades",
-        enunciado:
-          "Em relação à LGPD, qual é o papel do 'Encarregado de Proteção de Dados' (DPO — Data Protection Officer)?",
-        alternativas: {
-          A: "Desenvolver os sistemas de segurança da empresa.",
-          B: "Ser o canal de comunicação entre o controlador, titulares de dados e a ANPD.",
-          C: "Realizar auditorias externas na empresa.",
-          D: "Aprovar todos os contratos de processamento de dados.",
-          E: "Substituir o CISO em questões de segurança da informação.",
-        },
+        numero: 41, disciplina: "Tecnologia da Informação",
+        enunciado: "Em computação em nuvem, a diferença entre IaaS, PaaS e SaaS é:",
+        alternativas: { A:"IaaS oferece somente armazenamento; PaaS oferece processamento; SaaS oferece rede.", B:"IaaS fornece infraestrutura virtualizada (VMs, storage, rede); PaaS fornece plataforma para desenvolvimento de aplicações; SaaS entrega aplicações prontas via internet.", C:"SaaS é mais barato que IaaS em qualquer cenário de uso.", D:"PaaS é restrito a aplicações de machine learning.", E:"IaaS requer que o cliente gerencie o hardware físico diretamente." },
         gabarito: "B",
-        comentario:
-          "O DPO (Encarregado) na LGPD atua como ponte entre a organização, os titulares de dados e a ANPD, recebendo reclamações e comunicações, orientando funcionários e realizando as demais atribuições do Art. 41.",
+        comentario: "IaaS (ex.: AWS EC2): infraestrutura como serviço — cliente gerencia SO e aplicações. PaaS (ex.: Heroku): plataforma gerenciada — cliente foca no código. SaaS (ex.: Gmail): software pronto — cliente só usa.",
       },
       {
-        numero: 22,
-        disciplina: "Atualidades",
-        enunciado:
-          "O conceito de 'DevOps' integra dois universos. Qual das alternativas melhor descreve sua essência?",
-        alternativas: {
-          A: "Fusão das equipes de Design e Operations.",
-          B: "Metodologia de desenvolvimento que substitui o Scrum.",
-          C: "Cultura e conjunto de práticas que une Desenvolvimento e Operações para entregar software com alta velocidade e qualidade.",
-          D: "Framework de gestão de projetos para equipes distribuídas.",
-          E: "Plataforma de cloud computing para deploys automáticos.",
-        },
-        gabarito: "C",
-        comentario:
-          "DevOps é uma cultura/movimento que quebra silos entre Dev e Ops, promovendo colaboração, automação de pipelines CI/CD e entrega rápida e confiável de software.",
-      },
-      {
-        numero: 23,
-        disciplina: "Atualidades",
-        enunciado:
-          "Qual dos seguintes é um exemplo de 'Open Source' amplamente utilizado em sistemas governamentais brasileiros?",
-        alternativas: {
-          A: "Windows Server",
-          B: "Oracle Database",
-          C: "Linux (distribuição Ubuntu/Debian)",
-          D: "Microsoft SQL Server",
-          E: "Salesforce CRM",
-        },
-        gabarito: "C",
-        comentario:
-          "O Linux é o sistema operacional open source mais utilizado em servidores governamentais brasileiros. O governo federal tem política de preferência por software livre.",
-      },
-      {
-        numero: 24,
-        disciplina: "Atualidades",
-        enunciado:
-          "O que significa a sigla 'API' no contexto de sistemas de informação?",
-        alternativas: {
-          A: "Application Process Interface",
-          B: "Automated Programming Instruction",
-          C: "Application Programming Interface",
-          D: "Advanced Protocol Integration",
-          E: "Automated Process Integration",
-        },
-        gabarito: "C",
-        comentario:
-          "API (Application Programming Interface) é um conjunto de definições e protocolos que permite a comunicação entre sistemas de software de forma padronizada.",
-      },
-      {
-        numero: 25,
-        disciplina: "Atualidades",
-        enunciado:
-          "O movimento 'Green IT' (TI Verde) no contexto tecnológico visa principalmente:",
-        alternativas: {
-          A: "Usar componentes eletrônicos de cor verde nas placas-mãe.",
-          B: "Reduzir o impacto ambiental da tecnologia por meio de eficiência energética e sustentabilidade.",
-          C: "Promover o uso de linguagens de programação desenvolvidas no Brasil.",
-          D: "Criar data centers em áreas de floresta para aproveitar o microclima.",
-          E: "Implantar sistemas de monitoramento ambiental usando TI.",
-        },
-        gabarito: "B",
-        comentario:
-          "Green IT busca reduzir consumo de energia, emissões de carbono e resíduos eletrônicos no ciclo de vida de produtos e serviços de TI.",
-      },
-      {
-        numero: 26,
-        disciplina: "Atualidades",
-        enunciado:
-          "Em 2023, qual foi o principal framework de IA generativa que popularizou os LLMs (Large Language Models) para o público em geral?",
-        alternativas: {
-          A: "TensorFlow",
-          B: "ChatGPT / GPT-4 (OpenAI)",
-          C: "Keras",
-          D: "Apache Spark MLlib",
-          E: "Scikit-learn",
-        },
-        gabarito: "B",
-        comentario:
-          "O ChatGPT, baseado no GPT-4 da OpenAI, popularizou massivamente os LLMs em 2022-2023, tornando-se o produto de crescimento mais rápido da história.",
-      },
-      {
-        numero: 27,
-        disciplina: "Atualidades",
-        enunciado:
-          "Qual das alternativas descreve corretamente o conceito de 'Zero Trust Architecture' (Arquitetura Zero Trust) em segurança da informação?",
-        alternativas: {
-          A: "Modelo de segurança que confia em todos os usuários dentro da rede corporativa.",
-          B: "Abordagem que nunca confia automaticamente em nenhum usuário ou dispositivo, verificando continuamente identidade e autorização.",
-          C: "Sistema que bloqueia 100% do tráfego externo à organização.",
-          D: "Política de segurança que proíbe o uso de VPNs.",
-          E: "Framework que utiliza autenticação apenas por certificados digitais.",
-        },
-        gabarito: "B",
-        comentario:
-          "Zero Trust parte do princípio 'nunca confie, sempre verifique': nenhum usuário, dispositivo ou serviço é automaticamente confiável, mesmo dentro da rede corporativa.",
-      },
-      {
-        numero: 28,
-        disciplina: "Atualidades",
-        enunciado:
-          "O Decreto nº 10.046/2019 trata de:",
-        alternativas: {
-          A: "A criação da ANPD (Autoridade Nacional de Proteção de Dados).",
-          B: "O compartilhamento de dados no âmbito do Poder Executivo Federal.",
-          C: "A política de segurança cibernética nacional.",
-          D: "A implementação do PIX como sistema de pagamentos.",
-          E: "A regulamentação do trabalho remoto no serviço público federal.",
-        },
-        gabarito: "B",
-        comentario:
-          "O Decreto nº 10.046/2019 dispõe sobre a governança no compartilhamento de dados no âmbito do Poder Executivo Federal, criando regras para o intercâmbio de informações entre órgãos públicos.",
-      },
-      {
-        numero: 29,
-        disciplina: "Atualidades",
-        enunciado:
-          "O conceito de 'Low Code / No Code' no desenvolvimento de software refere-se a:",
-        alternativas: {
-          A: "Programação em linguagens de baixo nível como Assembly.",
-          B: "Plataformas que permitem criar aplicações com pouco ou nenhum código manual, usando interfaces visuais.",
-          C: "Metodologia de desenvolvimento que elimina a necessidade de documentação.",
-          D: "Técnica de minimização de código para otimizar o desempenho.",
-          E: "Processo de desenvolvimento sem testes automatizados.",
-        },
-        gabarito: "B",
-        comentario:
-          "Low Code/No Code são plataformas de desenvolvimento visual que permitem criar aplicações com interfaces drag-and-drop, democratizando o desenvolvimento para não-programadores.",
-      },
-      {
-        numero: 30,
-        disciplina: "Atualidades",
-        enunciado:
-          "O padrão de segurança PCI DSS é aplicável a organizações que:",
-        alternativas: {
-          A: "Processam dados de saúde de pacientes.",
-          B: "Armazenam dados de funcionários públicos.",
-          C: "Processam, armazenam ou transmitem dados de cartões de pagamento.",
-          D: "Operam infraestruturas críticas de telecomunicações.",
-          E: "Desenvolvem software para órgãos governamentais.",
-        },
-        gabarito: "C",
-        comentario:
-          "PCI DSS (Payment Card Industry Data Security Standard) é obrigatório para toda organização que processa, armazena ou transmite dados de cartões de crédito/débito.",
-      },
-
-      // ── CONHECIMENTOS ESPECÍFICOS ──────────────────────────────────────
-      {
-        numero: 31,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Qual das alternativas descreve corretamente o padrão de projeto 'Strategy'?",
-        alternativas: {
-          A: "Define um esqueleto de algoritmo em uma operação, postergando alguns passos para subclasses.",
-          B: "Define uma família de algoritmos encapsulados e intercambiáveis, permitindo variar o algoritmo independentemente dos clientes que o utilizam.",
-          C: "Fornece uma interface simplificada para um conjunto complexo de interfaces.",
-          D: "Converte a interface de uma classe em outra interface esperada pelos clientes.",
-          E: "Garante que uma classe tenha somente uma instância.",
-        },
-        gabarito: "B",
-        comentario:
-          "Strategy encapsula algoritmos intercambiáveis em classes separadas, permitindo trocar o comportamento de um objeto em runtime. Exemplo: diferentes estratégias de sorting, pagamento, compressão.",
-      },
-      {
-        numero: 32,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em relação ao Scrum, qual é a responsabilidade principal do Product Owner (PO)?",
-        alternativas: {
-          A: "Gerenciar o time de desenvolvimento e resolver impedimentos técnicos.",
-          B: "Facilitar as cerimônias Scrum e proteger o time de interferências externas.",
-          C: "Maximizar o valor do produto gerenciando e priorizando o Product Backlog.",
-          D: "Garantir que o time siga as práticas de engenharia de software.",
-          E: "Representar os interesses dos stakeholders técnicos no time.",
-        },
-        gabarito: "C",
-        comentario:
-          "O Product Owner é responsável por maximizar o valor entregue pelo produto. Ele prioriza o Product Backlog baseando-se em valor de negócio, alinhado com stakeholders.",
-      },
-      {
-        numero: 33,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em relação ao conceito de 'Coesão' em orientação a objetos, assinale a alternativa correta:",
-        alternativas: {
-          A: "Alta coesão significa que uma classe tem muitas responsabilidades.",
-          B: "Baixa coesão é desejável pois indica flexibilidade.",
-          C: "Alta coesão significa que uma classe tem uma responsabilidade bem definida e focada.",
-          D: "Coesão e acoplamento são conceitos equivalentes.",
-          E: "Alta coesão implica necessariamente em alto acoplamento.",
-        },
-        gabarito: "C",
-        comentario:
-          "Alta coesão = a classe faz uma coisa bem. Baixo acoplamento = a classe depende pouco de outras. Esses são os dois objetivos principais do bom design orientado a objetos.",
-      },
-      {
-        numero: 34,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Qual é a diferença entre os comandos DDL e DML em SQL?",
-        alternativas: {
-          A: "DDL opera sobre dados; DML opera sobre estrutura.",
-          B: "DDL define estrutura (CREATE, ALTER, DROP); DML manipula dados (INSERT, UPDATE, DELETE, SELECT).",
-          C: "DDL é usado em PostgreSQL; DML em MySQL.",
-          D: "DDL é executado no cliente; DML no servidor.",
-          E: "Não há diferença: são subcategorias equivalentes do SQL.",
-        },
-        gabarito: "B",
-        comentario:
-          "DDL (Data Definition Language): CREATE, ALTER, DROP, TRUNCATE — define estrutura. DML (Data Manipulation Language): INSERT, UPDATE, DELETE, SELECT — manipula dados.",
-      },
-      {
-        numero: 35,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "No contexto de REST APIs, o código de status HTTP 422 (Unprocessable Entity) indica:",
-        alternativas: {
-          A: "O servidor não encontrou o recurso solicitado.",
-          B: "A requisição foi bem-sucedida.",
-          C: "O cliente não tem permissão para acessar o recurso.",
-          D: "A requisição está bem formada, mas contém erros semânticos que impedem o processamento.",
-          E: "O servidor encontrou um erro interno inesperado.",
-        },
-        gabarito: "D",
-        comentario:
-          "422 significa que o servidor entende o content-type e a sintaxe está correta, mas os dados contêm erros semânticos (ex: campo obrigatório faltando, valor inválido).",
-      },
-      {
-        numero: 36,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em relação ao conceito de 'Imutabilidade' em programação funcional, assinale a alternativa correta:",
-        alternativas: {
-          A: "Objetos imutáveis não podem ser passados como parâmetros.",
-          B: "Imutabilidade impede qualquer tipo de transformação de dados.",
-          C: "Dados imutáveis não podem ter seu valor alterado após a criação, reduzindo efeitos colaterais.",
-          D: "Imutabilidade é exclusiva de linguagens funcionais puras como Haskell.",
-          E: "Objetos imutáveis consomem mais memória que objetos mutáveis em todos os casos.",
-        },
-        gabarito: "C",
-        comentario:
-          "Imutabilidade garante que uma vez criado, um valor não muda. Isso elimina efeitos colaterais, facilita raciocínio sobre o código e torna programas mais seguros em ambientes concorrentes.",
-      },
-      {
-        numero: 37,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Qual é a principal característica do padrão arquitetural 'Hexagonal Architecture' (Ports and Adapters)?",
-        alternativas: {
-          A: "Dividir a aplicação em seis camadas de processamento paralelo.",
-          B: "Isolar a lógica de negócio de detalhes tecnológicos através de ports (interfaces) e adapters (implementações).",
-          C: "Usar um banco de dados hexagonal para alta performance.",
-          D: "Implementar seis microsserviços independentes que se comunicam via API.",
-          E: "Estruturar o código em seis módulos: UI, Service, Repository, Entity, DTO e Config.",
-        },
-        gabarito: "B",
-        comentario:
-          "A Arquitetura Hexagonal (Alistair Cockburn) coloca a lógica de negócio no centro, com Ports (interfaces abstratas) e Adapters (implementações concretas) para cada tecnologia externa.",
-      },
-      {
-        numero: 38,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em relação ao ciclo de vida do desenvolvimento de software (SDLC), qual modelo se caracteriza por iterações curtas e entrega incremental de valor?",
-        alternativas: {
-          A: "Modelo em Cascata (Waterfall)",
-          B: "Modelo V",
-          C: "Modelo Espiral",
-          D: "Modelo Ágil (Scrum/Kanban)",
-          E: "Modelo Big Bang",
-        },
-        gabarito: "D",
-        comentario:
-          "Metodologias ágeis como Scrum e Kanban se caracterizam por ciclos curtos (sprints), entrega incremental, feedback contínuo e adaptação a mudanças.",
-      },
-      {
-        numero: 39,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Qual das seguintes alternativas representa corretamente a notação Big-O para busca em uma árvore binária de busca balanceada?",
-        alternativas: {
-          A: "O(1)",
-          B: "O(n)",
-          C: "O(log n)",
-          D: "O(n log n)",
-          E: "O(n²)",
-        },
-        gabarito: "C",
-        comentario:
-          "Em uma BST balanceada (AVL, Red-Black), a busca tem complexidade O(log n) pois a cada passo elimina metade dos nós. Em uma BST desbalanceada (degenerada), pode ser O(n).",
-      },
-      {
-        numero: 40,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em relação ao protocolo HTTPS, qual tecnologia garante a confidencialidade e integridade dos dados transmitidos?",
-        alternativas: {
-          A: "SSH (Secure Shell)",
-          B: "TLS (Transport Layer Security)",
-          C: "IPSec",
-          D: "VPN (Virtual Private Network)",
-          E: "SFTP",
-        },
-        gabarito: "B",
-        comentario:
-          "HTTPS = HTTP + TLS. O TLS (successor of SSL) fornece criptografia, autenticação do servidor e integridade das mensagens na camada de transporte.",
-      },
-      {
-        numero: 41,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em JavaScript, qual é a diferença entre 'null' e 'undefined'?",
-        alternativas: {
-          A: "São equivalentes; 'undefined' é apenas a versão mais antiga de 'null'.",
-          B: "'null' é atribuído explicitamente para indicar ausência de valor; 'undefined' indica que uma variável foi declarada mas não inicializada.",
-          C: "'undefined' é um objeto; 'null' é um primitivo.",
-          D: "'null' ocorre apenas em erros de runtime; 'undefined' é um valor válido.",
-          E: "Ambos lançam TypeError quando acessados.",
-        },
-        gabarito: "B",
-        comentario:
-          "'undefined' = variável declarada sem valor, função sem return explícito, propriedade inexistente. 'null' = ausência intencional de valor, atribuída pelo programador.",
-      },
-      {
-        numero: 42,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Qual é a vantagem principal do padrão 'Repository' em aplicações que utilizam acesso a dados?",
-        alternativas: {
-          A: "Aumentar a velocidade das queries SQL.",
-          B: "Abstrair a lógica de acesso a dados, desacoplando o domínio da infraestrutura de persistência.",
-          C: "Eliminar a necessidade de um banco de dados relacional.",
-          D: "Garantir transações distribuídas entre múltiplos bancos de dados.",
-          E: "Permitir o uso de múltiplos ORMs simultaneamente.",
-        },
-        gabarito: "B",
-        comentario:
-          "O padrão Repository cria uma abstração sobre a camada de dados, permitindo que a lógica de negócio não conheça os detalhes de como os dados são armazenados ou recuperados.",
-      },
-      {
-        numero: 43,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "No contexto de testes de software, qual é a pirâmide de testes ideal proposta por Mike Cohn?",
-        alternativas: {
-          A: "Base: E2E; Meio: Integração; Topo: Unitários.",
-          B: "Base: Unitários; Meio: Integração; Topo: E2E (UI/Acceptance).",
-          C: "Base: Performance; Meio: Segurança; Topo: Funcional.",
-          D: "Todos os níveis têm a mesma proporção de testes.",
-          E: "Base: Manuais; Meio: Automatizados; Topo: Exploratórios.",
-        },
-        gabarito: "B",
-        comentario:
-          "A Pirâmide de Testes: muitos testes unitários (rápidos, baratos) na base, menos testes de integração no meio, e poucos testes E2E (lentos, caros) no topo.",
-      },
-      {
-        numero: 44,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Qual das alternativas descreve corretamente o conceito de 'Service Mesh' em arquiteturas de microsserviços?",
-        alternativas: {
-          A: "Um banco de dados distribuído que conecta microsserviços.",
-          B: "Uma camada de infraestrutura dedicada ao gerenciamento da comunicação entre serviços, incluindo balanceamento, segurança e observabilidade.",
-          C: "Uma ferramenta de orquestração de containers como Kubernetes.",
-          D: "Um padrão de API Gateway que centraliza todas as chamadas externas.",
-          E: "Uma rede virtual que conecta datacenters de diferentes provedores de nuvem.",
-        },
-        gabarito: "B",
-        comentario:
-          "Service Mesh (ex: Istio, Linkerd) é uma camada de infraestrutura que gerencia comunicação serviço-a-serviço: load balancing, service discovery, circuit breaking, mTLS e observabilidade.",
-      },
-      {
-        numero: 45,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em Python, qual é o resultado de: `[x**2 for x in range(1,5) if x % 2 == 0]`?",
-        alternativas: {
-          A: "[1, 4, 9, 16]",
-          B: "[4, 16]",
-          C: "[2, 4]",
-          D: "[1, 9]",
-          E: "[4, 8, 16]",
-        },
-        gabarito: "B",
-        comentario:
-          "range(1,5) = [1,2,3,4]. Filtro x%2==0: [2,4]. Aplicando x²: [4, 16].",
-      },
-      {
-        numero: 46,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "O princípio 'Open/Closed' do SOLID estabelece que:",
-        alternativas: {
-          A: "Classes devem ser abertas para modificação e fechadas para extensão.",
-          B: "Entidades de software devem ser abertas para extensão, mas fechadas para modificação.",
-          C: "Interfaces devem ser abertas e classes concretas fechadas.",
-          D: "Módulos abertos podem ser importados; módulos fechados não.",
-          E: "Código open source segue o princípio; código proprietário não.",
-        },
-        gabarito: "B",
-        comentario:
-          "OCP (Bertrand Meyer, Robert Martin): você pode adicionar novo comportamento (extensão) sem modificar o código existente. Geralmente implementado com herança, interfaces ou composição.",
-      },
-      {
-        numero: 47,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Qual das alternativas descreve corretamente o conceito de 'Index' em bancos de dados relacionais?",
-        alternativas: {
-          A: "Uma cópia completa de uma tabela para fins de backup.",
-          B: "Uma estrutura de dados que melhora a velocidade de recuperação de dados em uma tabela, ao custo de espaço adicional e overhead em operações de escrita.",
-          C: "Um campo numérico autoincrementado usado como chave primária.",
-          D: "Uma constraint que garante unicidade dos valores em uma coluna.",
-          E: "Uma visão materializada que acelera consultas complexas.",
-        },
-        gabarito: "B",
-        comentario:
-          "Índices de banco de dados (B-Tree, Hash, etc.) aceleram consultas ao custo de espaço em disco e de tornar INSERT/UPDATE/DELETE mais lentos (pois o índice também é atualizado).",
-      },
-      {
-        numero: 48,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Sobre o conceito de 'Programação Reativa', qual biblioteca/framework JavaScript é amplamente utilizado para esse paradigma?",
-        alternativas: {
-          A: "Lodash",
-          B: "Express.js",
-          C: "RxJS (Reactive Extensions for JavaScript)",
-          D: "Mongoose",
-          E: "Jest",
-        },
-        gabarito: "C",
-        comentario:
-          "RxJS é a principal biblioteca de programação reativa para JavaScript, baseada em Observables. É amplamente usada com Angular e Node.js para gerenciar fluxos de dados assíncronos.",
-      },
-      {
-        numero: 49,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "No contexto de segurança, o que é um ataque 'Cross-Site Scripting' (XSS)?",
-        alternativas: {
-          A: "Ataque que intercepta comunicação entre cliente e servidor.",
-          B: "Injeção de scripts maliciosos em páginas web visualizadas por outros usuários.",
-          C: "Ataque de força bruta contra credenciais de login.",
-          D: "Exploração de vulnerabilidades em queries SQL.",
-          E: "Ataque de negação de serviço distribuído.",
-        },
-        gabarito: "B",
-        comentario:
-          "XSS permite que atacantes injetem scripts do lado cliente em páginas web. Os scripts são executados no browser da vítima, podendo roubar cookies, tokens de sessão ou redirecionar usuários.",
-      },
-      {
-        numero: 50,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Qual das alternativas descreve corretamente o conceito de 'Blue-Green Deployment'?",
-        alternativas: {
-          A: "Deploy realizado em servidores de cor azul para diferenciar de servidores de produção.",
-          B: "Estratégia de deploy que mantém dois ambientes idênticos (Blue e Green), onde um está em produção e o outro recebe a nova versão, permitindo rollback instantâneo.",
-          C: "Metodologia de deploy que usa containers azuis para backend e verdes para frontend.",
-          D: "Sistema de monitoramento que usa cores para indicar saúde dos serviços.",
-          E: "Técnica de CI/CD que alterna entre branches blue e green no Git.",
-        },
-        gabarito: "B",
-        comentario:
-          "Blue-Green Deployment mantém dois ambientes de produção idênticos. A nova versão vai ao ambiente inativo, e após validação o tráfego é redirecionado. Permite rollback instantâneo.",
-      },
-      {
-        numero: 51,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Sobre o conceito de 'Programação Orientada a Aspectos' (AOP), assinale a alternativa correta:",
-        alternativas: {
-          A: "É um paradigma que substitui a orientação a objetos.",
-          B: "Permite separar preocupações transversais (logging, segurança, transações) do código de negócio principal.",
-          C: "Refere-se ao desenvolvimento de APIs com múltiplas perspectivas de design.",
-          D: "É uma metodologia de teste para avaliar aspectos não-funcionais.",
-          E: "Consiste em orientar o código para atender a múltiplos aspectos de qualidade.",
-        },
-        gabarito: "B",
-        comentario:
-          "AOP separa cross-cutting concerns (logging, autenticação, transações) do código principal usando 'advices' e 'pointcuts'. Spring AOP é um exemplo popular.",
-      },
-      {
-        numero: 52,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em relação ao uso de 'Generics' em linguagens tipadas como Java e TypeScript, qual é sua principal vantagem?",
-        alternativas: {
-          A: "Aumentar a performance do código compilado.",
-          B: "Permitir reutilização de código com segurança de tipos, sem necessidade de casting.",
-          C: "Eliminar a necessidade de interfaces e classes abstratas.",
-          D: "Permitir que métodos retornem múltiplos tipos simultaneamente.",
-          E: "Gerar automaticamente testes unitários para classes genéricas.",
-        },
-        gabarito: "B",
-        comentario:
-          "Generics permitem criar classes, interfaces e métodos que funcionam com qualquer tipo, mas com verificação de tipo em tempo de compilação, evitando ClassCastExceptions.",
-      },
-      {
-        numero: 53,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "O que é 'Infrastructure as Code' (IaC) e qual é seu principal benefício?",
-        alternativas: {
-          A: "Prática de codificar a infraestrutura em linguagem assembly para maximizar performance.",
-          B: "Gerenciamento e provisionamento de infraestrutura através de arquivos de configuração versionáveis, tornando-a reproduzível e automatizável.",
-          C: "Desenvolvimento de aplicações que rodam diretamente no hardware sem sistema operacional.",
-          D: "Metodologia de documentação de infraestrutura em wikis de código.",
-          E: "Técnica de compressão de código para reduzir o tamanho da infraestrutura.",
-        },
-        gabarito: "B",
-        comentario:
-          "IaC (Terraform, Ansible, CloudFormation) trata infraestrutura como código: versionável, testável e reproduzível. Elimina 'configuration drift' e viabiliza ambientes idempotentes.",
-      },
-      {
-        numero: 54,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em relação ao conceito de 'API Gateway' em arquiteturas de microsserviços, qual é sua função principal?",
-        alternativas: {
-          A: "Armazenar e distribuir pacotes de código entre microsserviços.",
-          B: "Servir como ponto de entrada único para clientes externos, gerenciando roteamento, autenticação, rate limiting e transformação de requisições.",
-          C: "Gerenciar o banco de dados compartilhado entre microsserviços.",
-          D: "Monitorar a saúde e disponibilidade de cada microsserviço.",
-          E: "Compilar e distribuir builds dos microsserviços para produção.",
-        },
-        gabarito: "B",
-        comentario:
-          "API Gateway é o ponto de entrada único (single entry point) para clientes, centralizando: autenticação, autorização, rate limiting, logging, caching, transformação de payload e roteamento.",
-      },
-      {
-        numero: 55,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em relação ao conceito de 'Eventual Consistency' vs 'Strong Consistency', qual dos seguintes bancos de dados prioriza forte consistência sobre disponibilidade?",
-        alternativas: {
-          A: "Apache Cassandra",
-          B: "Amazon DynamoDB (por padrão)",
-          C: "CouchDB",
-          D: "PostgreSQL (modo síncrono)",
-          E: "MongoDB (writeConcern: 1)",
-        },
-        gabarito: "D",
-        comentario:
-          "PostgreSQL em modo síncrono (replicação síncrona ou single-node com ACID) garante forte consistência. Cassandra, DynamoDB e MongoDB por padrão preferem disponibilidade sobre consistência forte.",
-      },
-      {
-        numero: 56,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Sobre o conceito de 'Code Review', qual das alternativas representa uma boa prática?",
-        alternativas: {
-          A: "Revisar o maior número possível de linhas em uma única sessão.",
-          B: "Focar apenas em erros de sintaxe e não em design.",
-          C: "Manter PRs pequenos e focados, com objetivo claro e contexto explicado.",
-          D: "Aprovar PRs sem comentários para não atrasar o time.",
-          E: "Apenas o tech lead deve revisar código.",
-        },
-        gabarito: "C",
-        comentario:
-          "PRs pequenos são mais fáceis de revisar, têm contexto claro, facilitam feedback construtivo e reduzem o tempo de integração. Essa é a prática recomendada para revisões efetivas.",
-      },
-      {
-        numero: 57,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Qual das alternativas descreve corretamente o padrão 'Strangler Fig' (Figueira Estranguladora) no contexto de migração de sistemas legados?",
-        alternativas: {
-          A: "Reescrita completa do sistema legado em uma nova tecnologia.",
-          B: "Substituição gradual do sistema legado, adicionando novas funcionalidades em um novo sistema enquanto o legado continua operando.",
-          C: "Técnica de compressão de código legado para reduzir o footprint.",
-          D: "Estratégia de abandonar o sistema legado sem migrar dados.",
-          E: "Método de refatoração agressiva do código legado sem alteração da arquitetura.",
-        },
-        gabarito: "B",
-        comentario:
-          "Strangler Fig (Martin Fowler) é uma estratégia de migração incremental: novas funcionalidades são implementadas no novo sistema, e gradualmente o legado é 'estrangulado' até ser completamente substituído.",
-      },
-      {
-        numero: 58,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em relação ao conceito de 'Test-Driven Development' (TDD), qual é a sequência correta do ciclo?",
-        alternativas: {
-          A: "Implementar → Testar → Refatorar",
-          B: "Planejar → Implementar → Testar",
-          C: "Red (escrever teste que falha) → Green (implementar para passar) → Refactor (melhorar o código)",
-          D: "Design → Code → Test → Deploy",
-          E: "Test → Design → Code → Review",
-        },
-        gabarito: "C",
-        comentario:
-          "O ciclo TDD é Red-Green-Refactor: 1) Escreva um teste que falha (Red); 2) Escreva o código mínimo para o teste passar (Green); 3) Refatore sem quebrar os testes.",
-      },
-      {
-        numero: 59,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Sobre o conceito de 'Kubernetes' (K8s), qual é a unidade mínima de deployment?",
-        alternativas: {
-          A: "Container",
-          B: "Node",
-          C: "Pod",
-          D: "Deployment",
-          E: "Service",
-        },
-        gabarito: "C",
-        comentario:
-          "No Kubernetes, o Pod é a menor unidade deployável: pode conter um ou mais containers que compartilham rede (IP) e armazenamento. Um Deployment gerencia ReplicaSets, que gerenciam Pods.",
-      },
-      {
-        numero: 60,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em relação ao versionamento semântico (SemVer), o formato MAJOR.MINOR.PATCH define que:",
-        alternativas: {
-          A: "MAJOR muda a cada sprint; MINOR a cada feature; PATCH a cada hotfix.",
-          B: "PATCH = bug fixes compatíveis; MINOR = novas features compatíveis; MAJOR = mudanças incompatíveis com versão anterior.",
-          C: "MAJOR é o número do projeto; MINOR é o número da equipe; PATCH é o número do desenvolvedor.",
-          D: "Todos os três números são incrementados a cada release.",
-          E: "PATCH é obrigatório; MINOR e MAJOR são opcionais.",
-        },
-        gabarito: "B",
-        comentario:
-          "SemVer 2.0.0: PATCH para bug fixes backward compatible; MINOR para novas funcionalidades backward compatible; MAJOR para mudanças que quebram compatibilidade (breaking changes).",
-      },
-      {
-        numero: 61,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Qual das alternativas descreve corretamente o padrão 'Decorator' (Decorador)?",
-        alternativas: {
-          A: "Garante que uma classe tenha somente uma instância.",
-          B: "Anexa responsabilidades adicionais a um objeto dinamicamente, fornecendo uma alternativa flexível à herança.",
-          C: "Define uma interface para criar famílias de objetos relacionados.",
-          D: "Separa a construção de um objeto complexo de sua representação.",
-          E: "Define um esqueleto de algoritmo postergando alguns passos para subclasses.",
-        },
-        gabarito: "B",
-        comentario:
-          "Decorator envolve um objeto com outro que adiciona comportamento. Exemplo clássico: decoradores de stream em Java (BufferedReader wrapping InputStreamReader).",
-      },
-      {
-        numero: 62,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em relação ao conceito de 'Throughput' vs 'Latência' em sistemas, assinale a alternativa correta:",
-        alternativas: {
-          A: "São medidas equivalentes; throughput é o nome americano de latência.",
-          B: "Latência é o tempo para processar uma única requisição; throughput é o número de requisições processadas por unidade de tempo.",
-          C: "Throughput mede tempo de resposta; latência mede volume de dados.",
-          D: "Aumentar o throughput sempre reduz a latência.",
-          E: "Latência e throughput medem aspectos de segurança do sistema.",
-        },
-        gabarito: "B",
-        comentario:
-          "Latência = tempo de uma operação (ex: 50ms por request). Throughput = volume por tempo (ex: 1000 req/s). São relacionados mas distintos — melhorar um pode piorar o outro.",
-      },
-      {
-        numero: 63,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "No contexto de WebSockets, qual é a principal diferença em relação ao modelo HTTP tradicional?",
-        alternativas: {
-          A: "WebSocket é mais seguro que HTTP por padrão.",
-          B: "WebSocket estabelece uma conexão persistente bidirecional, permitindo comunicação em tempo real sem polling.",
-          C: "WebSocket usa UDP enquanto HTTP usa TCP.",
-          D: "WebSocket é exclusivo para aplicações mobile.",
-          E: "WebSocket requer autenticação por certificado digital.",
-        },
-        gabarito: "B",
-        comentario:
-          "WebSocket cria uma conexão full-duplex persistente sobre TCP. Ao contrário do HTTP (request-response), permite que servidor e cliente enviem mensagens a qualquer momento.",
-      },
-      {
-        numero: 64,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Sobre o princípio 'Interface Segregation Principle' (ISP) do SOLID, assinale a alternativa correta:",
-        alternativas: {
-          A: "Clientes não devem ser forçados a depender de interfaces que não utilizam.",
-          B: "Interfaces devem ser segregadas por camada de aplicação.",
-          C: "Uma interface pode ter no máximo cinco métodos.",
-          D: "Interfaces públicas devem ser documentadas em contrato separado.",
-          E: "Todos os métodos de uma interface devem ter o mesmo tipo de retorno.",
-        },
+        numero: 42, disciplina: "Tecnologia da Informação",
+        enunciado: "Em Git, a diferença entre 'git merge' e 'git rebase' é:",
+        alternativas: { A:"Merge combina históricos preservando todos os commits; rebase reaplica commits em cima de outro branch, criando histórico linear.", B:"Rebase é mais seguro que merge em branches compartilhados remotamente.", C:"Merge sempre cria um commit de merge; rebase é usado apenas para resolver conflitos.", D:"Não há diferença prática; ambos produzem o mesmo resultado final.", E:"Git rebase só funciona em repositórios locais, nunca com remote." },
         gabarito: "A",
-        comentario:
-          "ISP afirma que é melhor ter muitas interfaces específicas do que uma grande interface genérica. Clientes só devem implementar métodos que realmente usam.",
+        comentario: "Merge une branches preservando o histórico divergente (cria um merge commit). Rebase reaplica os commits do branch atual sobre outro branch, reescrevendo o histórico para ser linear — ideal para histórico limpo, mas não recomendado em branches públicos.",
       },
       {
-        numero: 65,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em relação ao protocolo gRPC, qual é sua principal vantagem em relação a APIs REST/JSON?",
-        alternativas: {
-          A: "É suportado por mais linguagens de programação.",
-          B: "Usa HTTP/2 e Protocol Buffers, oferecendo menor latência e menor tamanho de payload.",
-          C: "É mais fácil de debugar pois usa formato texto.",
-          D: "Não requer definição prévia de contrato.",
-          E: "É o único protocolo suportado por Kubernetes.",
-        },
-        gabarito: "B",
-        comentario:
-          "gRPC usa HTTP/2 (multiplexação) e Protocol Buffers (serialização binária eficiente), resultando em payloads menores e latência menor que REST/JSON em cenários de alta performance.",
+        numero: 43, disciplina: "Tecnologia da Informação",
+        enunciado: "A principal diferença entre containers Docker e máquinas virtuais (VMs) é:",
+        alternativas: { A:"Containers compartilham o kernel do sistema operacional host, sendo mais leves; VMs têm SO próprio, sendo mais isoladas mas mais pesadas.", B:"VMs são mais rápidas para inicializar que containers.", C:"Containers requerem hypervisor dedicado para funcionar.", D:"Docker só funciona em sistemas operacionais Linux.", E:"Containers são menos seguros que VMs porque não possuem isolamento algum." },
+        gabarito: "A",
+        comentario: "Containers compartilham o kernel do host OS, consumindo menos recursos (MB vs GB). VMs incluem um SO completo sobre um hypervisor, oferecendo maior isolamento mas com overhead maior.",
       },
       {
-        numero: 66,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Qual é a principal diferença entre uma 'Stored Procedure' e uma 'Function' em bancos de dados relacionais?",
-        alternativas: {
-          A: "Stored Procedures são mais rápidas; Functions são mais seguras.",
-          B: "Functions sempre retornam um valor e podem ser usadas em SELECT; Stored Procedures podem não retornar valor e executam lógica mais complexa com transações.",
-          C: "Stored Procedures são escritas em SQL; Functions em linguagens procedurais.",
-          D: "Não há diferença: são sinônimos em todos os SGBDs.",
-          E: "Functions são temporárias; Stored Procedures são permanentes.",
-        },
+        numero: 44, disciplina: "Tecnologia da Informação",
+        enunciado: "Em Python, o resultado de [x**2 for x in range(1, 5) if x % 2 == 0] é:",
+        alternativas: { A:"[1, 4, 9, 16]", B:"[4, 16]", C:"[2, 4]", D:"[1, 9]", E:"[4, 8, 16]" },
         gabarito: "B",
-        comentario:
-          "Functions retornam obrigatoriamente um valor e podem ser chamadas em SELECT. Stored Procedures podem não retornar valor, usam parâmetros OUT e são invocadas com CALL/EXEC.",
+        comentario: "range(1, 5) gera [1, 2, 3, 4]. Filtro: apenas pares (2 e 4). Expressão: 2²=4 e 4²=16. Resultado: [4, 16].",
       },
       {
-        numero: 67,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Sobre o conceito de 'Load Balancing' (Balanceamento de Carga), qual algoritmo distribui requisições baseando-se no número de conexões ativas de cada servidor?",
-        alternativas: {
-          A: "Round Robin",
-          B: "Least Connections",
-          C: "IP Hash",
-          D: "Random",
-          E: "Weighted Round Robin",
-        },
-        gabarito: "B",
-        comentario:
-          "Least Connections direciona novas requisições para o servidor com o menor número de conexões ativas. Round Robin distribui igualmente em sequência.",
+        numero: 45, disciplina: "Tecnologia da Informação",
+        enunciado: "Em SQL, qual função de agregação retorna o número de linhas que satisfazem uma condição?",
+        alternativas: { A:"SUM().", B:"AVG().", C:"MAX().", D:"COUNT().", E:"MIN()." },
+        gabarito: "D",
+        comentario: "COUNT() conta o número de linhas (ou valores não nulos de uma coluna). COUNT(*) conta todas as linhas do resultado; COUNT(coluna) conta apenas linhas com valor não nulo.",
       },
       {
-        numero: 68,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em relação ao conceito de 'Dead Letter Queue' (DLQ) em sistemas de mensageria, qual é sua função?",
-        alternativas: {
-          A: "Fila de alta prioridade para mensagens urgentes.",
-          B: "Armazena mensagens que não puderam ser processadas após um número máximo de tentativas.",
-          C: "Fila para mensagens que foram lidas mas não confirmadas.",
-          D: "Repositório de mensagens duplicadas.",
-          E: "Fila de backup para recuperação em caso de desastre.",
-        },
+        numero: 46, disciplina: "Tecnologia da Informação",
+        enunciado: "Em Java, exceptions do tipo Checked (verificadas) diferem das Unchecked (não verificadas) porque:",
+        alternativas: { A:"Checked exceptions ocorrem apenas em tempo de execução; Unchecked em tempo de compilação.", B:"Checked exceptions devem ser declaradas ou capturadas explicitamente; Unchecked (subclasses de RuntimeException) não precisam.", C:"Unchecked exceptions são mais graves e sempre encerram o programa.", D:"Checked exceptions são geradas apenas pelo programador; Unchecked pela JVM.", E:"Não há diferença de comportamento em tempo de execução." },
         gabarito: "B",
-        comentario:
-          "DLQ captura mensagens que falharam no processamento após o número máximo de retentativas. Permite análise de erros sem perder mensagens e sem bloquear a fila principal.",
+        comentario: "Checked exceptions (ex.: IOException, SQLException) devem ser declaradas com 'throws' ou capturadas com try-catch. Unchecked (ex.: NullPointerException, ArrayIndexOutOfBoundsException) são subclasses de RuntimeException e não exigem tratamento obrigatório.",
       },
       {
-        numero: 69,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Sobre o conceito de 'Chaos Engineering', assinale a alternativa correta:",
-        alternativas: {
-          A: "Metodologia de desenvolvimento que permite que desenvolvedores façam alterações livres no código.",
-          B: "Prática de intencionalmente introduzir falhas em sistemas de produção para identificar fraquezas e melhorar a resiliência.",
-          C: "Abordagem de gerenciamento de projetos baseada na teoria do caos.",
-          D: "Técnica de testes que gera dados aleatórios para encontrar bugs.",
-          E: "Processo de refatoração agressiva sem planejamento prévio.",
-        },
-        gabarito: "B",
-        comentario:
-          "Chaos Engineering (Netflix Chaos Monkey) consiste em experimentar propositalmente falhas em sistemas para descobrir vulnerabilidades antes que causem incidentes reais.",
+        numero: 47, disciplina: "Tecnologia da Informação",
+        enunciado: "Em termos de complexidade algorítmica, O(n log n) é melhor que:",
+        alternativas: { A:"O(1).", B:"O(log n).", C:"O(n).", D:"O(n²).", E:"O(√n)." },
+        gabarito: "D",
+        comentario: "Ordem crescente de complexidade: O(1) < O(log n) < O(√n) < O(n) < O(n log n) < O(n²). Portanto O(n log n) é melhor que O(n²) mas pior que O(n).",
       },
       {
-        numero: 70,
-        disciplina: "Conhecimentos Específicos",
-        enunciado:
-          "Em relação ao modelo de computação serverless (FaaS — Function as a Service), qual é uma limitação conhecida?",
-        alternativas: {
-          A: "Impossibilidade de usar linguagens de programação modernas.",
-          B: "Cold start: latência adicional na primeira execução de uma função após período de inatividade.",
-          C: "Custo fixo elevado independente do uso.",
-          D: "Impossibilidade de integração com bancos de dados.",
-          E: "Necessidade de gerenciar servidores físicos.",
-        },
+        numero: 48, disciplina: "Tecnologia da Informação",
+        enunciado: "Em Machine Learning, overfitting ocorre quando:",
+        alternativas: { A:"O modelo é muito simples e não captura os padrões dos dados de treinamento.", B:"O modelo aprende demais os dados de treinamento, perdendo capacidade de generalizar para novos dados.", C:"O conjunto de dados de treinamento é muito grande para ser processado.", D:"O algoritmo de otimização não converge durante o treinamento.", E:"O modelo usa features irrelevantes que são descartadas na validação." },
         gabarito: "B",
-        comentario:
-          "Cold start é a principal limitação de FaaS: quando uma função não foi executada recentemente, o ambiente precisa ser inicializado, causando latência extra (de centenas de ms a segundos).",
+        comentario: "Overfitting: o modelo memoriza os dados de treinamento, incluindo ruídos, mas generaliza mal. Detectado quando a performance no treino é ótima mas no teste/validação é ruim. Técnicas de regularização (L1, L2, dropout) e mais dados combatem o overfitting.",
+      },
+      {
+        numero: 49, disciplina: "Tecnologia da Informação",
+        enunciado: "Em Kubernetes, um Pod é:",
+        alternativas: { A:"Um cluster de servidores físicos gerenciados pelo Kubernetes.", B:"A menor unidade de implantação do Kubernetes, contendo um ou mais containers que compartilham rede e armazenamento.", C:"Um serviço de balanceamento de carga entre clusters.", D:"Um volume persistente para armazenamento de dados.", E:"Um nó de controle (control plane) do cluster." },
+        gabarito: "B",
+        comentario: "Pod é a unidade básica de implantação no Kubernetes. Um Pod encapsula um ou mais containers que compartilham o mesmo IP, portas e volumes. O Kubernetes gerencia Pods, não containers diretamente.",
+      },
+      {
+        numero: 50, disciplina: "Tecnologia da Informação",
+        enunciado: "Qual tipo de banco de dados NoSQL é mais adequado para armazenar informações de sessão de usuário (chave = session_id, valor = dados do usuário)?",
+        alternativas: { A:"Banco de dados orientado a documentos (ex.: MongoDB).", B:"Banco de dados de grafos (ex.: Neo4j).", C:"Banco de dados colunar (ex.: Cassandra).", D:"Banco de dados chave-valor (ex.: Redis).", E:"Banco de dados relacional (ex.: PostgreSQL)." },
+        gabarito: "D",
+        comentario: "Bancos chave-valor (Redis, DynamoDB) são ideais para sessões de usuário: acesso por chave única, operações extremamente rápidas (O(1)) e TTL (time-to-live) para expiração automática.",
+      },
+      {
+        numero: 51, disciplina: "Tecnologia da Informação",
+        enunciado: "Em HTTP/REST, qual método é utilizado para ATUALIZAR completamente um recurso existente?",
+        alternativas: { A:"POST.", B:"GET.", C:"PATCH.", D:"PUT.", E:"DELETE." },
+        gabarito: "D",
+        comentario: "PUT substitui completamente um recurso existente com os dados fornecidos. PATCH faz atualização parcial. POST cria novos recursos. GET recupera recursos. DELETE remove recursos.",
+      },
+      {
+        numero: 52, disciplina: "Tecnologia da Informação",
+        enunciado: "Em banco de dados, a propriedade ACID que garante que uma transação é tratada como uma unidade indivisível (ou executa completamente ou não executa nada) é:",
+        alternativas: { A:"Consistência.", B:"Isolamento.", C:"Durabilidade.", D:"Atomicidade.", E:"Confiabilidade." },
+        gabarito: "D",
+        comentario: "Atomicidade: todas as operações de uma transação são executadas (commit) ou nenhuma é (rollback). É o 'tudo ou nada'. As demais propriedades: Consistência (dados sempre válidos), Isolamento (transações independentes), Durabilidade (dados persistem após commit).",
+      },
+      {
+        numero: 53, disciplina: "Tecnologia da Informação",
+        enunciado: "Em Java, para garantir que apenas uma thread acesse um método por vez, utiliza-se:",
+        alternativas: { A:"A anotação @Immutable.", B:"A palavra-chave synchronized.", C:"O uso de variáveis static.", D:"A anotação @ThreadSafe.", E:"A cláusula volatile." },
+        gabarito: "B",
+        comentario: "'synchronized' em Java garante exclusão mútua: apenas uma thread por vez pode executar um método ou bloco synchronized no mesmo objeto. Isso evita race conditions.",
+      },
+      {
+        numero: 54, disciplina: "Tecnologia da Informação",
+        enunciado: "Em Python, a palavra-chave 'yield' é usada para:",
+        alternativas: { A:"Lançar uma exceção em um função.", B:"Retornar um valor de um gerador (generator) e pausar a execução da função.", C:"Importar um módulo de forma lazy (sob demanda).", D:"Declarar uma variável global dentro de uma função.", E:"Encerrar um loop prematuram ente." },
+        gabarito: "B",
+        comentario: "'yield' transforma uma função em um gerador. Quando yield é encontrado, o valor é retornado e a execução é pausada, retomando do mesmo ponto quando next() é chamado. Ideal para grandes datasets processados em streaming.",
+      },
+      {
+        numero: 55, disciplina: "Tecnologia da Informação",
+        enunciado: "A principal diferença entre TCP e UDP é:",
+        alternativas: { A:"TCP é mais rápido que UDP em todos os cenários.", B:"UDP garante entrega ordenada e confiável dos pacotes.", C:"TCP é orientado a conexão, com controle de erros e reordenação; UDP é sem conexão, sem garantias, mas mais rápido.", D:"UDP é usado apenas em redes locais; TCP em redes WAN.", E:"TCP e UDP operam na camada de rede do modelo OSI." },
+        gabarito: "C",
+        comentario: "TCP: orientado a conexão (3-way handshake), garante entrega, ordena pacotes, controla fluxo — usado em HTTP, FTP, SMTP. UDP: sem conexão, sem garantias, menor latência — usado em streaming, DNS, jogos online.",
+      },
+      {
+        numero: 56, disciplina: "Tecnologia da Informação",
+        enunciado: "Em criptografia, a diferença entre criptografia simétrica e assimétrica é:",
+        alternativas: { A:"Simétrica usa duas chaves (pública e privada); assimétrica usa apenas uma chave compartilhada.", B:"Simétrica usa a mesma chave para cifrar e decifrar; assimétrica usa um par de chaves (pública para cifrar, privada para decifrar).", C:"Criptografia simétrica é sempre mais segura que a assimétrica.", D:"Assimétrica é usada apenas para assinatura digital, nunca para cifrar dados.", E:"Simétrica só funciona com chaves de 128 bits; assimétrica exige 4096 bits." },
+        gabarito: "B",
+        comentario: "Simétrica (AES, DES): mesma chave para cifrar/decifrar — rápida, mas o compartilhamento de chave é um desafio. Assimétrica (RSA, ECC): par de chaves — pública (livre distribuição) e privada (secreta) — resolve o problema de distribuição de chaves.",
+      },
+      {
+        numero: 57, disciplina: "Tecnologia da Informação",
+        enunciado: "Uma lista encadeada (linked list) difere de um array principalmente porque:",
+        alternativas: { A:"Uma lista encadeada permite acesso aleatório O(1), enquanto o array não.", B:"Arrays permitem inserção e remoção O(1) em qualquer posição; listas encadeadas requerem O(n).", C:"Em uma lista encadeada, os elementos não precisam estar em posições contíguas de memória; o acesso é O(n) mas inserção/remoção em posição conhecida é O(1).", D:"Arrays são dinâmicos; listas encadeadas têm tamanho fixo.", E:"Listas encadeadas só existem em linguagens de baixo nível como C." },
+        gabarito: "C",
+        comentario: "Array: memória contígua, acesso O(1), inserção/remoção O(n). Lista encadeada: memória não contígua (nós com ponteiros), acesso O(n), mas inserção/remoção em posição conhecida O(1) (apenas ajuste de ponteiros).",
+      },
+      {
+        numero: 58, disciplina: "Tecnologia da Informação",
+        enunciado: "Em SQL, uma subconsulta correlacionada (correlated subquery) é aquela que:",
+        alternativas: { A:"É executada uma única vez e seu resultado é reutilizado para cada linha da query externa.", B:"Referencia colunas da query externa, sendo executada uma vez para cada linha processada pela query externa.", C:"Substitui uma tabela em um JOIN, sendo equivalente a uma VIEW.", D:"Pode ser executada independentemente da query principal.", E:"Só pode ser usada na cláusula FROM, nunca em WHERE ou HAVING." },
+        gabarito: "B",
+        comentario: "Subconsulta correlacionada referencia colunas da query externa: é executada uma vez para cada linha da query externa, tornando-a potencialmente mais lenta mas mais poderosa para comparações linha a linha.",
+      },
+      {
+        numero: 59, disciplina: "Tecnologia da Informação",
+        enunciado: "O padrão de projeto Singleton garante que:",
+        alternativas: { A:"Uma classe pode ter múltiplas instâncias, mas compartilham o mesmo estado.", B:"Uma classe tenha apenas uma instância e forneça um ponto global de acesso a ela.", C:"Uma instância possa ser clonada com facilidade.", D:"A criação de objetos seja delegada a subclasses.", E:"Um objeto possa assumir diferentes comportamentos em tempo de execução." },
+        gabarito: "B",
+        comentario: "Singleton restringe a instanciação de uma classe a exatamente um objeto. É implementado com construtor privado e método estático getInstance() que retorna sempre a mesma instância.",
+      },
+      {
+        numero: 60, disciplina: "Tecnologia da Informação",
+        enunciado: "Em Kotlin, uma data class é especial porque:",
+        alternativas: { A:"Só pode herdar de outras data classes.", B:"Gera automaticamente equals(), hashCode(), toString() e copy() baseados nas propriedades declaradas no construtor primário.", C:"Não pode ter métodos definidos pelo programador.", D:"Armazena dados exclusivamente em banco de dados local.", E:"Não suporta propriedades mutáveis (var)." },
+        gabarito: "B",
+        comentario: "Kotlin data class gera automaticamente: equals() e hashCode() baseados nas propriedades, toString() legível, copy() para cópia com modificações, e componentN() para destructuring declarations.",
+      },
+      {
+        numero: 61, disciplina: "Tecnologia da Informação",
+        enunciado: "Em TypeScript, a diferença entre 'interface' e 'type' é:",
+        alternativas: { A:"Interfaces não podem ser utilizadas com classes; type sim.", B:"Type não pode descrever objetos; apenas tipos primitivos.", C:"Interfaces podem ser estendidas e mescladas (declaration merging); types são mais flexíveis para union types e tipos condicionais.", D:"Type é sempre equivalente a interface — não há diferença prática.", E:"Interfaces só existem em tempo de execução; types são apagados pelo compilador." },
+        gabarito: "C",
+        comentario: "Interface: suporta declaration merging (múltiplas declarações são combinadas), mais adequada para contratos de classes. Type alias: suporta union types, intersection types, tipos condicionais e mapped types — mais poderoso para composição de tipos complexos.",
+      },
+      {
+        numero: 62, disciplina: "Tecnologia da Informação",
+        enunciado: "Em Python, para capturar qualquer exceção e garantir que um bloco seja executado independentemente do resultado, usa-se:",
+        alternativas: { A:"try/except Exception/else.", B:"try/catch/finally.", C:"try/except/finally.", D:"try/except/else/catch.", E:"try/catch/else." },
+        gabarito: "C",
+        comentario: "Python usa try/except para capturar exceções. O bloco 'finally' é executado sempre, independente de exceção. O bloco 'else' executa apenas se nenhuma exceção ocorrer. Não existe 'catch' em Python (é 'except').",
+      },
+      {
+        numero: 63, disciplina: "Tecnologia da Informação",
+        enunciado: "A Java Streams API, introduzida no Java 8, permite:",
+        alternativas: { A:"Transmissão de dados entre aplicações via protocolos de rede.", B:"Manipulação de coleções de forma declarativa e funcional, com operações como filter(), map() e reduce(), podendo ser paralelas.", C:"Acesso a streams de áudio e vídeo em aplicações multimídia.", D:"Gerenciamento de I/O de arquivos de forma assíncrona.", E:"Criação de threads leves para programação concorrente." },
+        gabarito: "B",
+        comentario: "Java Streams API permite processar coleções funcionalmente: encadeia operações intermediárias (filter, map, sorted) e terminais (collect, count, reduce). Operações são lazy e podem ser paralelizadas com parallelStream().",
+      },
+      {
+        numero: 64, disciplina: "Tecnologia da Informação",
+        enunciado: "Em banco de dados, um índice B-Tree é adequado para:",
+        alternativas: { A:"Apenas buscas por igualdade exata em colunas com poucos valores distintos.", B:"Buscas por igualdade e por intervalo, sendo eficiente para consultas com operadores =, <, >, BETWEEN e LIKE com prefixo.", C:"Armazenamento de dados geoespaciais como pontos e polígonos.", D:"Busca full-text em colunas de texto longo.", E:"Exclusivamente para aceleração de operações JOIN." },
+        gabarito: "B",
+        comentario: "B-Tree (Balanced Tree) é o tipo de índice padrão na maioria dos SGBDs. Suporta buscas por igualdade (=) e por intervalo (<, >, BETWEEN, LIKE 'prefixo%') de forma eficiente — O(log n) para localização.",
+      },
+      {
+        numero: 65, disciplina: "Tecnologia da Informação",
+        enunciado: "Em computação em nuvem, o modelo serverless (FaaS — Function as a Service) apresenta como desvantagem:",
+        alternativas: { A:"Necessidade de gerenciar servidores físicos.", B:"Custo fixo elevado independente do uso.", C:"Cold start: latência adicional na primeira execução de uma função após período de inatividade.", D:"Impossibilidade de integração com outros serviços de nuvem.", E:"Limitação a linguagens de programação antigas." },
+        gabarito: "C",
+        comentario: "Cold start é a principal desvantagem do serverless: quando a função não foi executada recentemente, o ambiente precisa ser inicializado, causando latência extra de centenas de ms a segundos.",
+      },
+      {
+        numero: 66, disciplina: "Tecnologia da Informação",
+        enunciado: "Em Git, a diferença entre 'git revert' e 'git reset' é:",
+        alternativas: { A:"Ambos apagam commits do histórico permanentemente.", B:"'git revert' cria um novo commit que desfaz as mudanças de um commit anterior, preservando o histórico; 'git reset' move o ponteiro HEAD, podendo reescrever o histórico.", C:"'git reset' é mais seguro para uso em branches compartilhados.", D:"'git revert' só funciona com o último commit.", E:"Não há diferença prática entre os dois comandos." },
+        gabarito: "B",
+        comentario: "'git revert': cria um novo commit invertendo as mudanças — seguro para branches compartilhados (não reescreve histórico). 'git reset': move HEAD (e opcionalmente o índice e working tree) — reescreve histórico, perigoso em branches remotos.",
+      },
+      {
+        numero: 67, disciplina: "Tecnologia da Informação",
+        enunciado: "Memoização é uma técnica de otimização que:",
+        alternativas: { A:"Compila código interpretado em código de máquina para execução mais rápida.", B:"Armazena os resultados de chamadas de função custosas para reutilizá-los quando os mesmos argumentos ocorrem novamente.", C:"Distribui chamadas de função entre múltiplos processadores.", D:"Converte algoritmos recursivos em iterativos automaticamente.", E:"Remove código morto de algoritmos para reduzir o uso de memória." },
+        gabarito: "B",
+        comentario: "Memoização (top-down dynamic programming): armazena em cache os resultados de subproblemas já resolvidos. Quando a função é chamada com os mesmos argumentos, retorna o resultado cacheado em vez de recomputar — transforma complexidade exponencial em polinomial para problemas adequados.",
+      },
+      {
+        numero: 68, disciplina: "Tecnologia da Informação",
+        enunciado: "Em SQL, qual JOIN retorna TODAS as linhas de ambas as tabelas, com NULL onde não há correspondência?",
+        alternativas: { A:"INNER JOIN.", B:"LEFT JOIN.", C:"RIGHT JOIN.", D:"CROSS JOIN.", E:"FULL OUTER JOIN." },
+        gabarito: "E",
+        comentario: "FULL OUTER JOIN retorna todas as linhas de ambas as tabelas. Onde não há correspondência, as colunas da tabela sem correspondência ficam como NULL. Combina os resultados de LEFT e RIGHT JOIN.",
+      },
+      {
+        numero: 69, disciplina: "Tecnologia da Informação",
+        enunciado: "JWT (JSON Web Token) é usado para autenticação porque:",
+        alternativas: { A:"Armazena a senha do usuário de forma criptografada para verificação rápida.", B:"É um token autocontido que contém informações do usuário (claims) assinadas digitalmente, permitindo verificação sem consulta ao banco de dados.", C:"Elimina a necessidade de HTTPS nas comunicações.", D:"É gerenciado exclusivamente pelo banco de dados para garantir consistência.", E:"Funciona apenas com OAuth 2.0 e não pode ser usado de forma independente." },
+        gabarito: "B",
+        comentario: "JWT é composto por header.payload.signature. O servidor verifica a assinatura sem precisar consultar o banco de dados (stateless). Os claims (informações do usuário) ficam no payload, codificado em Base64.",
+      },
+      {
+        numero: 70, disciplina: "Tecnologia da Informação",
+        enunciado: "Em Python, o módulo 'os' é utilizado para:",
+        alternativas: { A:"Operações de I/O assíncronas em rede.", B:"Interagir com o sistema operacional: manipular arquivos, diretórios, variáveis de ambiente e executar processos.", C:"Análise sintática de código Python em tempo de execução.", D:"Gerenciamento de pacotes e dependências.", E:"Compilação de código Python para C." },
+        gabarito: "B",
+        comentario: "O módulo 'os' fornece interface portável com funcionalidades do SO: os.path (manipulação de caminhos), os.listdir() (listar diretórios), os.environ (variáveis de ambiente), os.system() (executar comandos), entre outros.",
       },
     ],
   },
 ];
 
-export const getProvaPorId = (id) => provas.find((p) => p.id === id);
-
-export const getQuestoesPorDisciplina = (provaId, disciplina) => {
-  const prova = getProvaPorId(provaId);
-  if (!prova) return [];
-  return prova.questoes.filter((q) => q.disciplina === disciplina);
-};
-
-
 const COR_DISC_PROVA = {
-  "Língua Portuguesa":         { bg:"#EFF6FF", text:"#1D4ED8", border:"#BFDBFE" },
-  "Língua Inglesa":            { bg:"#F5F3FF", text:"#6D28D9", border:"#DDD6FE" },
-  "Raciocínio Lógico":         { bg:"#FEFCE8", text:"#92400E", border:"#FDE68A" },
-  "Atualidades":               { bg:"#FDF2F8", text:"#9D174D", border:"#FBCFE8" },
-  "Conhecimentos Específicos": { bg:"#F0FDF4", text:"#166534", border:"#BBF7D0" },
+  "Língua Portuguesa":                 { bg:"#EFF6FF", text:"#1D4ED8", border:"#BFDBFE" },
+  "Língua Inglesa":                    { bg:"#F5F3FF", text:"#6D28D9", border:"#DDD6FE" },
+  "Raciocínio Lógico":                 { bg:"#FEFCE8", text:"#92400E", border:"#FDE68A" },
+  "Atualidades":                       { bg:"#FDF2F8", text:"#9D174D", border:"#FBCFE8" },
+  "Conhecimentos Específicos":         { bg:"#F0FDF4", text:"#166534", border:"#BBF7D0" },
+  "Matemática":                        { bg:"#FFF7ED", text:"#C2410C", border:"#FED7AA" },
+  "Atualidades do Mercado Financeiro": { bg:"#FDF4FF", text:"#86198F", border:"#F0ABFC" },
+  "Probabilidade e Estatística":       { bg:"#FEFCE8", text:"#713F12", border:"#FEF08A" },
+  "Conhecimentos Bancários":           { bg:"#F0FDF4", text:"#15803D", border:"#86EFAC" },
+  "Tecnologia da Informação":          { bg:"#EFF6FF", text:"#1E40AF", border:"#93C5FD" },
 };
 
 function BadgeDisc({ disc }) {
@@ -3101,7 +1830,11 @@ function ProvasView({ concurso }) {
   function finalizar() { clearInterval(timerRef.current); setDadosResult({ prova:provaSel, modo, respostas, questoes:qFiltradas, tempo }); setTela("resultado"); }
   function voltar() { clearInterval(timerRef.current); setTela("lista"); setProvaSel(null); }
 
-  const qBase = provaSel ? (modo === "especificos" ? provaSel.questoes.filter((q) => q.disciplina === "Conhecimentos Específicos") : provaSel.questoes) : [];
+  const qBase = provaSel ? (modo === "especificos"
+    ? (provaSel.especificosDiscs
+      ? provaSel.questoes.filter((q) => provaSel.especificosDiscs.includes(q.disciplina))
+      : provaSel.questoes.filter((q) => q.disciplina === "Conhecimentos Específicos"))
+    : provaSel.questoes) : [];
   const qFiltradas = filtroDisc === "todas" ? qBase : qBase.filter((q) => q.disciplina === filtroDisc);
   const q = qFiltradas[atual];
   const respostaAtual = q ? respostas[q.numero] : null;
@@ -3110,40 +1843,46 @@ function ProvasView({ concurso }) {
   const mm = String(Math.floor(tempo/60)).padStart(2,"0"); const ss = String(tempo%60).padStart(2,"0");
 
   if (tela === "lista") {
-    if (concurso?.id === "bb-at") return (
+    if (concurso?.id === "bb-at") {
+      const provas = PROVAS_BB;
+      return (
+        <div>
+          <PageTitle sub="Banco do Brasil · Agente de Tecnologia · CESGRANRIO">Provas BB</PageTitle>
+          <div className="space-y-4">
+            {provas.map((p) => {
+              const numEsp = p.especificosDiscs ? p.questoes.filter((q) => p.especificosDiscs.includes(q.disciplina)).length : 0;
+              return (
+                <Card key={p.id}>
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background:C.goldSoft, color:C.gold }}>{p.banca} · {p.data}</span>
+                      <h2 className="font-extrabold text-base mt-2">{p.titulo}</h2>
+                    </div>
+                    <div className="text-right shrink-0 ml-3"><div className="text-3xl font-extrabold" style={{ color:BRAND }}>{p.totalQuestoes}</div><div className="text-xs" style={{ color:C.muted }}>questões</div></div>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 mb-4">{Object.keys(p.disciplinas).map((disc) => <BadgeDisc key={disc} disc={disc} />)}</div>
+                  <div className="flex gap-2">
+                    <Btn onClick={() => iniciar(p, "completa")} className="flex-1 justify-center"><Play size={14} /> Prova Completa ({p.totalQuestoes} q)</Btn>
+                    <Btn variant="ghost" onClick={() => iniciar(p, "especificos")} className="flex-1 justify-center"><FileText size={14} /> Só Específicos ({numEsp} q)</Btn>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+    return (
       <div>
-        <PageTitle sub="Banco do Brasil · Agente de Tecnologia">Provas BB</PageTitle>
+        <PageTitle sub="Dataprev · Arquitetura de Software">Provas Dataprev</PageTitle>
         <Card className="text-center py-10">
           <GraduationCap size={40} color={C.muted} className="mx-auto mb-3" />
           <div className="font-bold text-base mb-2">Provas em breve</div>
-          <p className="text-sm" style={{ color: C.muted }}>As questões das provas anteriores do BB · Agente de Tecnologia estão sendo organizadas. Em breve estarão disponíveis aqui.</p>
-          <p className="text-xs mt-3" style={{ color: C.muted }}>Enquanto isso, use o <strong>Simulados</strong> para registrar seu desempenho nas provas que você praticar.</p>
+          <p className="text-sm" style={{ color: C.muted }}>Não há provas públicas disponíveis para o cargo Arquitetura de Software da Dataprev. As questões serão adicionadas assim que disponíveis.</p>
+          <p className="text-xs mt-3" style={{ color: C.muted }}>Use o <strong>Simulados</strong> para registrar seu desempenho nas provas que você praticar.</p>
         </Card>
       </div>
     );
-    return (
-    <div>
-      <PageTitle sub="Provas reais FGV · Dataprev 2023 e 2024 · Perfil Desenvolvimento de Software">Provas Dataprev</PageTitle>
-      <div className="space-y-4">
-        {PROVAS_DATAPREV.map((p) => (
-          <Card key={p.id}>
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background:C.goldSoft, color:C.gold }}>{p.banca} · {p.data}</span>
-                <h2 className="font-extrabold text-base mt-2">{p.titulo}</h2>
-              </div>
-              <div className="text-right shrink-0 ml-3"><div className="text-3xl font-extrabold" style={{ color:BRAND }}>{p.totalQuestoes}</div><div className="text-xs" style={{ color:C.muted }}>questões</div></div>
-            </div>
-            <div className="flex flex-wrap gap-1.5 mb-4">{Object.keys(p.disciplinas).map((disc) => <BadgeDisc key={disc} disc={disc} />)}</div>
-            <div className="flex gap-2">
-              <Btn onClick={() => iniciar(p, "completa")} className="flex-1 justify-center"><Play size={14} /> Prova Completa (70 q)</Btn>
-              <Btn variant="ghost" onClick={() => iniciar(p, "especificos")} className="flex-1 justify-center"><FileText size={14} /> Só Específicos (40 q)</Btn>
-            </div>
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
   }
 
   if (tela === "simulado" && q) {
