@@ -38,62 +38,77 @@ const inputCls = "w-full px-3 py-2 rounded-lg text-sm outline-none";
    sobre os temas mais relevantes para a trilha de arquitetura.
    ============================================================ */
 const SEED_DATAPREV = [
-  { name: "Arquitetura de Software", block: "Específicos", peso: 45, q: 30, topics: [
-    { name: "Microsserviços, monólitos, modular monolith e bounded contexts", hits: 18 },
-    { name: "APIs REST, versionamento, OpenAPI e contratos", hits: 14 },
-    { name: "Mensageria (Kafka, RabbitMQ, Pub/Sub) e event-driven architecture", hits: 16 },
-    { name: "Padrões arquiteturais (CQRS, Hexagonal, Clean Architecture, MVC)", hits: 14 },
-    { name: "Cloud e conteinerização (Docker, Kubernetes, observabilidade)", hits: 12 },
-    { name: "Segurança em arquitetura (OAuth2, OIDC, Zero Trust, IAM)", hits: 10 },
-    { name: "Escalabilidade, resiliência, cache e tolerância a falhas", hits: 12 },
-    { name: "Documentação arquitetural e decisões técnicas (ADR)", hits: 8 },
+  { name: "Língua Portuguesa", block: "Gerais", peso: 10, q: 10, topics: [
+    { name: "Compreensão e interpretação de textos de gêneros variados e reconhecimento textuais.", hits: 8 },
+    { name: "Domínio da ortografia oficial, acentuação e crase.", hits: 5 },
+    { name: "Mecanismos de coesão textual, tempos e modos verbais.", hits: 5 },
+    { name: "Estrutura morfossintática do período, concordância e regência verbal/nominal.", hits: 6 },
+    { name: "Reescrita de frases e parágrafos, significação e substituição de palavras.", hits: 4 },
   ]},
-  { name: "Banco de Dados", block: "Específicos", peso: 20, q: 12, topics: [
-    { name: "Modelagem relacional, ER e normalização", hits: 16 },
-    { name: "SQL, joins, agregações e subconsultas", hits: 15 },
-    { name: "Transações, ACID, concorrência e isolamento", hits: 12 },
-    { name: "Índices, otimização e plano de execução", hits: 10 },
-    { name: "NoSQL, particionamento e replicação", hits: 8 },
-    { name: "DW, ETL e modelagem dimensional", hits: 8 },
+  { name: "Língua Inglesa", block: "Gerais", peso: 5, q: 5, topics: [
+    { name: "Compreensão de textos em língua inglesa e itens gramaticais relevantes.", hits: 5 },
   ]},
-  { name: "Engenharia de Software", block: "Específicos", peso: 15, q: 10, topics: [
-    { name: "Testes automatizados, TDD e pirâmide de testes", hits: 12 },
-    { name: "CI/CD, GitFlow e automação de deploy", hits: 10 },
-    { name: "Observabilidade (logs, métricas, traces) e SRE", hits: 11 },
-    { name: "Requisitos, UML e documentação técnica", hits: 8 },
-    { name: "Qualidade de software e refatoração", hits: 7 },
+  { name: "Raciocínio Lógico Matemático", block: "Gerais", peso: 10, q: 10, topics: [
+    { name: "Estruturas lógicas, lógica de argumentação (inferências, deduções).", hits: 8 },
+    { name: "Lógica sentencial (proposições simples/compostas, tabelas-verdade, equivalências).", hits: 8 },
+    { name: "Diagramas lógicos e lógica de primeira ordem.", hits: 6 },
+    { name: "Problemas aritméticos, geométricos e matriciais.", hits: 5 },
   ]},
-  { name: "Língua Portuguesa", block: "Básicos", peso: 12, q: 8, topics: [
-      { name: "Compreensão e interpretação de textos", hits: 8 },
-      { name: "Concordância verbal e nominal", hits: 3 },
-      { name: "Coesão e referência textual", hits: 3 },
-      { name: "Colocação pronominal (próclise, mesóclise, ênclise)", hits: 2 },
-      { name: "Emprego da crase", hits: 2 },
-      { name: "Pontuação (vírgula)", hits: 2 },
-      { name: "Classe e emprego de palavras", hits: 1 },
-      { name: "Regência verbal e nominal", hits: 0 },
-      { name: "Ortografia oficial", hits: 0 },
+  { name: "Atualidades e IA", block: "Gerais", peso: 5, q: 5, topics: [
+    { name: "Tópicos de segurança, política, economia, sociedade, tecnologia, ecologia.", hits: 4 },
+    { name: "Inteligência Artificial: conceitos, fundamentos, aplicações e aprendizado de máquina.", hits: 6 },
+    { name: "Modelos generativos, LLMs, ética, governança e privacidade em IA.", hits: 5 },
   ]},
-  { name: "Raciocínio Lógico", block: "Básicos", peso: 10, q: 7, topics: [
-    { name: "Lógica proposicional e equivalências", hits: 8 },
-    { name: "Conjuntos, relações e diagramas", hits: 6 },
-    { name: "Análise combinatória e contagem", hits: 5 },
-    { name: "Porcentagem, razão e proporção", hits: 4 },
-    { name: "Sequências, padrões e progressões", hits: 4 },
-    { name: "Problemas com tabelas e gráficos", hits: 3 },
+  { name: "Legislação e Seg. Informação", block: "Gerais", peso: 5, q: 5, topics: [
+    { name: "Lei nº 12.527/2011 (Acesso à Informação) — caps I ao V; Dec 7.724 e 7.845.", hits: 4 },
+    { name: "Lei nº 12.737/2012 (Delitos Informáticos) — art. 2º.", hits: 3 },
+    { name: "Lei nº 12.965/2014 (Marco Civil da Internet) — caps II e III.", hits: 3 },
+    { name: "Lei nº 13.709/2018 (LGPD) — capítulos I, II, III, IV, VII, VIII e IX.", hits: 5 },
   ]},
-  { name: "Atualidades e Tecnologia", block: "Básicos", peso: 8, q: 6, topics: [
-    { name: "Transformação digital e governo digital", hits: 8 },
-    { name: "IA generativa, automação e impacto nos serviços", hits: 7 },
-    { name: "LGPD, privacidade e segurança da informação", hits: 6 },
-    { name: "Economia digital, dados e serviços públicos", hits: 4 },
-    { name: "Cloud, open source e ecossistemas de software", hits: 4 },
+  { name: "Redes de Computadores", block: "Específicos", peso: 8, q: 8, topics: [
+    { name: "Conceitos básicos: meios de transmissão, classificação, topologias, WAN, LAN e Redes Sem Fio.", hits: 7 },
+    { name: "Elementos de interconexão (hubs, switches, roteadores), VLANs e Cabeamento estruturado.", hits: 6 },
+    { name: "Modelo de referência OSI e padrões IEEE 802.1, 802.3, 802.11 a/b/g/n/ac.", hits: 7 },
+    { name: "Arquitetura e pilhas de protocolos TCP/IP: camada de rede, transporte e aplicação.", hits: 8 },
   ]},
-  { name: "Língua Inglesa", block: "Básicos", peso: 5, q: 5, topics: [
-      { name: "Interpretação de texto / ideia principal", hits: 5 },
-      { name: "Referência pronominal", hits: 2 },
-      { name: "Vocabulário, prefixos e expressões idiomáticas", hits: 2 },
-      { name: "Aspectos gramaticais (tempos verbais, conectivos)", hits: 1 },
+  { name: "Banco de Dados", block: "Específicos", peso: 8, q: 8, topics: [
+    { name: "Arquitetura, estruturas, modelagem de dados e normalização.", hits: 7 },
+    { name: "SQL (ANSI), DDL, DML. SGBDs: Oracle 19C, MySQL, PostgreSQL, MongoDB, MS-SQLSERVER.", hits: 8 },
+    { name: "Armazenamento, backup, restauração, segurança, monitoração e Big Data.", hits: 5 },
+  ]},
+  { name: "Arquitetura Tecnológica", block: "Específicos", peso: 10, q: 10, topics: [
+    { name: "Ciclo de vida do software, Metodologias Ágeis, Qualidade e Gestão de Configuração.", hits: 8 },
+    { name: "Engenharia de requisitos (elicitação, gerenciamento, especificação, validação) e Usabilidade.", hits: 6 },
+    { name: "Orientação a objetos, SOLID, GRASP, TDD, BDD, Padrões de projeto, UML.", hits: 9 },
+    { name: "Interoperabilidade, APIs, API Gateway, Web Services, padrões XML, JSON, REST, DEVSECOPS.", hits: 8 },
+  ]},
+  { name: "Computação em Nuvem e Virt.", block: "Específicos", peso: 8, q: 8, topics: [
+    { name: "Conceitos IaaS, PaaS, SaaS. Nuvens Privada, Pública e Híbrida. Escalabilidade e Alta Disponibilidade.", hits: 7 },
+    { name: "Componentes de arquitetura (regiões, zonas). Identidade, privacidade e segurança. IaC.", hits: 6 },
+    { name: "Red Hat Clair, Docker, Harbor, Kubernetes, VMware (vCenter, vCloud, NSX, vRealize).", hits: 7 },
+  ]},
+  { name: "Linguagens e Frameworks", block: "Específicos", peso: 7, q: 7, topics: [
+    { name: "Gitlab, HTML5, CSS3, Java, Javascript / React.js, Java EE, Spring Boot, Spring Cloud, Kafka.", hits: 7 },
+  ]},
+  { name: "Segurança da Informação", block: "Específicos", peso: 8, q: 8, topics: [
+    { name: "Políticas e Procedimentos. Normas ISO/IEC 27001 e 27002. Criptografia e Certificação digital.", hits: 8 },
+    { name: "Vulnerabilidades, malwares, ataques. Ferramentas: IDS, IPS, SIEM. NIST Framework v1.1.", hits: 8 },
+  ]},
+  { name: "Plataforma Básica", block: "Específicos", peso: 4, q: 4, topics: [
+    { name: "Arquitetura de Computadores (Hardware). Backups. Storages (bloco, objeto, NAS, CIFS, NFS).", hits: 4 },
+    { name: "Arquitetura de SO (processamento, memória, sistema de arquivos). Monitoramento.", hits: 4 },
+  ]},
+  { name: "Automação", block: "Específicos", peso: 4, q: 4, topics: [
+    { name: "Infra como código, DevOps, Cloud. Ferramentas: Puppet, Ansible, Gitlab, Jenkins, Rundeck. Contêineres.", hits: 5 },
+  ]},
+  { name: "Ferramentas Analytics", block: "Específicos", peso: 3, q: 3, topics: [
+    { name: "ETL, BI, Big Data, Machine Learning, IA. Mineração de Dados e bancos distribuídos.", hits: 4 },
+  ]},
+  { name: "Plataforma Baixa", block: "Específicos", peso: 3, q: 3, topics: [
+    { name: "Windows, Linux, Unix (instalação e suporte). Serviços: Samba, LDAP, AD, SSH, FTP, NFS. Virtualização.", hits: 3 },
+  ]},
+  { name: "Aplicações", block: "Específicos", peso: 2, q: 2, topics: [
+    { name: "Java EE, Container WEB e EJB, Arquitetura SOA e Microserviços. Servidores: Apache, NGINX, Weblogic, JBoss.", hits: 5 },
   ]},
 ];
 
@@ -228,7 +243,7 @@ function seedSims(disc, simData) {
 
 /* ============================ App ============================ */
 function StudyApp({ onLogout, concurso, setConcurso }) {
-  const CK = (k) => concurso.id === "dataprev-arq" ? k : `${concurso.id}_${k}`;
+  const CK = (k) => `${concurso.id}_${k}`;
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState("home");
   const [navOpen, setNavOpen] = useState(false);
@@ -472,12 +487,6 @@ function PomodoroView({ pomo, setPomo, disciplines, discById, registerStudy }) {
   // reinicia o relógio quando o modo muda ou quando o usuário edita as durações (com o timer parado)
   useEffect(() => { if (!running) setLeft(modeMin(mode) * 60); /* eslint-disable-next-line */ }, [mode, pomo.focus, pomo.short, pomo.long]);
 
-  function toggleTopic(disciplineId, topicId) {
-    setDisciplines((prev) => prev.map((d) => d.id !== disciplineId ? d : ({
-      ...d,
-      topics: d.topics.map((t) => t.id === topicId ? { ...t, studied: !t.studied } : t),
-    })));
-  }
   useEffect(() => {
     if (!running) return;
     ref.current = setInterval(() => setLeft((s) => s - 1), 1000);
@@ -485,11 +494,7 @@ function PomodoroView({ pomo, setPomo, disciplines, discById, registerStudy }) {
   }, [running]);
 
   useEffect(() => {
-            <div className="grid gap-2 md:grid-cols-2">
-              {[...d.topics].sort((a, b) => b.hits - a.hits).map((t) => { const p = perf[t.id]; const tot = p ? p.r + p.w : 0; const acc = tot ? Math.round((p.r / tot) * 100) : null; const weak = acc !== null && acc < 60;
-                return <button key={t.id} type="button" onClick={() => toggleTopic(d.id, t.id)} className="w-full flex items-center gap-2 text-sm p-2.5 rounded-xl border text-left transition hover:-translate-y-[1px]" style={{ background: t.studied ? C.greenSoft : C.surface2, borderColor: t.studied ? C.green : C.line, boxShadow: t.studied ? `0 0 0 1px ${C.green} inset` : "none" }}><span className="pointer-events-none shrink-0 mt-0.5">{t.studied ? <CheckCircle2 size={15} color={C.green} /> : <Circle size={15} color={C.line} />}</span><span className="pointer-events-none flex-1 min-w-0" style={{ color: t.studied ? C.ink : C.muted }}>{t.name}</span><span className="pointer-events-none flex items-center gap-1 shrink-0">{t.hits >= 8 && <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: C.redSoft, color: C.red }}>cai muito</span>}{t.hits >= 4 && t.hits < 8 && <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: C.goldSoft, color: C.ink }}>cai bastante</span>}{p && <span className="text-xs" style={{ color: C.muted }}>{fmtMin(p.min)}</span>}{acc !== null && <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: weak ? C.redSoft : C.greenSoft, color: weak ? C.red : C.green }}>{acc}%{weak && " · foco"}</span>}</span></button>;
-              })}
-            </div>
+    if (left > 0) return;
     beep();
     if (mode === "focus") {
       const nd = doneFocus + 1; setDoneFocus(nd);
