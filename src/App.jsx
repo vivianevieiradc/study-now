@@ -491,7 +491,7 @@ function ManualModal({ disciplines, discById, onClose, onSave, initial }) {
 }
 
 /* ============================ PLANEJAMENTO ============================ */
-function PlanoView({ plan, setPlan, disciplines, discById, cycle }) {
+function PlanoView({ plan, setPlan, disciplines, discById, cycle, setView }) {
   const C = useC();
   const [open, setOpen] = useState(null);
   const [gerarOpen, setGerarOpen] = useState(false);
