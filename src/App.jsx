@@ -491,16 +491,42 @@ function ManualModal({ disciplines, discById, onClose, onSave, initial }) {
 }
 
 /* ============================ PLANEJAMENTO ============================ */
-function PlanoView({ plan, setPlan, disciplines, discById }) {
+function PlanoView({ plan, setPlan, disciplines, discById, cycle }) {
   const C = useC();
   const [open, setOpen] = useState(null);
+  const [gerarOpen, setGerarOpen] = useState(false);
   const doneCount = plan.filter((p) => p.done).length;
   const pct = plan.length ? Math.round((doneCount / plan.length) * 100) : 0;
   function toggle(id) { setPlan((p) => p.map((x) => x.id === id ? { ...x, done: !x.done } : x)); }
   function add(day, disciplineId, minutes) { setPlan((p) => [...p, { id: uid(), day, disciplineId, minutes, done: false }]); setOpen(null); }
   function remove(id) { setPlan((p) => p.filter((x) => x.id !== id)); }
+  function gerarDoCiclo(dias, horasPorDia) {
+    const minPerDay = horasPorDia * 60;
+    const newPlan = [];
+    let dayIdx = 0;
+    let dayUsed = 0;
+    for (const block of (cycle?.blocks || [])) {
+      let remaining = block.targetMinutes;
+      while (remaining > 0 && dayIdx < dias.length) {
+        const available = minPerDay - dayUsed;
+        const take = Math.min(remaining, available, minPerDay);
+        if (take > 0) {
+          newPlan.push({ id: uid(), day: dias[dayIdx], disciplineId: block.disciplineId, minutes: take, done: false });
+          remaining -= take;
+          dayUsed += take;
+        }
+        if (dayUsed >= minPerDay) { dayIdx++; dayUsed = 0; }
+      }
+    }
+    setPlan(newPlan);
+    setGerarOpen(false);
+  }
   return <div>
-    <PageTitle sub="Distribua sessões ao longo da semana em grade. Trabalha junto com o ciclo, sem conflito.">Planejamento semanal</PageTitle>
+    <PageTitle sub="Distribua sessões ao longo da semana em grade. Gerado automaticamente a partir do ciclo ou ajustado manualmente.">Planejamento semanal</PageTitle>
+    <div className="flex flex-wrap gap-2 mb-4">
+      <Btn variant="primary" onClick={() => setGerarOpen(true)}><RefreshCw size={14} /> Gerar da semana</Btn>
+      <span className="text-xs self-center ml-auto" style={{ color: C.muted }}>ou adicione sessões manualmente nos dias abaixo</span>
+    </div>
     <Card className="mb-4"><GoalBar label="Planejamento cumprido esta semana" value={doneCount} target={plan.length || 1} pct={pct} unit="" /></Card>
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
       {DAYS.map((d, i) => { const items = plan.filter((p) => p.day === i);
@@ -508,7 +534,32 @@ function PlanoView({ plan, setPlan, disciplines, discById }) {
       })}
     </div>
     {open !== null && <PlanAddModal day={open} disciplines={disciplines} onClose={() => setOpen(null)} onAdd={add} />}
+    {gerarOpen && <GerarPlanoModal cycle={cycle} discById={discById} onClose={() => setGerarOpen(false)} onGerar={gerarDoCiclo} />}
   </div>;
+}
+function GerarPlanoModal({ cycle, discById, onClose, onGerar }) {
+  const C = useC();
+  const [dias, setDias] = useState([1, 2, 3, 4, 5, 6]);
+  const [horas, setHoras] = useState(2);
+  function toggleDia(i) { setDias((d) => d.includes(i) ? d.filter((x) => x !== i) : [...d, i].sort((a, b) => a - b)); }
+  const totalCiclo = (cycle?.blocks || []).reduce((a, b) => a + b.targetMinutes, 0);
+  const totalSemana = dias.length * horas * 60;
+  return <Modal open title="Gerar planejamento da semana" onClose={onClose}>
+    <p className="text-sm mb-4" style={{ color: C.muted }}>Distribui os blocos do seu ciclo de estudo automaticamente pelos dias selecionados.</p>
+    <Field label="Dias de estudo">
+      <div className="flex gap-1.5 flex-wrap">
+        {DAYS.map((d, i) => <button key={i} type="button" onClick={() => toggleDia(i)} className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition" style={{ background: dias.includes(i) ? C.ink : C.surface2, color: dias.includes(i) ? C.bg : C.muted, borderColor: dias.includes(i) ? C.ink : C.line }}>{d}</button>)}
+      </div>
+    </Field>
+    <Field label="Horas de estudo por dia">
+      <input type="number" min={0.5} max={12} step={0.5} value={horas} onChange={(e) => setHoras(+e.target.value)} className={inputCls} style={inputStyle(C)} />
+    </Field>
+    <div className="text-xs rounded-xl p-3 mb-2" style={{ background: C.surface2, color: C.muted }}>
+      Ciclo: <b style={{ color: C.ink }}>{fmtMin(totalCiclo)}</b> total · Semana: <b style={{ color: C.ink }}>{fmtMin(totalSemana)}</b> disponível
+      {totalSemana < totalCiclo && <span className="block mt-1 text-amber-600">⚠ Horas insuficientes para um ciclo completo por semana — só parte será alocada.</span>}
+    </div>
+    <Btn className="w-full justify-center" onClick={() => onGerar(dias, horas)} disabled={dias.length === 0}><Check size={16} /> Gerar planejamento</Btn>
+  </Modal>;
 }
 function PlanAddModal({ day, disciplines, onClose, onAdd }) { const C = useC(); const [discId, setDiscId] = useState(disciplines[0]?.id); const [min, setMin] = useState(60); return <Modal open title={`Adicionar sessão · ${DAYS[day]}`} onClose={onClose}><Field label="Disciplina"><select value={discId} onChange={(e) => setDiscId(e.target.value)} className={inputCls} style={inputStyle(C)}>{disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></Field><Field label="Duração (min)"><input type="number" value={min} step={15} onChange={(e) => setMin(+e.target.value)} className={inputCls} style={inputStyle(C)} /></Field><Btn className="w-full justify-center" onClick={() => onAdd(day, discId, min)}><Plus size={16} /> Adicionar</Btn></Modal>; }
 
