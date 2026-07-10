@@ -218,6 +218,7 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
   function registerStudy({ disciplineId, topicId, minutes, right, wrong, note, date, addReview }) {
     const s = { id: uid(), disciplineId, topicId: topicId || null, minutes, right: right || 0, wrong: wrong || 0, note: note || "", date: date || todayISO() };
     setSessions((p) => [s, ...p]);
+    setCycle((prev) => ({ ...prev, blocks: prev.blocks.map((b) => b.disciplineId === disciplineId ? { ...b, doneMinutes: (b.doneMinutes || 0) + minutes } : b) }));
     if (topicId) setDisciplines((p) => p.map((d) => d.id === disciplineId ? { ...d, topics: d.topics.map((t) => t.id === topicId ? { ...t, studied: true } : t) } : d));
     if (addReview !== false) {
       const disc = discById[disciplineId];
