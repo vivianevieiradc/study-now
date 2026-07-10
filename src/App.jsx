@@ -534,16 +534,25 @@ function PlanoView({ plan, setPlan, disciplines, discById, cycle }) {
       })}
     </div>
     {open !== null && <PlanAddModal day={open} disciplines={disciplines} onClose={() => setOpen(null)} onAdd={add} />}
-    {gerarOpen && <GerarPlanoModal cycle={cycle} discById={discById} onClose={() => setGerarOpen(false)} onGerar={gerarDoCiclo} />}
+    {gerarOpen && <GerarPlanoModal cycle={cycle} discById={discById} onClose={() => setGerarOpen(false)} onGerar={gerarDoCiclo} setView={setView} />}
   </div>;
 }
-function GerarPlanoModal({ cycle, discById, onClose, onGerar }) {
+function GerarPlanoModal({ cycle, discById, onClose, onGerar, setView }) {
   const C = useC();
   const [dias, setDias] = useState([1, 2, 3, 4, 5, 6]);
   const [horas, setHoras] = useState(2);
   function toggleDia(i) { setDias((d) => d.includes(i) ? d.filter((x) => x !== i) : [...d, i].sort((a, b) => a - b)); }
-  const totalCiclo = (cycle?.blocks || []).reduce((a, b) => a + b.targetMinutes, 0);
+  const blocks = cycle?.blocks || [];
+  const totalCiclo = blocks.reduce((a, b) => a + b.targetMinutes, 0);
   const totalSemana = dias.length * horas * 60;
+  if (blocks.length === 0) return <Modal open title="Gerar planejamento da semana" onClose={onClose}>
+    <div className="text-center py-6">
+      <RefreshCw size={32} color={C.muted} className="mx-auto mb-3" />
+      <p className="text-sm font-semibold mb-1" style={{ color: C.ink }}>Ciclo de estudo vazio</p>
+      <p className="text-sm mb-5" style={{ color: C.muted }}>Você precisa configurar o ciclo de estudo antes de gerar o planejamento.</p>
+      <Btn onClick={() => { onClose(); setView("ciclo"); }}><RefreshCw size={14} /> Ir para o Ciclo de estudo</Btn>
+    </div>
+  </Modal>;
   return <Modal open title="Gerar planejamento da semana" onClose={onClose}>
     <p className="text-sm mb-4" style={{ color: C.muted }}>Distribui os blocos do seu ciclo de estudo automaticamente pelos dias selecionados.</p>
     <Field label="Dias de estudo">
