@@ -503,23 +503,21 @@ function PlanoView({ plan, setPlan, disciplines, discById, cycle, setView }) {
   function gerarDoCiclo(dias, horasPorDia) {
     const minPerDay = Math.round(Number(horasPorDia) * 60);
     if (!minPerDay || !dias.length) return;
-    const used = new Array(dias.length).fill(0);
+    const blocks = cycle?.blocks || [];
+    if (!blocks.length) return;
+    // Distribute blocks across days round-robin by index
+    const dayBlocks = dias.map(() => []);
+    blocks.forEach((block, bi) => { dayBlocks[bi % dias.length].push(block); });
     const newPlan = [];
-    let di = 0;
-    for (const block of (cycle?.blocks || [])) {
-      let remaining = Number(block.targetMinutes);
-      let skipped = 0;
-      while (remaining > 0 && skipped < dias.length) {
-        const available = minPerDay - used[di];
-        if (available <= 0) { skipped++; di = (di + 1) % dias.length; continue; }
-        skipped = 0;
-        const take = Math.min(remaining, available);
-        newPlan.push({ id: uid(), day: dias[di], disciplineId: block.disciplineId, minutes: take, done: false });
-        used[di] += take;
-        remaining -= take;
-        di = (di + 1) % dias.length;
-      }
-    }
+    dayBlocks.forEach((assigned, di) => {
+      if (!assigned.length) return;
+      const totalMin = assigned.reduce((s, b) => s + Number(b.targetMinutes), 0);
+      const scale = totalMin > minPerDay ? minPerDay / totalMin : 1;
+      assigned.forEach((block) => {
+        const minutes = Math.max(15, Math.round(Number(block.targetMinutes) * scale / 15) * 15);
+        newPlan.push({ id: uid(), day: dias[di], disciplineId: block.disciplineId, minutes, done: false });
+      });
+    });
     setPlan(newPlan);
     setGerarOpen(false);
   }
