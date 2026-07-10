@@ -508,9 +508,15 @@ function PlanoView({ plan, setPlan, disciplines, discById, cycle, setView }) {
     if (!minPerDay || !dias.length) return;
     const blocks = cycle?.blocks || [];
     if (!blocks.length) return;
-    // Distribute blocks across days round-robin by index
     const dayBlocks = dias.map(() => []);
     blocks.forEach((block, bi) => { dayBlocks[bi % dias.length].push(block); });
+    // Se blocos < dias, dias do final ficam vazios — preenche com repetição
+    if (blocks.length < dias.length) {
+      let src = 0;
+      dayBlocks.forEach((assigned, di) => {
+        if (assigned.length === 0) { dayBlocks[di].push(blocks[src % blocks.length]); src++; }
+      });
+    }
     const newPlan = [];
     dayBlocks.forEach((assigned, di) => {
       if (!assigned.length) return;
