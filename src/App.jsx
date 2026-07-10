@@ -264,7 +264,7 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
           <main className="flex-1 min-w-0">
             <header className="md:hidden flex items-center gap-3 px-4 py-3 border-b sticky top-0 z-30" style={{ background: C.surface, borderColor: C.line }}>
               <button onClick={() => setNavOpen(true)}><Menu size={22} /></button>
-              <span className="font-bold flex-1">Study Now</span>
+              <span className="font-bold flex-1">Studora</span>
               <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>{theme === "dark" ? <Sun size={20} color={C.gold} /> : <Moon size={20} color={C.inkSoft} />}</button>
             </header>
             <div className="max-w-5xl mx-auto p-4 md:p-8 pb-28 md:pb-8">
@@ -305,7 +305,7 @@ function Brand({ concurso, setConcurso }) {
     <div className="px-4 pt-5 pb-3">
       <div className="flex items-center gap-2.5 mb-3">
         <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: BRAND }}><BookOpen size={18} color="#F5B301" /></div>
-        <div className="font-extrabold text-lg leading-none" style={{ color: C.ink }}>Study Now</div>
+        <div className="font-extrabold text-lg leading-none" style={{ color: C.ink }}>Studora</div>
       </div>
       <div className="flex gap-1.5">
         {CONCURSOS.map((c) => (
@@ -610,8 +610,9 @@ function EditalView({ concurso, disciplines, sessions, setDisciplines }) {
     if (sincronizando) return;
     setSincronizando(true);
     try {
-      const edital = await fetchEdital(concurso.id);
+      const edital = EDITAIS[concurso.id] || [];
       const globalDisc = buildDiscFromEdital(concurso.id, edital);
+      await supabase.from("editais").upsert({ concurso_id: concurso.id, disciplinas: edital, updated_at: new Date().toISOString() });
       setDisciplines((prev) => mergeEdital(prev, globalDisc));
     } finally { setSincronizando(false); }
   }
@@ -1002,7 +1003,7 @@ function Login() {
       <form onSubmit={submit} style={{ width: "100%", maxWidth: 380, background: P.surface, border: `1px solid ${P.line}`, borderRadius: 20, padding: 28 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
           <div style={{ width: 40, height: 40, borderRadius: 12, background: BRAND, display: "flex", alignItems: "center", justifyContent: "center" }}><BookOpen size={20} color="#F5B301" /></div>
-          <div><div style={{ fontWeight: 800, fontSize: 20, color: P.ink }}>Study Now</div><div style={{ fontSize: 11, color: P.muted }}>Dataprev · Arquitetura</div></div>
+          <div><div style={{ fontWeight: 800, fontSize: 20, color: P.ink }}>Studora</div><div style={{ fontSize: 11, color: P.muted }}>Dataprev · Arquitetura</div></div>
         </div>
         <h1 style={{ fontSize: 16, fontWeight: 700, color: P.ink, margin: "0 0 14px" }}>{mode === "login" ? "Entrar" : "Criar conta"}</h1>
         <label style={{ fontSize: 12, fontWeight: 600, color: P.muted }}>E-mail
