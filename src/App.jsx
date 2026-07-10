@@ -501,21 +501,22 @@ function PlanoView({ plan, setPlan, disciplines, discById, cycle }) {
   function add(day, disciplineId, minutes) { setPlan((p) => [...p, { id: uid(), day, disciplineId, minutes, done: false }]); setOpen(null); }
   function remove(id) { setPlan((p) => p.filter((x) => x.id !== id)); }
   function gerarDoCiclo(dias, horasPorDia) {
-    const minPerDay = horasPorDia * 60;
+    const minPerDay = Math.round(Number(horasPorDia) * 60);
+    if (!minPerDay || !dias.length) return;
+    const slots = dias.map((d) => ({ day: d, used: 0 }));
+    let si = 0;
     const newPlan = [];
-    let dayIdx = 0;
-    let dayUsed = 0;
     for (const block of (cycle?.blocks || [])) {
-      let remaining = block.targetMinutes;
-      while (remaining > 0 && dayIdx < dias.length) {
-        const available = minPerDay - dayUsed;
-        const take = Math.min(remaining, available, minPerDay);
-        if (take > 0) {
-          newPlan.push({ id: uid(), day: dias[dayIdx], disciplineId: block.disciplineId, minutes: take, done: false });
-          remaining -= take;
-          dayUsed += take;
-        }
-        if (dayUsed >= minPerDay) { dayIdx++; dayUsed = 0; }
+      let remaining = Number(block.targetMinutes);
+      while (remaining > 0 && si < slots.length) {
+        const slot = slots[si];
+        const available = minPerDay - slot.used;
+        if (available <= 0) { si++; continue; }
+        const take = Math.min(remaining, available);
+        newPlan.push({ id: uid(), day: slot.day, disciplineId: block.disciplineId, minutes: take, done: false });
+        remaining -= take;
+        slot.used += take;
+        if (slot.used >= minPerDay) si++;
       }
     }
     setPlan(newPlan);
