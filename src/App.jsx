@@ -503,20 +503,21 @@ function PlanoView({ plan, setPlan, disciplines, discById, cycle, setView }) {
   function gerarDoCiclo(dias, horasPorDia) {
     const minPerDay = Math.round(Number(horasPorDia) * 60);
     if (!minPerDay || !dias.length) return;
-    const slots = dias.map((d) => ({ day: d, used: 0 }));
-    let si = 0;
+    const used = new Array(dias.length).fill(0);
     const newPlan = [];
+    let di = 0;
     for (const block of (cycle?.blocks || [])) {
       let remaining = Number(block.targetMinutes);
-      while (remaining > 0 && si < slots.length) {
-        const slot = slots[si];
-        const available = minPerDay - slot.used;
-        if (available <= 0) { si++; continue; }
+      let skipped = 0;
+      while (remaining > 0 && skipped < dias.length) {
+        const available = minPerDay - used[di];
+        if (available <= 0) { skipped++; di = (di + 1) % dias.length; continue; }
+        skipped = 0;
         const take = Math.min(remaining, available);
-        newPlan.push({ id: uid(), day: slot.day, disciplineId: block.disciplineId, minutes: take, done: false });
+        newPlan.push({ id: uid(), day: dias[di], disciplineId: block.disciplineId, minutes: take, done: false });
+        used[di] += take;
         remaining -= take;
-        slot.used += take;
-        if (slot.used >= minPerDay) si++;
+        di = (di + 1) % dias.length;
       }
     }
     setPlan(newPlan);
