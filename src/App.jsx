@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, createContext, useContext } from "react";
 import {
   Home, RefreshCw, CalendarDays, ListChecks, BookOpen, History, BarChart3,
-  ClipboardList, Play, Pause, Plus, Flame, Target, Clock, Check,
+  ClipboardList, Play, Plus, Flame, Target, Clock, Check,
   Trash2, Pencil, X, ChevronRight, TrendingUp, Circle, CheckCircle2,
   Timer as TimerIcon, Menu, Crosshair, Zap, Sun, Moon, RotateCcw, LogOut,
   GraduationCap, FileText, ChevronLeft, AlertCircle, Award, Filter
@@ -422,7 +422,6 @@ function RaioXView({ disciplines }) {
 /* ============================ CICLO ============================ */
 function CicloView({ cycle, setCycle, disciplines, discById, registerStudy }) {
   const C = useC();
-  const [timerBlock, setTimerBlock] = useState(null);
   const [manualOpen, setManualOpen] = useState(false);
   const total = cycle.blocks.reduce((a, b) => a + b.targetMinutes, 0);
   function regen() { setCycle({ ...cycle, mode: "auto", blocks: autoCycle(disciplines) }); }
@@ -436,28 +435,12 @@ function CicloView({ cycle, setCycle, disciplines, discById, registerStudy }) {
       <div className="flex flex-wrap gap-2 mb-4"><Btn variant={cycle.mode === "auto" ? "primary" : "ghost"} onClick={regen}><RefreshCw size={15} /> Gerar automático</Btn><Btn variant="ghost" onClick={addBlock}><Plus size={15} /> Adicionar etapa</Btn><Btn variant="ghost" onClick={() => setManualOpen(true)}><Pencil size={15} /> Registro manual</Btn><span className="ml-auto text-sm self-center" style={{ color: C.muted }}>Total: <b style={{ color: C.ink }}>{fmtMin(total)}</b></span></div>
       <div className="space-y-2">
         {cycle.blocks.map((b, i) => { const d = discById[b.disciplineId]; const pct = Math.min(100, Math.round((b.doneMinutes / b.targetMinutes) * 100));
-          return <Card key={b.id} className="!p-4"><div className="flex items-center gap-3"><span className="text-xs font-bold w-6 text-center" style={{ color: C.muted }}>{i + 1}</span><span className="w-1.5 h-10 rounded-full" style={{ background: d?.color }} /><div className="flex-1 min-w-0"><div className="font-semibold truncate">{d?.name} <span className="text-xs font-normal" style={{ color: C.muted }}>· {d?.peso} pts</span></div><div className="flex items-center gap-2 mt-1"><div className="h-1.5 rounded-full flex-1 max-w-[140px] overflow-hidden" style={{ background: C.line }}><div className="h-full" style={{ width: `${pct}%`, background: C.gold }} /></div><span className="text-xs" style={{ color: C.muted }}>{fmtMin(b.doneMinutes)} / {fmtMin(b.targetMinutes)}</span></div></div><div className="flex items-center gap-1"><input type="number" value={b.targetMinutes} min={15} step={15} onChange={(e) => updateBlock(b.id, { targetMinutes: +e.target.value })} className="w-16 px-2 py-1 rounded-lg text-sm text-center" style={inputStyle(C)} /><button onClick={() => move(b.id, -1)} className="p-1 rotate-[-90deg]" style={{ color: C.muted }}><ChevronRight size={16} /></button><button onClick={() => move(b.id, 1)} className="p-1 rotate-90" style={{ color: C.muted }}><ChevronRight size={16} /></button><button onClick={() => removeBlock(b.id)} className="p-1"><Trash2 size={16} color={C.red} /></button></div></div><div className="mt-3"><Btn variant="green" className="!py-1.5" onClick={() => setTimerBlock(b)}><Play size={14} /> Iniciar estudo</Btn></div></Card>;
+          return <Card key={b.id} className="!p-4"><div className="flex items-center gap-3"><span className="text-xs font-bold w-6 text-center" style={{ color: C.muted }}>{i + 1}</span><span className="w-1.5 h-10 rounded-full" style={{ background: d?.color }} /><div className="flex-1 min-w-0"><div className="font-semibold truncate">{d?.name} <span className="text-xs font-normal" style={{ color: C.muted }}>· {d?.peso} pts</span></div><div className="flex items-center gap-2 mt-1"><div className="h-1.5 rounded-full flex-1 max-w-[140px] overflow-hidden" style={{ background: C.line }}><div className="h-full" style={{ width: `${pct}%`, background: C.gold }} /></div><span className="text-xs" style={{ color: C.muted }}>{fmtMin(b.doneMinutes)} / {fmtMin(b.targetMinutes)}</span></div></div><div className="flex items-center gap-1"><input type="number" value={b.targetMinutes} min={15} step={15} onChange={(e) => updateBlock(b.id, { targetMinutes: +e.target.value })} className="w-16 px-2 py-1 rounded-lg text-sm text-center" style={inputStyle(C)} /><button onClick={() => move(b.id, -1)} className="p-1 rotate-[-90deg]" style={{ color: C.muted }}><ChevronRight size={16} /></button><button onClick={() => move(b.id, 1)} className="p-1 rotate-90" style={{ color: C.muted }}><ChevronRight size={16} /></button><button onClick={() => removeBlock(b.id)} className="p-1"><Trash2 size={16} color={C.red} /></button></div></div></Card>;
         })}
       </div>
-      {timerBlock && <TimerModal block={timerBlock} disc={discById[timerBlock.disciplineId]} onClose={() => setTimerBlock(null)} onSave={(data) => { registerStudy({ ...data, disciplineId: timerBlock.disciplineId }); setCycle((cy) => ({ ...cy, blocks: cy.blocks.map((b) => b.id === timerBlock.id ? { ...b, doneMinutes: b.doneMinutes + data.minutes } : b) })); setTimerBlock(null); }} />}
       {manualOpen && <ManualModal disciplines={disciplines} discById={discById} onClose={() => setManualOpen(false)} onSave={(data) => { registerStudy(data); setManualOpen(false); }} />}
     </div>
   );
-}
-function TimerModal({ block, disc, onClose, onSave }) {
-  const C = useC();
-  const [sec, setSec] = useState(0); const [running, setRunning] = useState(true);
-  const [topicId, setTopicId] = useState(disc?.topics[0]?.id || ""); const [right, setRight] = useState(""); const [wrong, setWrong] = useState("");
-  const ref = useRef();
-  useEffect(() => { if (running) { ref.current = setInterval(() => setSec((s) => s + 1), 1000); } return () => clearInterval(ref.current); }, [running]);
-  const mm = String(Math.floor(sec / 60)).padStart(2, "0"); const ss = String(sec % 60).padStart(2, "0");
-  return <Modal open title={`Estudando: ${disc?.name}`} onClose={onClose}>
-    <div className="text-center py-4"><div className="text-6xl font-extrabold tabular-nums" style={{ color: C.ink }}>{mm}:{ss}</div><div className="flex justify-center gap-2 mt-4"><Btn variant={running ? "ghost" : "green"} onClick={() => setRunning((r) => !r)}>{running ? <><Pause size={16} /> Pausar</> : <><Play size={16} /> Retomar</>}</Btn></div></div>
-    <Field label="Tópico estudado"><select value={topicId} onChange={(e) => setTopicId(e.target.value)} className={inputCls} style={inputStyle(C)}>{disc?.topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></Field>
-    <div className="grid grid-cols-2 gap-3"><Field label="Acertos"><input type="number" value={right} onChange={(e) => setRight(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="0" /></Field><Field label="Erros"><input type="number" value={wrong} onChange={(e) => setWrong(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="0" /></Field></div>
-    <Btn className="w-full justify-center mt-2" onClick={() => onSave({ minutes: Math.max(1, Math.round(sec / 60)), topicId, right: +right || 0, wrong: +wrong || 0 })}><Check size={16} /> Registrar {Math.max(1, Math.round(sec / 60))}min</Btn>
-    <p className="text-xs text-center mt-3" style={{ color: C.muted }}>Ao registrar, a revisão deste conteúdo é agendada automaticamente.</p>
-  </Modal>;
 }
 function ManualModal({ disciplines, discById, onClose, onSave, initial }) {
   const C = useC();
