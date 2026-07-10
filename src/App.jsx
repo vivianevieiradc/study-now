@@ -411,7 +411,38 @@ function RaioXView({ disciplines }) {
         <p className="text-xs mb-4" style={{ color: C.muted }}>A disciplina de maior peso é <b>{top.name}</b>: {top.peso} de {total} pontos ({topPct}%).</p>
         {byPeso.map((d) => (<div key={d.id} className="py-1.5"><div className="flex justify-between text-sm mb-1"><span className="font-medium flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full" style={{ background: d.color }} />{d.name}</span><span style={{ color: C.muted }}>{d.peso} pts · {d.q}q</span></div><div className="h-2 rounded-full overflow-hidden" style={{ background: C.line }}><div className="h-full rounded-full" style={{ width: `${(d.peso / maxPeso) * 100}%`, background: d.color }} /></div></div>))}
       </Card>
-      {top.topics && top.topics.length > 0 && (<Card className="mb-4"><div className="text-sm font-semibold mb-1 flex items-center gap-2"><Crosshair size={16} color={C.gold} /> Dentro de {top.name} — assuntos por incidência</div><p className="text-xs mb-4" style={{ color: C.muted }}>É a disciplina que mais vale pontos. Priorize os assuntos do topo.</p>{[...top.topics].sort((a, b) => b.hits - a.hits).map((t) => (<div key={t.id} className="py-1.5"><div className="flex justify-between text-sm mb-1"><span className="flex-1 min-w-0 pr-2 flex items-baseline gap-2">{t.num && <span className="text-xs font-mono shrink-0" style={{ color: C.muted }}>{t.num}</span>}<span>{t.name}</span></span><span className="shrink-0 font-semibold" style={{ color: t.hits >= 8 ? C.red : t.hits >= 4 ? C.gold : C.muted }}>{t.hits} q</span></div><div className="h-2 rounded-full overflow-hidden" style={{ background: C.line }}><div className="h-full rounded-full" style={{ width: `${(t.hits / maxHit) * 100}%`, background: t.hits >= 8 ? C.red : t.hits >= 4 ? C.gold : C.ink }} /></div></div>))}</Card>)}
+      <Card className="mb-4">
+        <div className="text-sm font-semibold mb-1 flex items-center gap-2"><Flame size={16} color={C.red} /> Mapa de calor — tópicos por incidência</div>
+        <p className="text-xs mb-3" style={{ color: C.muted }}>Todos os tópicos do edital. Quanto mais quente a cor, mais vezes o assunto caiu em provas anteriores.</p>
+        <div className="flex flex-wrap gap-1.5 mb-4 text-[10px]">
+          {[["≥8 cai muito", C.red], ["5–7 cai bastante", C.gold], ["3–4 recorrente", "#b45309"], ["1–2 raro", C.line]].map(([lbl, bg]) => (
+            <span key={lbl} className="flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold" style={{ background: bg, color: bg === C.line ? C.muted : "#fff" }}>{lbl}</span>
+          ))}
+        </div>
+        <div className="space-y-4">
+          {disciplines.map((d) => (
+            <div key={d.id}>
+              <div className="text-xs font-semibold mb-1.5 flex items-center gap-1.5" style={{ color: C.inkSoft }}>
+                <span className="w-2 h-2 rounded-full shrink-0" style={{ background: d.color }} />{d.name}
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {[...d.topics].sort((a, b) => b.hits - a.hits).map((t) => {
+                  const bg = t.hits >= 8 ? C.red : t.hits >= 5 ? C.gold : t.hits >= 3 ? "#b45309" : C.line;
+                  const fg = t.hits >= 3 ? "#fff" : C.muted;
+                  const label = (t.num ? t.num + " " : "") + (t.name.length > 50 ? t.name.slice(0, 50) + "…" : t.name);
+                  return (
+                    <span key={t.id} title={`${t.num ? t.num + " " : ""}${t.name} — ${t.hits}× em provas`}
+                      className="text-[10px] px-1.5 py-0.5 rounded leading-tight cursor-default"
+                      style={{ background: bg, color: fg, maxWidth: 220 }}>
+                      {label}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
       <Card><div className="text-sm font-semibold mb-2">Estratégia sugerida</div><ul className="text-sm space-y-2" style={{ color: C.inkSoft }}><li>• <b>{top.name}</b> é prioridade: {topPct}% dos {total} pontos.</li><li>• Maiores pesos: {top3.map((d) => `${d.name} (${d.peso} pts)`).join(", ")}.</li><li>• Busque <b>≥50%</b> no total e não zere nenhuma disciplina.</li><li>• Comece pelos assuntos de maior incidência (marcados em vermelho/dourado no edital).</li></ul></Card>
     </div>
   );
