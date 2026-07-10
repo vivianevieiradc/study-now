@@ -3,7 +3,7 @@ import {
   Home, RefreshCw, CalendarDays, ListChecks, BookOpen, History, BarChart3,
   ClipboardList, Play, Pause, Plus, Flame, Target, Clock, Check,
   Trash2, Pencil, X, ChevronRight, TrendingUp, Circle, CheckCircle2,
-  Timer as TimerIcon, Menu, Crosshair, Zap, Sun, Moon, SkipForward, RotateCcw, Coffee, LogOut,
+  Timer as TimerIcon, Menu, Crosshair, Zap, Sun, Moon, RotateCcw, LogOut,
   GraduationCap, FileText, ChevronLeft, AlertCircle, Award, Filter
 } from "lucide-react";
 import {
@@ -149,7 +149,6 @@ async function fetchProvas(concursoId) {
   return PROVAS[concursoId] || [];
 }
 
-function beep() { try { const a = new (window.AudioContext || window.webkitAudioContext)(); const o = a.createOscillator(); const g = a.createGain(); o.connect(g); g.connect(a.destination); o.frequency.value = 880; g.gain.setValueAtTime(0.001, a.currentTime); g.gain.exponentialRampToValueAtTime(0.15, a.currentTime + 0.02); g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + 0.4); o.start(); o.stop(a.currentTime + 0.42); setTimeout(() => a.close(), 600); } catch {} }
 
 function autoCycle(disc) {
   const totalPeso = disc.reduce((a, d) => a + d.peso, 0);
@@ -179,7 +178,6 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
   const [plan, setPlan] = useState([]);
   const [goals, setGoals] = useState({ hours: 20, questions: 200 });
   const [simulados, setSimulados] = useState([]);
-  const [pomo, setPomo] = useState({ focus: 25, short: 5, long: 15, rounds: 4, autostart: true });
 
   const C = theme === "dark" ? DARK : LIGHT;
 
@@ -198,7 +196,6 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
       setPlan(await store.get(CK("plan"), []));
       let sm = await store.get(CK("sim"), null); if (!sm) { sm = seedSims(d, concurso.seedSimsData); await store.set(CK("sim"), sm); } setSimulados(sm);
       setGoals(await store.get(CK("goals"), { hours: 20, questions: 200 }));
-      setPomo(await store.get("pomo", { focus: 25, short: 5, long: 15, rounds: 4, autostart: true }));
       let cy = await store.get(CK("cycle"), null);
       if (!cy) { cy = { mode: "auto", blocks: autoCycle(d) }; await store.set(CK("cycle"), cy); }
       setCycle(cy);
@@ -215,7 +212,6 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
   useEffect(() => { if (!loading) store.set(CK("plan"), plan); }, [plan, loading]);
   useEffect(() => { if (!loading) store.set(CK("goals"), goals); }, [goals, loading]);
   useEffect(() => { if (!loading) store.set(CK("sim"), simulados); }, [simulados, loading]);
-  useEffect(() => { if (!loading) store.set("pomo", pomo); }, [pomo, loading]);
 
   const discById = useMemo(() => Object.fromEntries(disciplines.map((d) => [d.id, d])), [disciplines]);
 
@@ -236,9 +232,9 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
 
   if (loading) return <div className="h-screen flex items-center justify-center" style={{ background: LIGHT.bg }}><div className="text-center"><BookOpen size={40} color={LIGHT.ink} className="mx-auto animate-pulse" /><p className="mt-3 text-sm" style={{ color: LIGHT.muted }}>Carregando seus estudos…</p></div></div>;
 
-  const shared = { concurso, disciplines, setDisciplines, sessions, setSessions, reviews, setReviews, cycle, setCycle, plan, setPlan, goals, setGoals, simulados, setSimulados, pomo, setPomo, discById, registerStudy, markReviewDone, setView };
+  const shared = { concurso, disciplines, setDisciplines, sessions, setSessions, reviews, setReviews, cycle, setCycle, plan, setPlan, goals, setGoals, simulados, setSimulados, discById, registerStudy, markReviewDone, setView };
   const NAV = [
-    ["home", "Início", Home], ["raiox", "Raio-X da prova", Crosshair], ["pomodoro", "Pomodoro", TimerIcon],
+    ["home", "Início", Home], ["raiox", "Raio-X da prova", Crosshair],
     ["ciclo", "Ciclo de estudo", RefreshCw], ["plano", "Planejamento", CalendarDays], ["revisoes", "Revisões", ListChecks],
     ["edital", "Edital verticalizado", BookOpen], ["historico", "Histórico", History], ["stats", "Estatísticas", BarChart3], ["simulados", "Simulados", ClipboardList],
     ["provas", `Provas ${concurso.label}`, GraduationCap],
@@ -274,7 +270,6 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
             <div className="max-w-5xl mx-auto p-4 md:p-8 pb-28 md:pb-8">
               {view === "home" && <HomeView {...shared} />}
               {view === "raiox" && <RaioXView {...shared} />}
-              {view === "pomodoro" && <PomodoroView {...shared} />}
               {view === "ciclo" && <CicloView {...shared} />}
               {view === "plano" && <PlanoView {...shared} />}
               {view === "revisoes" && <RevisoesView {...shared} />}
@@ -288,7 +283,7 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
         </div>
 
         <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 border-t flex justify-around" style={{ background: C.surface, borderColor: C.line }}>
-          {[["home", Home], ["pomodoro", TimerIcon], ["ciclo", RefreshCw], ["edital", BookOpen], ["stats", BarChart3]].map(([id, Icon]) => (
+          {[["home", Home], ["raiox", Crosshair], ["ciclo", RefreshCw], ["edital", BookOpen], ["stats", BarChart3]].map(([id, Icon]) => (
             <button key={id} onClick={() => setView(id)} className="flex-1 py-2 flex justify-center" style={{ color: view === id ? C.ink : C.muted }}><Icon size={22} /></button>
           ))}
         </nav>
@@ -390,104 +385,12 @@ function HomeView({ sessions, disciplines, reviews, goals, markReviewDone, setVi
           {activeDisc.length === 0 ? <Empty msg="Registre um estudo para ver seu desempenho aqui." /> : activeDisc.slice(0, 7).map(([id, v]) => { const tot = v.right + v.wrong; const acc = tot ? Math.round((v.right / tot) * 100) : 0; return <div key={id} className="py-2 border-b last:border-0" style={{ borderColor: C.line }}><div className="flex items-center justify-between text-sm"><span className="font-medium flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full" style={{ background: v.color }} />{v.name}</span><span style={{ color: C.muted }}>{fmtMin(v.minutes)}</span></div><div className="flex items-center gap-3 text-xs mt-1" style={{ color: C.muted }}><span style={{ color: C.green }}>✓ {v.right}</span><span style={{ color: C.red }}>✕ {v.wrong}</span>{tot > 0 && <span className="ml-auto font-semibold" style={{ color: acc >= 70 ? C.green : acc >= 50 ? C.gold : C.red }}>{acc}% acerto</span>}</div></div>; })}
         </Card>
       </div>
-      <div className="mt-4 flex gap-2"><Btn variant="gold" onClick={() => setView("pomodoro")}><TimerIcon size={16} /> Foco (Pomodoro)</Btn><Btn onClick={() => setView("ciclo")}><Play size={16} /> Estudar pelo ciclo</Btn></div>
+      <div className="mt-4 flex gap-2"><Btn onClick={() => setView("ciclo")}><Play size={16} /> Estudar pelo ciclo</Btn></div>
     </div>
   );
 }
 function StreakDots({ sessions }) { const days = new Set(sessions.map((s) => s.date)); const last = Array.from({ length: 7 }, (_, i) => addDays(todayISO(), -(6 - i))); return <div className="flex gap-1.5">{last.map((d) => (<div key={d} className="flex-1 h-8 rounded-md flex items-center justify-center text-[10px]" style={{ background: days.has(d) ? "#F5B301" : "rgba(255,255,255,.12)", color: days.has(d) ? BRAND : "rgba(255,255,255,.5)" }}>{DAYS[new Date(d + "T00:00:00").getDay()][0]}</div>))}</div>; }
 function GoalBar({ label, value, target, pct, unit }) { const C = useC(); return <div><div className="flex justify-between text-sm mb-1.5"><span className="font-medium">{label}</span><span style={{ color: C.muted }}>{Math.round(value * 10) / 10}{unit} / {target}{unit}</span></div><div className="h-2.5 rounded-full overflow-hidden" style={{ background: C.line }}><div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: pct >= 100 ? C.green : C.gold }} /></div></div>; }
-
-/* ============================ POMODORO ============================ */
-function PomodoroView({ pomo, setPomo, disciplines, discById, registerStudy }) {
-  const C = useC();
-  const [mode, setMode] = useState("focus"); // focus | short | long
-  const [left, setLeft] = useState(pomo.focus * 60);
-  const [running, setRunning] = useState(false);
-  const [doneFocus, setDoneFocus] = useState(0);
-  const [logDiscId, setLogDiscId] = useState("");
-  const [logTopicId, setLogTopicId] = useState("");
-  const ref = useRef();
-  const modeMin = (mo) => mo === "focus" ? pomo.focus : mo === "short" ? pomo.short : pomo.long;
-
-  // reinicia o relógio quando o modo muda ou quando o usuário edita as durações (com o timer parado)
-  useEffect(() => { if (!running) setLeft(modeMin(mode) * 60); /* eslint-disable-next-line */ }, [mode, pomo.focus, pomo.short, pomo.long]);
-
-  useEffect(() => {
-    if (!running) return;
-    ref.current = setInterval(() => setLeft((s) => s - 1), 1000);
-    return () => clearInterval(ref.current);
-  }, [running]);
-
-  useEffect(() => {
-    if (left > 0) return;
-    beep();
-    if (mode === "focus") {
-      const nd = doneFocus + 1; setDoneFocus(nd);
-      if (logDiscId) registerStudy({ disciplineId: logDiscId, topicId: logTopicId || null, minutes: pomo.focus, right: 0, wrong: 0, note: "Sessão Pomodoro" });
-      const next = nd % pomo.rounds === 0 ? "long" : "short";
-      setMode(next); setLeft(modeMin(next) * 60); setRunning(pomo.autostart);
-    } else {
-      setMode("focus"); setLeft(pomo.focus * 60); setRunning(pomo.autostart);
-    }
-    /* eslint-disable-next-line */
-  }, [left]);
-
-  const total = modeMin(mode) * 60;
-  const pct = total ? ((total - left) / total) * 100 : 0;
-  const mm = String(Math.max(0, Math.floor(left / 60))).padStart(2, "0");
-  const ss = String(Math.max(0, left % 60)).padStart(2, "0");
-  const modeColor = mode === "focus" ? C.gold : C.green;
-  const modeLabel = mode === "focus" ? "Foco" : mode === "short" ? "Pausa curta" : "Pausa longa";
-  const R = 130, CIRC = 2 * Math.PI * R;
-  function skip() { setRunning(false); if (mode === "focus") { setMode("short"); setLeft(pomo.short * 60); } else { setMode("focus"); setLeft(pomo.focus * 60); } }
-  function reset() { setRunning(false); setLeft(modeMin(mode) * 60); }
-  const topics = discById[logDiscId]?.topics || [];
-
-  return (
-    <div>
-      <PageTitle sub="Ciclos de foco e pausa. Vincule uma disciplina e cada foco concluído vira uma sessão de estudo automaticamente.">Pomodoro</PageTitle>
-      <div className="grid md:grid-cols-3 gap-4">
-        <Card className="md:col-span-2 flex flex-col items-center py-8">
-          <div className="flex gap-2 mb-6">
-            {["focus", "short", "long"].map((mo) => <button key={mo} onClick={() => { setRunning(false); setMode(mo); }} className="px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background: mode === mo ? modeColor : C.surface2, color: mode === mo ? "#fff" : C.muted, border: `1px solid ${C.line}` }}>{mo === "focus" ? "Foco" : mo === "short" ? "Pausa curta" : "Pausa longa"}</button>)}
-          </div>
-          <div className="relative" style={{ width: 300, height: 300 }}>
-            <svg width="300" height="300" style={{ transform: "rotate(-90deg)" }}>
-              <circle cx="150" cy="150" r={R} fill="none" stroke={C.line} strokeWidth="14" />
-              <circle cx="150" cy="150" r={R} fill="none" stroke={modeColor} strokeWidth="14" strokeLinecap="round" strokeDasharray={CIRC} strokeDashoffset={CIRC - (pct / 100) * CIRC} style={{ transition: "stroke-dashoffset 1s linear" }} />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: modeColor }}>{modeLabel}</span>
-              <span className="text-6xl font-extrabold tabular-nums" style={{ color: C.ink }}>{mm}:{ss}</span>
-              <span className="text-xs mt-1" style={{ color: C.muted }}>{doneFocus} focos concluídos</span>
-            </div>
-          </div>
-          <div className="flex gap-2 mt-6">
-            <Btn variant={running ? "ghost" : (mode === "focus" ? "gold" : "green")} onClick={() => setRunning((r) => !r)}>{running ? <><Pause size={16} /> Pausar</> : <><Play size={16} /> Iniciar</>}</Btn>
-            <Btn variant="ghost" onClick={reset}><RotateCcw size={16} /> Zerar</Btn>
-            <Btn variant="ghost" onClick={skip}><SkipForward size={16} /> Pular</Btn>
-          </div>
-        </Card>
-
-        <div className="space-y-4">
-          <Card>
-            <div className="text-sm font-semibold mb-3 flex items-center gap-2"><Coffee size={15} color={C.gold} /> Configurações</div>
-            {[["focus", "Foco (min)"], ["short", "Pausa curta (min)"], ["long", "Pausa longa (min)"], ["rounds", "Focos até a pausa longa"]].map(([k, lbl]) => (
-              <div key={k} className="flex items-center justify-between mb-2 text-sm"><span style={{ color: C.muted }}>{lbl}</span><input type="number" min={1} value={pomo[k]} onChange={(e) => setPomo({ ...pomo, [k]: Math.max(1, +e.target.value || 1) })} className="w-16 px-2 py-1 rounded-lg text-sm text-center" style={inputStyle(C)} /></div>
-            ))}
-            <label className="flex items-center justify-between text-sm mt-1"><span style={{ color: C.muted }}>Iniciar próxima fase sozinho</span><input type="checkbox" checked={pomo.autostart} onChange={(e) => setPomo({ ...pomo, autostart: e.target.checked })} /></label>
-          </Card>
-          <Card>
-            <div className="text-sm font-semibold mb-3">Contabilizar como estudo</div>
-            <Field label="Disciplina (opcional)"><select value={logDiscId} onChange={(e) => { setLogDiscId(e.target.value); setLogTopicId(""); }} className={inputCls} style={inputStyle(C)}><option value="">Não registrar</option>{disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></Field>
-            {logDiscId && <Field label="Tópico (opcional)"><select value={logTopicId} onChange={(e) => setLogTopicId(e.target.value)} className={inputCls} style={inputStyle(C)}><option value="">— geral —</option>{topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></Field>}
-            <p className="text-xs" style={{ color: C.muted }}>Cada foco de {pomo.focus}min concluído entra no histórico e agenda revisão.</p>
-          </Card>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 /* ============================ RAIO-X ============================ */
 function RaioXView({ disciplines }) {
