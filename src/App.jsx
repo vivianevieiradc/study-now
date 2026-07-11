@@ -225,7 +225,11 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
     if (addReview !== false) {
       const disc = discById[disciplineId];
       const topicName = topicId ? disc?.topics.find((t) => t.id === topicId)?.name : "";
-      setReviews((p) => [{ id: uid(), sessionId: s.id, disciplineId, topicId: topicId || null, label: topicName || disc?.name || "Conteúdo", intervalIdx: 0, due: addDays(s.date, REVIEW_INTERVALS[0]), done: false }, ...p]);
+      setReviews((p) => {
+        const jaExiste = p.some((r) => !r.done && r.disciplineId === disciplineId && r.topicId === (topicId || null) && r.intervalIdx === 0);
+        if (jaExiste) return p;
+        return [{ id: uid(), sessionId: s.id, disciplineId, topicId: topicId || null, label: topicName || disc?.name || "Conteúdo", intervalIdx: 0, due: addDays(s.date, REVIEW_INTERVALS[0]), done: false }, ...p];
+      });
     }
     return s;
   }
