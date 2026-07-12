@@ -4,7 +4,7 @@ import {
   ClipboardList, Play, Plus, Flame, Target, Clock, Check,
   Trash2, Pencil, X, ChevronRight, TrendingUp, Circle, CheckCircle2,
   Timer as TimerIcon, Menu, Crosshair, Zap, Sun, Moon, RotateCcw, LogOut,
-  GraduationCap, FileText, ChevronLeft, AlertCircle, Award, Filter
+  GraduationCap, FileText, ChevronLeft, AlertCircle, Award, Filter, History
 } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis,
@@ -234,7 +234,7 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
   const NAV = [
     ["home", "Início", Home], ["raiox", "Raio-X da prova", Crosshair],
     ["ciclo", "Ciclo de estudo", RefreshCw], ["plano", "Planejamento", CalendarDays], ["revisoes", "Revisões", ListChecks],
-    ["edital", "Edital verticalizado", BookOpen], ["stats", "Estatísticas", BarChart3], ["simulados", "Simulados", ClipboardList],
+    ["edital", "Edital verticalizado", BookOpen], ["historico", "Histórico", History], ["stats", "Estatísticas", BarChart3], ["simulados", "Simulados", ClipboardList],
     ["provas", `Provas ${concurso.label}`, GraduationCap],
   ];
 
@@ -272,6 +272,7 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
               {view === "plano" && <PlanoView {...shared} />}
               {view === "revisoes" && <RevisoesView {...shared} />}
               {view === "edital" && <EditalView {...shared} />}
+              {view === "historico" && <HistoricoView {...shared} />}
               {view === "stats" && <StatsView {...shared} />}
               {view === "simulados" && <SimuladosView {...shared} />}
               {view === "provas" && <ProvasView concurso={concurso} />}
@@ -643,6 +644,21 @@ function RevisoesView({ reviews, setReviews, markReviewDone, discById, disciplin
     </div>
     {pend.length === 0 && <Empty msg="Nenhuma revisão pendente. Use o formulário acima para criar a primeira." />}
     <Group title="Atrasadas" items={late} color={C.red} /><Group title="Hoje" items={today} color={C.gold} /><Group title="Próximas" items={upcoming} color={C.green} />
+  </div>;
+}
+
+/* ============================ HISTÓRICO ============================ */
+function HistoricoView({ sessions, setSessions, discById, disciplines }) {
+  const C = useC();
+  const [edit, setEdit] = useState(null);
+  const sorted = [...sessions].sort((a, b) => b.date.localeCompare(a.date));
+  function remove(id) { setSessions((p) => p.filter((s) => s.id !== id)); }
+  function save(id, data) { setSessions((p) => p.map((s) => s.id === id ? { ...s, ...data } : s)); setEdit(null); }
+  return <div>
+    <PageTitle sub="Registro completo e cronológico. Corrija ou exclua registros direto aqui.">Histórico de estudo</PageTitle>
+    {sorted.length === 0 ? <Empty msg="Nenhuma sessão registrada ainda." /> : <div className="space-y-2">{sorted.map((s) => { const d = discById[s.disciplineId]; const topic = d?.topics.find((t) => t.id === s.topicId); const tot = s.right + s.wrong;
+      return <Card key={s.id} className="!p-3 flex items-center gap-3 group"><span className="w-1.5 h-10 rounded-full" style={{ background: d?.color }} /><div className="flex-1 min-w-0"><div className="text-sm font-semibold truncate">{d?.name} {topic && <span className="font-normal" style={{ color: C.muted }}>· {topic.name}</span>}</div><div className="text-xs flex gap-3 mt-0.5" style={{ color: C.muted }}><span>{fmtDate(s.date)}</span><span><Clock size={11} className="inline" /> {fmtMin(s.minutes)}</span>{tot > 0 && <span style={{ color: C.green }}>✓{s.right}</span>}{tot > 0 && <span style={{ color: C.red }}>✕{s.wrong}</span>}</div>{s.note && <div className="text-xs mt-0.5 italic" style={{ color: C.muted }}>{s.note}</div>}</div><button onClick={() => setEdit(s)} className="p-1"><Pencil size={15} color={C.muted} /></button><button onClick={() => remove(s.id)} className="p-1"><Trash2 size={15} color={C.red} /></button></Card>; })}</div>}
+    {edit && <ManualModal disciplines={disciplines} discById={discById} initial={edit} onClose={() => setEdit(null)} onSave={(data) => save(edit.id, data)} />}
   </div>;
 }
 
