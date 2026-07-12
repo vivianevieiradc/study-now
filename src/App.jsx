@@ -612,18 +612,50 @@ function GerarPlanoModal({ cycle, discById, onClose, onGerar, setView }) {
 function PlanAddModal({ day, disciplines, onClose, onAdd }) { const C = useC(); const [discId, setDiscId] = useState(disciplines[0]?.id); const [min, setMin] = useState(60); return <Modal open title={`Adicionar sessão · ${DAYS[day]}`} onClose={onClose}><Field label="Disciplina"><select value={discId} onChange={(e) => setDiscId(e.target.value)} className={inputCls} style={inputStyle(C)}>{disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></Field><Field label="Duração (min)"><input type="number" value={min} step={15} onChange={(e) => setMin(+e.target.value)} className={inputCls} style={inputStyle(C)} /></Field><Btn className="w-full justify-center" onClick={() => onAdd(day, discId, min)}><Plus size={16} /> Adicionar</Btn></Modal>; }
 
 /* ============================ REVISÕES ============================ */
-function RevisoesView({ reviews, setReviews, markReviewDone, discById, disciplines }) {
+function RevisoesView({ reviews, setReviews, markReviewDone, discById, disciplines, sessions }) {
   const C = useC();
   const pend = reviews.filter((r) => !r.done).sort((a, b) => a.due.localeCompare(b.due));
   const late = pend.filter((r) => r.due < todayISO()); const today = pend.filter((r) => r.due === todayISO()); const upcoming = pend.filter((r) => r.due > todayISO());
   const [discId, setDiscId] = useState(disciplines[0]?.id);
+  const [topicId, setTopicId] = useState("");
   const [label, setLabel] = useState("");
   const [due, setDue] = useState(addDays(todayISO(), 1));
   const [note, setNote] = useState("");
+
+  const currentDisc = discById[discId];
+  const topics = currentDisc?.topics || [];
+
+  const activitiesByDate = useMemo(() => {
+    const map = {};
+    sessions.forEach((s) => {
+      if (!map[s.date]) map[s.date] = [];
+      map[s.date].push(s);
+    });
+    return map;
+  }, [sessions]);
+
+  const selectedDateActivities = activitiesByDate[due] || [];
+  const activitySummary = useMemo(() => {
+    if (!selectedDateActivities.length) return null;
+    const byDisc = {};
+    let totalMin = 0;
+    selectedDateActivities.forEach((a) => {
+      const d = discById[a.disciplineId];
+      if (!byDisc[a.disciplineId]) byDisc[a.disciplineId] = { name: d?.name || "?", types: {}, min: 0 };
+      const type = a.studyType || "teoria";
+      byDisc[a.disciplineId].types[type] = (byDisc[a.disciplineId].types[type] || 0) + 1;
+      byDisc[a.disciplineId].min += a.minutes;
+      totalMin += a.minutes;
+    });
+    return { byDisc, totalMin, count: selectedDateActivities.length };
+  }, [selectedDateActivities, discById]);
+
   function addManual() {
     if (!discId) return;
-    setReviews((p) => [{ id: uid(), sessionId: null, intervalIdx: 0, done: false, disciplineId: discId, topicId: null, label: label || discById[discId]?.name || "Revisão", due, note }, ...p]);
+    const finalLabel = label || (topicId ? topics.find(t => t.id === topicId)?.name : null) || currentDisc?.name || "Revisão";
+    setReviews((p) => [{ id: uid(), sessionId: null, intervalIdx: 0, done: false, disciplineId: discId, topicId: topicId || null, label: finalLabel, due, note }, ...p]);
     setLabel("");
+    setTopicId("");
     setNote("");
     setDue(addDays(todayISO(), 1));
   }
@@ -635,24 +667,26 @@ function RevisoesView({ reviews, setReviews, markReviewDone, discById, disciplin
   return <div>
     <PageTitle sub="Cadastro e controle 100% manual das revisões. Cada item fica fixo até você decidir o que fazer com ele.">Revisões</PageTitle>
     <Card className="mb-4">
-      <div className="flex items-center gap-2 text-sm font-semibold mb-4"><Plus size={16} color={C.gold} /> Nova revisão manual</div>
-      <div className="grid md:grid-cols-2 gap-3">
-        <Field label="Disciplina">
-          <select value={discId || ""} onChange={(e) => setDiscId(e.target.value)} className={inputCls} style={inputStyle(C)}>
-            {disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
-          </select>
-        </Field>
-        <Field label="Conteúdo">
-          <input value={label} onChange={(e) => setLabel(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="Ex.: Normalização 3FN" />
-        </Field>
+      <div className="flex items-center gap-2 text-sm font-semibold mb-4"><Plus size={16} color={C.gold} /> Cadastrar nova revisão</div>
+      <div className="grid md:grid-cols-2 gap-3 mb-4">
         <Field label="Data">
           <input type="date" value={due} onChange={(e) => setDue(e.target.value)} className={inputCls} style={inputStyle(C)} />
         </Field>
-        <Field label="Anotações">
-          <input value={note} onChange={(e) => setNote(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="Ex.: revisar teoria depois" />
+        <Field label="Matéria">
+          <select value={discId || ""} onChange={(e) => { setDiscId(e.target.value); setTopicId(""); }} className={inputCls} style={inputStyle(C)}>
+            {disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+          </select>
         </Field>
+        {topics.length > 0 && <Field label="Conteúdo"><select value={topicId} onChange={(e) => setTopicId(e.target.value)} className={inputCls} style={inputStyle(C)}><option value="">Escolha um conteúdo</option>{topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></Field>}
+        <Field label="Label customizado (opcional)">
+          <input value={label} onChange={(e) => setLabel(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="Ex.: Normalização 3FN" />
+        </Field>
+        <Field label="Anotações"><input value={note} onChange={(e) => setNote(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="Ex.: revisar teoria depois" /></Field>
       </div>
-      <div className="mt-4 flex justify-end">
+
+      {activitySummary && <div className="mb-4 p-3 rounded-lg" style={{ background: C.surface2, border: `1px solid ${C.line}` }}><div className="text-xs font-semibold mb-2 flex items-center gap-2"><History size={14} color={C.gold} /> Atividades do dia {fmtDate(due)}</div><div className="text-sm space-y-1"><div style={{ color: C.muted }}>• <b>{activitySummary.count}</b> atividade{activitySummary.count !== 1 ? "s" : ""} · <b>{fmtMin(activitySummary.totalMin)}</b> no total</div>{Object.entries(activitySummary.byDisc).map(([dId, d]) => <div key={dId} style={{ color: C.muted }}>• <b>{d.name}</b>: {Object.entries(d.types).map(([type, cnt]) => `${cnt} ${type}`).join(" + ")} · {fmtMin(d.min)}</div>)}</div></div>}
+
+      <div className="flex justify-end">
         <Btn onClick={addManual}><Plus size={16} /> Salvar revisão</Btn>
       </div>
     </Card>
