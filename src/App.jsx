@@ -255,13 +255,6 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
             <Brand concurso={concurso} setConcurso={setConcurso} />
             <nav className="px-3 flex-1 space-y-1 overflow-auto">{NAV.map(([id, label, Icon]) => <NavItem key={id} active={view === id} onClick={() => setView(id)} Icon={Icon} label={label} />)}</nav>
             <div className="p-3 border-t" style={{ borderColor: C.line }}>
-              <div className="mb-4 p-3 rounded-xl text-center" style={{ background: C.surface2, border: `1px solid ${C.line}` }}>
-                <div className="text-2xl font-extrabold font-mono mb-2" style={{ color: C.gold }}>{fmtTime(timerSeconds)}</div>
-                <div className="flex gap-2">
-                  <Btn variant={timerRunning ? "green" : "primary"} onClick={() => setTimerRunning(!timerRunning)} className="flex-1 text-xs"><Play size={12} /> {timerRunning ? "Pausar" : "Iniciar"}</Btn>
-                  <Btn variant="ghost" onClick={() => setTimerSeconds(0)} className="flex-1 text-xs"><RotateCcw size={12} /> Reset</Btn>
-                </div>
-              </div>
               <ThemeToggle theme={theme} setTheme={setTheme} />
               <button onClick={onLogout} className="w-full flex items-center gap-3 px-3 py-2.5 mt-2 rounded-xl text-sm font-medium" style={{ background: "transparent", color: C.muted, border: `1px solid ${C.line}` }}><LogOut size={18} color={C.muted} /> Sair</button>
               <div className="px-1 pt-3 text-xs" style={{ color: C.muted }}>{concurso.label} · {concurso.subtitle}</div>
