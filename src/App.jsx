@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, createContext, useContext } from "react";
 import {
-  Home, RefreshCw, CalendarDays, ListChecks, BookOpen, History, BarChart3,
+  Home, RefreshCw, CalendarDays, ListChecks, BookOpen, BarChart3,
   ClipboardList, Play, Plus, Flame, Target, Clock, Check,
   Trash2, Pencil, X, ChevronRight, TrendingUp, Circle, CheckCircle2,
   Timer as TimerIcon, Menu, Crosshair, Zap, Sun, Moon, RotateCcw, LogOut,
@@ -215,8 +215,8 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
 
   const discById = useMemo(() => Object.fromEntries(disciplines.map((d) => [d.id, d])), [disciplines]);
 
-  function registerStudy({ disciplineId, topicId, minutes, right, wrong, note, date }) {
-    const s = { id: uid(), disciplineId, topicId: topicId || null, minutes, right: right || 0, wrong: wrong || 0, note: note || "", date: date || todayISO() };
+  function registerStudy({ disciplineId, topicId, minutes, right, wrong, note, date, material, paginaInicio, paginaFim, videoTitulo }) {
+    const s = { id: uid(), disciplineId, topicId: topicId || null, minutes, right: right || 0, wrong: wrong || 0, note: note || "", material: material || "", paginaInicio: paginaInicio || "", paginaFim: paginaFim || "", videoTitulo: videoTitulo || "", date: date || todayISO() };
     setSessions((p) => [s, ...p]);
     setCycle((prev) => ({ ...prev, blocks: prev.blocks.map((b) => b.disciplineId === disciplineId ? { ...b, doneMinutes: (b.doneMinutes || 0) + minutes } : b) }));
     const sessionDay = new Date((date || todayISO()) + "T00:00:00").getDay();
@@ -225,7 +225,7 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
     return s;
   }
   function markReviewDone(rid) {
-    setReviews((p) => p.map((r) => { if (r.id !== rid) return r; const nextIdx = r.intervalIdx + 1; if (nextIdx >= REVIEW_INTERVALS.length) return { ...r, done: true }; return { ...r, intervalIdx: nextIdx, due: addDays(todayISO(), REVIEW_INTERVALS[nextIdx]) }; }));
+    setReviews((p) => p.map((r) => (r.id === rid ? { ...r, done: true } : r)));
   }
 
   if (loading) return <div className="h-screen flex items-center justify-center" style={{ background: LIGHT.bg }}><div className="text-center"><BookOpen size={40} color={LIGHT.ink} className="mx-auto animate-pulse" /><p className="mt-3 text-sm" style={{ color: LIGHT.muted }}>Carregando seus estudos…</p></div></div>;
@@ -234,7 +234,7 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
   const NAV = [
     ["home", "Início", Home], ["raiox", "Raio-X da prova", Crosshair],
     ["ciclo", "Ciclo de estudo", RefreshCw], ["plano", "Planejamento", CalendarDays], ["revisoes", "Revisões", ListChecks],
-    ["edital", "Edital verticalizado", BookOpen], ["historico", "Histórico", History], ["stats", "Estatísticas", BarChart3], ["simulados", "Simulados", ClipboardList],
+    ["edital", "Edital verticalizado", BookOpen], ["stats", "Estatísticas", BarChart3], ["simulados", "Simulados", ClipboardList],
     ["provas", `Provas ${concurso.label}`, GraduationCap],
   ];
 
@@ -272,7 +272,6 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
               {view === "plano" && <PlanoView {...shared} />}
               {view === "revisoes" && <RevisoesView {...shared} />}
               {view === "edital" && <EditalView {...shared} />}
-              {view === "historico" && <HistoricoView {...shared} />}
               {view === "stats" && <StatsView {...shared} />}
               {view === "simulados" && <SimuladosView {...shared} />}
               {view === "provas" && <ProvasView concurso={concurso} />}
@@ -478,13 +477,25 @@ function ManualModal({ disciplines, discById, onClose, onSave, initial }) {
   const [minutes, setMinutes] = useState(initial?.minutes || 30);
   const [right, setRight] = useState(initial?.right ?? ""); const [wrong, setWrong] = useState(initial?.wrong ?? "");
   const [date, setDate] = useState(initial?.date || todayISO()); const [note, setNote] = useState(initial?.note || "");
+  const [material, setMaterial] = useState(initial?.material || "");
+  const [paginaInicio, setPaginaInicio] = useState(initial?.paginaInicio || "");
+  const [paginaFim, setPaginaFim] = useState(initial?.paginaFim || "");
+  const [videoTitulo, setVideoTitulo] = useState(initial?.videoTitulo || "");
   const topics = discById[discId]?.topics || [];
   return <Modal open title={initial ? "Editar registro" : "Registro manual de estudo"} onClose={onClose}>
     <Field label="Disciplina"><select value={discId} onChange={(e) => { setDiscId(e.target.value); setTopicId(""); }} className={inputCls} style={inputStyle(C)}>{disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></Field>
     <Field label="Tópico (opcional)"><select value={topicId} onChange={(e) => setTopicId(e.target.value)} className={inputCls} style={inputStyle(C)}><option value="">— geral —</option>{topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></Field>
     <div className="grid grid-cols-2 gap-3"><Field label="Tempo (min)"><input type="number" value={minutes} onChange={(e) => setMinutes(+e.target.value)} className={inputCls} style={inputStyle(C)} /></Field><Field label="Data"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputCls} style={inputStyle(C)} /></Field><Field label="Acertos"><input type="number" value={right} onChange={(e) => setRight(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="0" /></Field><Field label="Erros"><input type="number" value={wrong} onChange={(e) => setWrong(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="0" /></Field></div>
+    <div className="grid md:grid-cols-2 gap-3">
+      <Field label="Material"><input value={material} onChange={(e) => setMaterial(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="Ex.: PDF" /></Field>
+      <Field label="Vídeo / aula"><input value={videoTitulo} onChange={(e) => setVideoTitulo(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="Ex.: Video 01 - Focus" /></Field>
+    </div>
+    <div className="grid md:grid-cols-2 gap-3">
+      <Field label="Página inicial"><input type="number" value={paginaInicio} onChange={(e) => setPaginaInicio(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="30" /></Field>
+      <Field label="Página final"><input type="number" value={paginaFim} onChange={(e) => setPaginaFim(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="40" /></Field>
+    </div>
     <Field label="Observação"><input value={note} onChange={(e) => setNote(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="Ex.: revisar teoria depois" /></Field>
-    <Btn className="w-full justify-center" onClick={() => onSave({ disciplineId: discId, topicId: topicId || null, minutes, right: +right || 0, wrong: +wrong || 0, date, note })}><Check size={16} /> {initial ? "Salvar alterações" : "Registrar estudo"}</Btn>
+    <Btn className="w-full justify-center" onClick={() => onSave({ disciplineId: discId, topicId: topicId || null, minutes, right: +right || 0, wrong: +wrong || 0, date, note, material, paginaInicio, paginaFim, videoTitulo })}><Check size={16} /> {initial ? "Salvar alterações" : "Registrar estudo"}</Btn>
   </Modal>;
 }
 
@@ -594,9 +605,12 @@ function RevisoesView({ reviews, setReviews, markReviewDone, discById, disciplin
     setDue(addDays(todayISO(), 1));
   }
   function editDate(id, due) { setReviews((p) => p.map((r) => r.id === id ? { ...r, due } : r)); }
-  const Group = ({ title, items, color }) => items.length ? <div className="mb-5"><h3 className="text-sm font-bold mb-2 flex items-center gap-2"><span className="w-2 h-2 rounded-full" style={{ background: color }} />{title} <span style={{ color: C.muted }}>({items.length})</span></h3><div className="space-y-2">{items.map((r) => { const topicName = r.topicId ? discById[r.disciplineId]?.topics?.find((t) => t.id === r.topicId)?.name : null; return (<Card key={r.id} className="!p-3 flex items-center gap-3"><button onClick={() => markReviewDone(r.id)}><Circle size={22} color={C.muted} /></button><div className="flex-1 min-w-0"><div className="font-medium text-sm">{r.label}</div>{topicName && topicName !== r.label && <div className="text-xs mt-0.5 italic" style={{ color: C.inkSoft }}>{topicName}</div>}<div className="text-xs mt-0.5" style={{ color: C.muted }}>{discById[r.disciplineId]?.name} · intervalo {REVIEW_INTERVALS[r.intervalIdx]}d</div></div><input type="date" value={r.due} onChange={(e) => editDate(r.id, e.target.value)} className="px-2 py-1 rounded-lg text-xs" style={inputStyle(C)} /></Card>); })}</div></div> : null;
+  function deleteReview(id) { setReviews((p) => p.filter((r) => r.id !== id)); }
+  function deleteCompleted() { setReviews((p) => p.filter((r) => !r.done)); }
+  function deleteAll() { if (confirm("Excluir todas as revisões?")) setReviews([]); }
+  const Group = ({ title, items, color }) => items.length ? <div className="mb-5"><h3 className="text-sm font-bold mb-2 flex items-center gap-2"><span className="w-2 h-2 rounded-full" style={{ background: color }} />{title} <span style={{ color: C.muted }}>({items.length})</span></h3><div className="space-y-2">{items.map((r) => { const topicName = r.topicId ? discById[r.disciplineId]?.topics?.find((t) => t.id === r.topicId)?.name : null; return (<Card key={r.id} className="!p-3 flex items-center gap-3"><button onClick={() => markReviewDone(r.id)} title="Marcar como concluída"><Circle size={22} color={C.muted} /></button><div className="flex-1 min-w-0"><div className="font-medium text-sm">{r.label}</div>{topicName && topicName !== r.label && <div className="text-xs mt-0.5 italic" style={{ color: C.inkSoft }}>{topicName}</div>}<div className="text-xs mt-0.5" style={{ color: C.muted }}>{discById[r.disciplineId]?.name} · data prevista {r.due || "—"}</div></div><input type="date" value={r.due} onChange={(e) => editDate(r.id, e.target.value)} className="px-2 py-1 rounded-lg text-xs" style={inputStyle(C)} /><button onClick={() => deleteReview(r.id)} title="Excluir revisão"><Trash2 size={16} color={C.red} /></button></Card>); })}</div></div> : null;
   return <div>
-    <PageTitle sub="Cadastro e controle manual das revisões. Sem geração automática de próximos intervalos.">Revisões</PageTitle>
+    <PageTitle sub="Cadastro e controle 100% manual das revisões. Cada item fica fixo até você decidir o que fazer com ele.">Revisões</PageTitle>
     <Card className="mb-4">
       <div className="flex items-center gap-2 text-sm font-semibold mb-4"><Plus size={16} color={C.gold} /> Nova revisão manual</div>
       <div className="grid md:grid-cols-2 gap-3">
@@ -619,6 +633,14 @@ function RevisoesView({ reviews, setReviews, markReviewDone, discById, disciplin
         <Btn onClick={addManual}><Plus size={16} /> Salvar revisão</Btn>
       </div>
     </Card>
+    <div className="flex flex-wrap gap-2 mb-4">
+      <Btn variant="ghost" onClick={deleteCompleted} className="text-red-600" style={{ color: C.red, borderColor: C.red }}>
+        <Trash2 size={15} color={C.red} /> Excluir concluídas
+      </Btn>
+      <Btn variant="ghost" onClick={deleteAll} className="text-red-600" style={{ color: C.red, borderColor: C.red }}>
+        <Trash2 size={15} color={C.red} /> Excluir todas
+      </Btn>
+    </div>
     {pend.length === 0 && <Empty msg="Nenhuma revisão pendente. Use o formulário acima para criar a primeira." />}
     <Group title="Atrasadas" items={late} color={C.red} /><Group title="Hoje" items={today} color={C.gold} /><Group title="Próximas" items={upcoming} color={C.green} />
   </div>;
@@ -667,21 +689,6 @@ function EditalView({ concurso, disciplines, sessions, setDisciplines }) {
       </div></div>
     ))}
     <p className="text-xs" style={{ color: C.muted }}>Incidência estimada a partir de provas anteriores e do foco atual do concurso. Guia de prioridade — os pesos podem ser refinados conforme o edital oficial.</p>
-  </div>;
-}
-
-/* ============================ HISTÓRICO ============================ */
-function HistoricoView({ sessions, setSessions, discById, disciplines }) {
-  const C = useC();
-  const [edit, setEdit] = useState(null);
-  const sorted = [...sessions].sort((a, b) => b.date.localeCompare(a.date));
-  function remove(id) { setSessions((p) => p.filter((s) => s.id !== id)); }
-  function save(id, data) { setSessions((p) => p.map((s) => s.id === id ? { ...s, ...data } : s)); setEdit(null); }
-  return <div>
-    <PageTitle sub="Registro completo e cronológico. Corrija ou exclua registros direto aqui.">Histórico de estudo</PageTitle>
-    {sorted.length === 0 ? <Empty msg="Nenhuma sessão registrada ainda." /> : <div className="space-y-2">{sorted.map((s) => { const d = discById[s.disciplineId]; const topic = d?.topics.find((t) => t.id === s.topicId); const tot = s.right + s.wrong;
-      return <Card key={s.id} className="!p-3 flex items-center gap-3 group"><span className="w-1.5 h-10 rounded-full" style={{ background: d?.color }} /><div className="flex-1 min-w-0"><div className="text-sm font-semibold truncate">{d?.name} {topic && <span className="font-normal" style={{ color: C.muted }}>· {topic.name}</span>}</div><div className="text-xs flex gap-3 mt-0.5" style={{ color: C.muted }}><span>{fmtDate(s.date)}</span><span><Clock size={11} className="inline" /> {fmtMin(s.minutes)}</span>{tot > 0 && <span style={{ color: C.green }}>✓{s.right}</span>}{tot > 0 && <span style={{ color: C.red }}>✕{s.wrong}</span>}</div>{s.note && <div className="text-xs mt-0.5 italic" style={{ color: C.muted }}>{s.note}</div>}</div><button onClick={() => setEdit(s)} className="p-1"><Pencil size={15} color={C.muted} /></button><button onClick={() => remove(s.id)} className="p-1"><Trash2 size={15} color={C.red} /></button></Card>; })}</div>}
-    {edit && <ManualModal disciplines={disciplines} discById={discById} initial={edit} onClose={() => setEdit(null)} onSave={(data) => save(edit.id, data)} />}
   </div>;
 }
 
