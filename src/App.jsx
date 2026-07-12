@@ -65,6 +65,7 @@ const addDays = (iso, n) => { const d = new Date(iso + "T00:00:00"); d.setDate(d
 const fmtMin = (m) => { const h = Math.floor(m / 60), mm = m % 60; return h ? `${h}h${mm ? String(mm).padStart(2, "0") : ""}` : `${mm}min`; };
 const fmtDate = (iso) => new Date(iso + "T00:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
 const startOfWeek = (iso) => { const d = new Date(iso + "T00:00:00"); d.setDate(d.getDate() - d.getDay()); return d.toISOString().slice(0, 10); };
+const fmtTime = (s) => { const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60; return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(ss).padStart(2, "0")}`; };
 let CURRENT_USER_ID = null;
 export function setCurrentUser(id) { CURRENT_USER_ID = id; }
 
@@ -178,6 +179,8 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
   const [plan, setPlan] = useState([]);
   const [goals, setGoals] = useState({ hours: 20, questions: 200 });
   const [simulados, setSimulados] = useState([]);
+  const [timerSeconds, setTimerSeconds] = useState(0);
+  const [timerRunning, setTimerRunning] = useState(false);
 
   const C = theme === "dark" ? DARK : LIGHT;
 
@@ -213,6 +216,12 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
   useEffect(() => { if (!loading) store.set(CK("goals"), goals); }, [goals, loading]);
   useEffect(() => { if (!loading) store.set(CK("sim"), simulados); }, [simulados, loading]);
 
+  useEffect(() => {
+    if (!timerRunning) return;
+    const interval = setInterval(() => setTimerSeconds((s) => s + 1), 1000);
+    return () => clearInterval(interval);
+  }, [timerRunning]);
+
   const discById = useMemo(() => Object.fromEntries(disciplines.map((d) => [d.id, d])), [disciplines]);
 
   function registerStudy({ disciplineId, topicId, minutes, right, wrong, note, date, material, paginaInicio, paginaFim, videoTitulo }) {
@@ -245,7 +254,18 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
           <aside className="hidden md:flex flex-col w-64 shrink-0 h-screen sticky top-0 border-r" style={{ background: C.surface, borderColor: C.line }}>
             <Brand concurso={concurso} setConcurso={setConcurso} />
             <nav className="px-3 flex-1 space-y-1 overflow-auto">{NAV.map(([id, label, Icon]) => <NavItem key={id} active={view === id} onClick={() => setView(id)} Icon={Icon} label={label} />)}</nav>
-            <div className="p-3 border-t" style={{ borderColor: C.line }}><ThemeToggle theme={theme} setTheme={setTheme} /><button onClick={onLogout} className="w-full flex items-center gap-3 px-3 py-2.5 mt-2 rounded-xl text-sm font-medium" style={{ background: "transparent", color: C.muted, border: `1px solid ${C.line}` }}><LogOut size={18} color={C.muted} /> Sair</button><div className="px-1 pt-3 text-xs" style={{ color: C.muted }}>{concurso.label} · {concurso.subtitle}</div></div>
+            <div className="p-3 border-t" style={{ borderColor: C.line }}>
+              <div className="mb-4 p-3 rounded-xl text-center" style={{ background: C.surface2, border: `1px solid ${C.line}` }}>
+                <div className="text-2xl font-extrabold font-mono mb-2" style={{ color: C.gold }}>{fmtTime(timerSeconds)}</div>
+                <div className="flex gap-2">
+                  <Btn variant={timerRunning ? "green" : "primary"} onClick={() => setTimerRunning(!timerRunning)} className="flex-1 text-xs"><Play size={12} /> {timerRunning ? "Pausar" : "Iniciar"}</Btn>
+                  <Btn variant="ghost" onClick={() => setTimerSeconds(0)} className="flex-1 text-xs"><RotateCcw size={12} /> Reset</Btn>
+                </div>
+              </div>
+              <ThemeToggle theme={theme} setTheme={setTheme} />
+              <button onClick={onLogout} className="w-full flex items-center gap-3 px-3 py-2.5 mt-2 rounded-xl text-sm font-medium" style={{ background: "transparent", color: C.muted, border: `1px solid ${C.line}` }}><LogOut size={18} color={C.muted} /> Sair</button>
+              <div className="px-1 pt-3 text-xs" style={{ color: C.muted }}>{concurso.label} · {concurso.subtitle}</div>
+            </div>
           </aside>
 
           {navOpen && (
