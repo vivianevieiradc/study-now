@@ -215,22 +215,13 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
 
   const discById = useMemo(() => Object.fromEntries(disciplines.map((d) => [d.id, d])), [disciplines]);
 
-  function registerStudy({ disciplineId, topicId, minutes, right, wrong, note, date, addReview }) {
+  function registerStudy({ disciplineId, topicId, minutes, right, wrong, note, date }) {
     const s = { id: uid(), disciplineId, topicId: topicId || null, minutes, right: right || 0, wrong: wrong || 0, note: note || "", date: date || todayISO() };
     setSessions((p) => [s, ...p]);
     setCycle((prev) => ({ ...prev, blocks: prev.blocks.map((b) => b.disciplineId === disciplineId ? { ...b, doneMinutes: (b.doneMinutes || 0) + minutes } : b) }));
     const sessionDay = new Date((date || todayISO()) + "T00:00:00").getDay();
     setPlan((prev) => { const idx = prev.findIndex((p) => p.day === sessionDay && p.disciplineId === disciplineId && !p.done); if (idx === -1) return prev; const next = [...prev]; next[idx] = { ...next[idx], done: true }; return next; });
     if (topicId) setDisciplines((p) => p.map((d) => d.id === disciplineId ? { ...d, topics: d.topics.map((t) => t.id === topicId ? { ...t, studied: true } : t) } : d));
-    if (addReview !== false) {
-      const disc = discById[disciplineId];
-      const topicName = topicId ? disc?.topics.find((t) => t.id === topicId)?.name : "";
-      setReviews((p) => {
-        const jaExiste = p.some((r) => !r.done && r.disciplineId === disciplineId && r.topicId === (topicId || null) && r.intervalIdx === 0);
-        if (jaExiste) return p;
-        return [{ id: uid(), sessionId: s.id, disciplineId, topicId: topicId || null, label: topicName || disc?.name || "Conteúdo", intervalIdx: 0, due: addDays(s.date, REVIEW_INTERVALS[0]), done: false }, ...p];
-      });
-    }
     return s;
   }
   function markReviewDone(rid) {
@@ -589,21 +580,49 @@ function PlanAddModal({ day, disciplines, onClose, onAdd }) { const C = useC(); 
 /* ============================ REVISÕES ============================ */
 function RevisoesView({ reviews, setReviews, markReviewDone, discById, disciplines }) {
   const C = useC();
-  const [addOpen, setAddOpen] = useState(false);
   const pend = reviews.filter((r) => !r.done).sort((a, b) => a.due.localeCompare(b.due));
   const late = pend.filter((r) => r.due < todayISO()); const today = pend.filter((r) => r.due === todayISO()); const upcoming = pend.filter((r) => r.due > todayISO());
-  function addManual(data) { setReviews((p) => [{ id: uid(), sessionId: null, intervalIdx: 0, done: false, ...data }, ...p]); setAddOpen(false); }
+  const [discId, setDiscId] = useState(disciplines[0]?.id);
+  const [label, setLabel] = useState("");
+  const [due, setDue] = useState(addDays(todayISO(), 1));
+  const [note, setNote] = useState("");
+  function addManual() {
+    if (!discId) return;
+    setReviews((p) => [{ id: uid(), sessionId: null, intervalIdx: 0, done: false, disciplineId: discId, topicId: null, label: label || discById[discId]?.name || "Revisão", due, note }, ...p]);
+    setLabel("");
+    setNote("");
+    setDue(addDays(todayISO(), 1));
+  }
   function editDate(id, due) { setReviews((p) => p.map((r) => r.id === id ? { ...r, due } : r)); }
   const Group = ({ title, items, color }) => items.length ? <div className="mb-5"><h3 className="text-sm font-bold mb-2 flex items-center gap-2"><span className="w-2 h-2 rounded-full" style={{ background: color }} />{title} <span style={{ color: C.muted }}>({items.length})</span></h3><div className="space-y-2">{items.map((r) => { const topicName = r.topicId ? discById[r.disciplineId]?.topics?.find((t) => t.id === r.topicId)?.name : null; return (<Card key={r.id} className="!p-3 flex items-center gap-3"><button onClick={() => markReviewDone(r.id)}><Circle size={22} color={C.muted} /></button><div className="flex-1 min-w-0"><div className="font-medium text-sm">{r.label}</div>{topicName && topicName !== r.label && <div className="text-xs mt-0.5 italic" style={{ color: C.inkSoft }}>{topicName}</div>}<div className="text-xs mt-0.5" style={{ color: C.muted }}>{discById[r.disciplineId]?.name} · intervalo {REVIEW_INTERVALS[r.intervalIdx]}d</div></div><input type="date" value={r.due} onChange={(e) => editDate(r.id, e.target.value)} className="px-2 py-1 rounded-lg text-xs" style={inputStyle(C)} /></Card>); })}</div></div> : null;
   return <div>
-    <PageTitle sub="Agendamento automático por repetição espaçada. Ao concluir, o próximo intervalo é reprogramado sozinho.">Revisões</PageTitle>
-    <div className="mb-4"><Btn variant="ghost" onClick={() => setAddOpen(true)}><Plus size={15} /> Revisão manual</Btn></div>
-    {pend.length === 0 && <Empty msg="Nenhuma revisão pendente. Registre estudos para gerar revisões." />}
+    <PageTitle sub="Cadastro e controle manual das revisões. Sem geração automática de próximos intervalos.">Revisões</PageTitle>
+    <Card className="mb-4">
+      <div className="flex items-center gap-2 text-sm font-semibold mb-4"><Plus size={16} color={C.gold} /> Nova revisão manual</div>
+      <div className="grid md:grid-cols-2 gap-3">
+        <Field label="Disciplina">
+          <select value={discId || ""} onChange={(e) => setDiscId(e.target.value)} className={inputCls} style={inputStyle(C)}>
+            {disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+          </select>
+        </Field>
+        <Field label="Conteúdo">
+          <input value={label} onChange={(e) => setLabel(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="Ex.: Normalização 3FN" />
+        </Field>
+        <Field label="Data">
+          <input type="date" value={due} onChange={(e) => setDue(e.target.value)} className={inputCls} style={inputStyle(C)} />
+        </Field>
+        <Field label="Anotações">
+          <input value={note} onChange={(e) => setNote(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="Ex.: revisar teoria depois" />
+        </Field>
+      </div>
+      <div className="mt-4 flex justify-end">
+        <Btn onClick={addManual}><Plus size={16} /> Salvar revisão</Btn>
+      </div>
+    </Card>
+    {pend.length === 0 && <Empty msg="Nenhuma revisão pendente. Use o formulário acima para criar a primeira." />}
     <Group title="Atrasadas" items={late} color={C.red} /><Group title="Hoje" items={today} color={C.gold} /><Group title="Próximas" items={upcoming} color={C.green} />
-    {addOpen && <RevAddModal disciplines={disciplines} discById={discById} onClose={() => setAddOpen(false)} onAdd={addManual} />}
   </div>;
 }
-function RevAddModal({ disciplines, discById, onClose, onAdd }) { const C = useC(); const [discId, setDiscId] = useState(disciplines[0]?.id); const [label, setLabel] = useState(""); const [due, setDue] = useState(addDays(todayISO(), 1)); return <Modal open title="Nova revisão" onClose={onClose}><Field label="Disciplina"><select value={discId} onChange={(e) => setDiscId(e.target.value)} className={inputCls} style={inputStyle(C)}>{disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></Field><Field label="Conteúdo"><input value={label} onChange={(e) => setLabel(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="Ex.: Normalização 3FN" /></Field><Field label="Data"><input type="date" value={due} onChange={(e) => setDue(e.target.value)} className={inputCls} style={inputStyle(C)} /></Field><Btn className="w-full justify-center" onClick={() => onAdd({ disciplineId: discId, topicId: null, label: label || discById[discId]?.name, due })}><Plus size={16} /> Agendar</Btn></Modal>; }
 
 /* ============================ EDITAL ============================ */
 function EditalView({ concurso, disciplines, sessions, setDisciplines }) {
