@@ -686,11 +686,21 @@ function HistoricoView({ sessions, setSessions, discById, disciplines }) {
 function EditalView({ concurso, disciplines, sessions, setDisciplines }) {
   const C = useC();
   const [sincronizando, setSincronizando] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const perf = useMemo(() => { const map = {}; sessions.forEach((s) => { if (!s.topicId) return; const k = s.topicId; map[k] = map[k] || { min: 0, r: 0, w: 0 }; map[k].min += s.minutes; map[k].r += s.right; map[k].w += s.wrong; }); return map; }, [sessions]);
   const allTopics = disciplines.flatMap((d) => d.topics);
   const studied = allTopics.filter((t) => t.studied).length;
   const pct = allTopics.length ? Math.round((studied / allTopics.length) * 100) : 0;
   const blocks = [...new Set(disciplines.map((d) => d.block))];
+
+  const filteredDisciplines = useMemo(() => {
+    if (!searchQuery.trim()) return disciplines;
+    const q = searchQuery.toLowerCase();
+    return disciplines.map((d) => ({
+      ...d,
+      topics: d.topics.filter((t) => t.name.toLowerCase().includes(q) || (t.num && t.num.toLowerCase().includes(q))),
+    })).filter((d) => d.name.toLowerCase().includes(q) || d.topics.length > 0);
+  }, [disciplines, searchQuery]);
   function toggleTopic(disciplineId, topicId) {
     setDisciplines((prev) => prev.map((d) => d.id !== disciplineId ? d : ({
       ...d,
@@ -712,10 +722,11 @@ function EditalView({ concurso, disciplines, sessions, setDisciplines }) {
       <div><h1 className="text-2xl font-extrabold">Edital verticalizado</h1><p className="text-sm mt-1" style={{ color: C.muted }}>{concurso.label} · {concurso.subtitle}. Peso, nº de questões e incidência por tópico. Marque o que já estudou.</p></div>
       <Btn variant="ghost" onClick={atualizarEdital} disabled={sincronizando} className="shrink-0"><RefreshCw size={14} className={sincronizando ? "animate-spin" : ""} /> {sincronizando ? "Atualizando…" : "Atualizar edital"}</Btn>
     </div>
+    <Card className="mb-4"><input type="text" placeholder="Pesquisar disciplina ou tópico…" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className={inputCls} style={inputStyle(C)} /></Card>
     <Card className="mb-4"><div className="flex items-center justify-between text-sm mb-2"><span className="font-semibold">Cobertura do edital</span><span style={{ color: C.muted }}>{studied}/{allTopics.length} tópicos</span></div><div className="h-3 rounded-full overflow-hidden" style={{ background: C.line }}><div className="h-full" style={{ width: `${pct}%`, background: C.ink }} /></div></Card>
     {blocks.map((block) => (
       <div key={block} className="mb-5"><h3 className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: C.muted }}>Conhecimentos {block}</h3><div className="space-y-3">
-        {disciplines.filter((d) => d.block === block).map((d) => { const done = d.topics.filter((t) => t.studied).length;
+        {filteredDisciplines.filter((d) => d.block === block).map((d) => { const done = d.topics.filter((t) => t.studied).length;
           return <Card key={d.id} className="!p-4"><div className="flex items-center gap-2 mb-3"><span className="w-1.5 h-6 rounded-full" style={{ background: d.color }} /><span className="font-bold flex-1">{d.name}</span><span className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: C.goldSoft, color: C.ink }}>{d.peso} pts · {d.q}q</span><span className="text-xs" style={{ color: C.muted }}>{done}/{d.topics.length}</span></div><div className="space-y-1.5">
             {d.topics.map((t) => { const isSub = t.num && t.num.includes("."); const p = perf[t.id]; const tot = p ? p.r + p.w : 0; const acc = tot ? Math.round((p.r / tot) * 100) : null; const weak = acc !== null && acc < 60;
               return <button key={t.id} type="button" onClick={() => toggleTopic(d.id, t.id)} className={`w-full flex items-center gap-2 text-sm p-2.5 rounded-xl border text-left transition hover:-translate-y-[1px]${isSub ? " ml-5" : ""}`} style={{ background: t.studied ? C.greenSoft : C.surface2, borderColor: t.studied ? C.green : C.line, boxShadow: t.studied ? `0 0 0 1px ${C.green} inset` : "none", width: isSub ? "calc(100% - 1.25rem)" : undefined }}><span className="pointer-events-none shrink-0 mt-0.5">{t.studied ? <CheckCircle2 size={15} color={C.green} /> : <Circle size={15} color={C.line} />}</span>{t.num && <span className="pointer-events-none text-xs font-mono shrink-0 min-w-[2rem] text-right" style={{ color: C.muted }}>{t.num}</span>}<span className="pointer-events-none flex-1 min-w-0" style={{ color: t.studied ? C.ink : C.inkSoft }}>{t.name}</span><span className="pointer-events-none flex items-center gap-1 shrink-0">{t.hits >= 8 && <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: C.redSoft, color: C.red }}>cai muito</span>}{t.hits >= 4 && t.hits < 8 && <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: C.goldSoft, color: C.ink }}>cai bastante</span>}{p && <span className="text-xs" style={{ color: C.muted }}>{fmtMin(p.min)}</span>}{acc !== null && <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: weak ? C.redSoft : C.greenSoft, color: weak ? C.red : C.green }}>{acc}%{weak && " · foco"}</span>}</span></button>;
