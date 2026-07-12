@@ -495,7 +495,7 @@ function ManualModal({ disciplines, discById, onClose, onSave, initial }) {
   const C = useC();
   const [discId, setDiscId] = useState(initial?.disciplineId || disciplines[0]?.id);
   const [topicId, setTopicId] = useState(initial?.topicId || "");
-  const [minutes, setMinutes] = useState(initial?.minutes || 30);
+  const [minutes, setMinutes] = useState(initial?.minutes ?? "");
   const [right, setRight] = useState(initial?.right ?? ""); const [wrong, setWrong] = useState(initial?.wrong ?? "");
   const [date, setDate] = useState(initial?.date || todayISO()); const [note, setNote] = useState(initial?.note || "");
   const [material, setMaterial] = useState(initial?.material || "");
@@ -506,7 +506,7 @@ function ManualModal({ disciplines, discById, onClose, onSave, initial }) {
   return <Modal open title={initial ? "Editar registro" : "Registro manual de estudo"} onClose={onClose}>
     <Field label="Disciplina"><select value={discId} onChange={(e) => { setDiscId(e.target.value); setTopicId(""); }} className={inputCls} style={inputStyle(C)}>{disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></Field>
     <Field label="Tópico (opcional)"><select value={topicId} onChange={(e) => setTopicId(e.target.value)} className={inputCls} style={inputStyle(C)}><option value="">— geral —</option>{topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></Field>
-    <div className="grid grid-cols-2 gap-3"><Field label="Tempo (min)"><input type="number" value={minutes} onChange={(e) => setMinutes(+e.target.value)} className={inputCls} style={inputStyle(C)} /></Field><Field label="Data"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputCls} style={inputStyle(C)} /></Field><Field label="Acertos"><input type="number" value={right} onChange={(e) => setRight(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="0" /></Field><Field label="Erros"><input type="number" value={wrong} onChange={(e) => setWrong(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="0" /></Field></div>
+    <div className="grid grid-cols-2 gap-3"><Field label="Tempo (min)"><input type="number" value={minutes || ""} onChange={(e) => setMinutes(e.target.value === "" ? "" : +e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="30" /></Field><Field label="Data"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputCls} style={inputStyle(C)} /></Field><Field label="Acertos"><input type="number" value={right} onChange={(e) => setRight(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="0" /></Field><Field label="Erros"><input type="number" value={wrong} onChange={(e) => setWrong(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="0" /></Field></div>
     <div className="grid md:grid-cols-2 gap-3">
       <Field label="Material"><input value={material} onChange={(e) => setMaterial(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="Ex.: PDF" /></Field>
       <Field label="Vídeo / aula"><input value={videoTitulo} onChange={(e) => setVideoTitulo(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="Ex.: Video 01 - Focus" /></Field>
@@ -516,7 +516,7 @@ function ManualModal({ disciplines, discById, onClose, onSave, initial }) {
       <Field label="Página final"><input type="number" value={paginaFim} onChange={(e) => setPaginaFim(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="40" /></Field>
     </div>
     <Field label="Observação"><input value={note} onChange={(e) => setNote(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="Ex.: revisar teoria depois" /></Field>
-    <Btn className="w-full justify-center" onClick={() => onSave({ disciplineId: discId, topicId: topicId || null, minutes, right: +right || 0, wrong: +wrong || 0, date, note, material, paginaInicio, paginaFim, videoTitulo })}><Check size={16} /> {initial ? "Salvar alterações" : "Registrar estudo"}</Btn>
+    <Btn className="w-full justify-center" onClick={() => onSave({ disciplineId: discId, topicId: topicId || null, minutes: +minutes || 0, right: +right || 0, wrong: +wrong || 0, date, note, material, paginaInicio, paginaFim, videoTitulo })}><Check size={16} /> {initial ? "Salvar alterações" : "Registrar estudo"}</Btn>
   </Modal>;
 }
 
