@@ -1093,7 +1093,10 @@ function Login() {
   const [pass, setPass] = React.useState("");
   const [msg, setMsg] = React.useState(null);
   const [busy, setBusy] = React.useState(false);
-  const P = LIGHT;
+  const [focusEmail, setFocusEmail] = React.useState(false);
+  const [focusPass, setFocusPass] = React.useState(false);
+
+  const isLogin = mode === "login";
 
   async function submit(e) {
     e?.preventDefault();
@@ -1113,28 +1116,75 @@ function Login() {
     } finally { setBusy(false); }
   }
 
-  const inp = { width: "100%", boxSizing: "border-box", padding: "10px 12px", borderRadius: 10, border: `1px solid ${P.line}`, fontSize: 14, marginTop: 6, outline: "none" };
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: P.bg, fontFamily: "'Inter',ui-sans-serif,system-ui,sans-serif", padding: 16 }}>
-      <form onSubmit={submit} style={{ width: "100%", maxWidth: 380, background: P.surface, border: `1px solid ${P.line}`, borderRadius: 20, padding: 28 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
-          <div style={{ width: 40, height: 40, borderRadius: 12, background: BRAND, display: "flex", alignItems: "center", justifyContent: "center" }}><BookOpen size={20} color="#F5B301" /></div>
-          <div><div style={{ fontWeight: 800, fontSize: 20, color: P.ink }}>Studora</div><div style={{ fontSize: 11, color: P.muted }}>Dataprev · Arquitetura</div></div>
+    <div style={{ minHeight: "100vh", width: "100%", position: "relative", overflow: "hidden", background: "#0A0F1C", display: "flex", alignItems: "center", justifyContent: "center", padding: 32, boxSizing: "border-box", fontFamily: "'Inter',ui-sans-serif,system-ui,sans-serif" }}>
+
+      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 900px 600px at 15% 20%, rgba(245,179,1,.10) 0%, transparent 60%), radial-gradient(ellipse 700px 700px at 85% 85%, rgba(11,42,91,.5) 0%, transparent 65%)" }} />
+      <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px)", backgroundSize: "44px 44px" }} />
+
+      <div style={{ position: "absolute", top: -60, left: "6%", width: 220, height: 220, border: "1px solid rgba(245,179,1,.25)", transform: "rotate(15deg)", animation: "ln-rotate 60s linear infinite" }} />
+      <div style={{ position: "absolute", bottom: -90, left: "12%", width: 160, height: 160, border: "1px solid rgba(245,179,1,.15)", borderRadius: "50%", animation: "ln-rotateRev 50s linear infinite" }} />
+      <div style={{ position: "absolute", top: "12%", right: "8%", width: 130, height: 130, background: "linear-gradient(135deg, rgba(245,179,1,.12), transparent)", transform: "rotate(45deg)", animation: "ln-rotate 40s linear infinite" }} />
+      <div style={{ position: "absolute", bottom: "14%", right: "14%", width: 8, height: 8, borderRadius: "50%", background: "#F5B301", boxShadow: "0 0 16px 4px rgba(245,179,1,.6)" }} />
+      <div style={{ position: "absolute", top: "22%", left: "22%", width: 5, height: 5, borderRadius: "50%", background: "#F5B301", boxShadow: "0 0 12px 3px rgba(245,179,1,.5)" }} />
+
+      <form onSubmit={submit} style={{ position: "relative", zIndex: 2, width: "100%", maxWidth: 412, background: "linear-gradient(180deg, rgba(22,30,46,.9), rgba(14,20,32,.95))", border: "1px solid rgba(245,179,1,.18)", borderRadius: 4, padding: "44px 40px 36px", boxShadow: "0 40px 100px -20px rgba(0,0,0,.7), 0 0 0 1px rgba(0,0,0,.4)", animation: "ln-fadeUp .6s ease both" }}>
+
+        <div style={{ position: "absolute", top: -1, left: -1, width: 28, height: 28, borderTop: "2px solid #F5B301", borderLeft: "2px solid #F5B301" }} />
+        <div style={{ position: "absolute", bottom: -1, right: -1, width: 28, height: 28, borderBottom: "2px solid #F5B301", borderRight: "2px solid #F5B301" }} />
+
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 34 }}>
+          <div style={{ width: 42, height: 42, border: "1px solid #F5B301", display: "flex", alignItems: "center", justifyContent: "center", transform: "rotate(45deg)" }}>
+            <BookOpen size={18} color="#F5B301" style={{ transform: "rotate(-45deg)" }} />
+          </div>
+          <div>
+            <div style={{ fontWeight: 800, fontSize: 19, color: "#F2F4F8", letterSpacing: ".02em" }}>STUDORA</div>
+            <div style={{ fontSize: 10, color: "#F5B301", letterSpacing: ".18em", fontWeight: 600 }}>DATAPREV · ARQUITETURA</div>
+          </div>
         </div>
-        <h1 style={{ fontSize: 16, fontWeight: 700, color: P.ink, margin: "0 0 14px" }}>{mode === "login" ? "Entrar" : "Criar conta"}</h1>
-        <label style={{ fontSize: 12, fontWeight: 600, color: P.muted }}>E-mail
-          <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} style={inp} placeholder="voce@email.com" />
-        </label>
-        <div style={{ height: 12 }} />
-        <label style={{ fontSize: 12, fontWeight: 600, color: P.muted }}>Senha
-          <input type="password" required minLength={6} value={pass} onChange={(e) => setPass(e.target.value)} style={inp} placeholder="mínimo 6 caracteres" />
-        </label>
-        {msg && <div style={{ marginTop: 12, fontSize: 13, color: msg.ok ? P.green : P.red }}>{msg.t}</div>}
-        <button type="submit" disabled={busy} style={{ width: "100%", marginTop: 18, padding: "11px 0", borderRadius: 12, border: "none", background: BRAND, color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer", opacity: busy ? 0.6 : 1 }}>
-          {busy ? "Aguarde…" : mode === "login" ? "Entrar" : "Criar conta"}
+
+        <h1 style={{ fontSize: 25, fontWeight: 800, color: "#F2F4F8", margin: "0 0 8px", letterSpacing: "-.01em" }}>
+          {isLogin ? "Bem-vindo de volta" : "Crie sua conta"}
+        </h1>
+        <p style={{ fontSize: 13.5, color: "#8A96AC", margin: "0 0 30px", lineHeight: 1.5 }}>
+          {isLogin ? "Entre para continuar sua trilha de estudos." : "Comece a organizar seus estudos hoje."}
+        </p>
+
+        <div style={{ marginBottom: 20 }}>
+          <label style={{ display: "block", fontSize: 11, fontWeight: 600, letterSpacing: ".06em", color: focusEmail ? "#F5B301" : "#8A96AC", marginBottom: 8, textTransform: "uppercase" }}>E-mail</label>
+          <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} onFocus={() => setFocusEmail(true)} onBlur={() => setFocusEmail(false)} placeholder="voce@email.com"
+            style={{ width: "100%", boxSizing: "border-box", padding: "13px 14px", borderRadius: 2, border: `1px solid ${focusEmail ? "#F5B301" : "rgba(255,255,255,.12)"}`, fontSize: 14.5, color: "#F2F4F8", outline: "none", background: "rgba(255,255,255,.03)", boxShadow: focusEmail ? "0 0 0 3px rgba(245,179,1,.12)" : "none" }} />
+        </div>
+
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
+            <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: ".06em", color: focusPass ? "#F5B301" : "#8A96AC", textTransform: "uppercase" }}>Senha</label>
+          </div>
+          <input type="password" required minLength={6} value={pass} onChange={(e) => setPass(e.target.value)} onFocus={() => setFocusPass(true)} onBlur={() => setFocusPass(false)} placeholder="mínimo 6 caracteres"
+            style={{ width: "100%", boxSizing: "border-box", padding: "13px 14px", borderRadius: 2, border: `1px solid ${focusPass ? "#F5B301" : "rgba(255,255,255,.12)"}`, fontSize: 14.5, color: "#F2F4F8", outline: "none", background: "rgba(255,255,255,.03)", boxShadow: focusPass ? "0 0 0 3px rgba(245,179,1,.12)" : "none" }} />
+        </div>
+
+        <button type="submit" disabled={busy}
+          style={{ width: "100%", marginTop: 22, padding: 15, borderRadius: 2, border: "1px solid #F5B301", background: busy ? "#8a7433" : "#F5B301", color: "#0A0F1C", fontSize: 13.5, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+          {busy && <span style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid rgba(10,15,28,.3)", borderTopColor: "#0A0F1C", animation: "ln-spin .7s linear infinite" }} />}
+          <span>{busy ? "Aguarde…" : isLogin ? "Entrar" : "Criar conta"}</span>
         </button>
-        <button type="button" onClick={() => { setMode(mode === "login" ? "signup" : "login"); setMsg(null); }} style={{ width: "100%", marginTop: 10, background: "transparent", border: "none", color: P.inkSoft, fontSize: 13, cursor: "pointer" }}>
-          {mode === "login" ? "Não tem conta? Criar agora" : "Já tenho conta — entrar"}
+
+        {msg && (
+          <div style={{ marginTop: 16, padding: "11px 13px", borderRadius: 2, border: `1px solid ${msg.ok ? "rgba(21,154,108,.4)" : "rgba(220,80,80,.4)"}`, background: msg.ok ? "rgba(21,154,108,.1)" : "rgba(220,80,80,.1)", color: msg.ok ? "#4ADE9C" : "#F28B8B", fontSize: 12.5, fontWeight: 500 }}>
+            {msg.t}
+          </div>
+        )}
+
+        <div style={{ display: "flex", alignItems: "center", gap: 14, margin: "30px 0 20px" }}>
+          <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,.08)" }} />
+          <span style={{ fontSize: 10, color: "#5B6478", fontWeight: 600, letterSpacing: ".1em" }}>OU</span>
+          <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,.08)" }} />
+        </div>
+
+        <button type="button" onClick={() => { setMode(isLogin ? "signup" : "login"); setMsg(null); }}
+          style={{ width: "100%", background: "transparent", border: "none", color: "#F5B301", fontSize: 13, fontWeight: 600, cursor: "pointer", padding: 6 }}>
+          {isLogin ? "Não tem conta? Criar agora" : "Já tenho conta — entrar"}
         </button>
       </form>
     </div>
