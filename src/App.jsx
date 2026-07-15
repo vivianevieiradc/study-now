@@ -169,6 +169,8 @@ function seedSims(disc, simData) {
 function StudyApp({ onLogout, concurso, setConcurso }) {
   const CK = (k) => `${concurso.id}_${k}`;
   const [loading, setLoading] = useState(true);
+  const [preloaderExiting, setPreloaderExiting] = useState(false);
+  const [showPreloader, setShowPreloader] = useState(true);
   const [view, setView] = useState("home");
   const [navOpen, setNavOpen] = useState(false);
   const [theme, setTheme] = useState("light");
@@ -206,6 +208,13 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
     })();
   }, []);
 
+  useEffect(() => {
+    if (loading) return;
+    const t1 = setTimeout(() => setPreloaderExiting(true), 300);
+    const t2 = setTimeout(() => setShowPreloader(false), 1300);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [loading]);
+
   useEffect(() => { document.body.style.background = C.bg; }, [C]);
   useEffect(() => { if (!loading) store.set("theme", theme); }, [theme, loading]);
   useEffect(() => { if (!loading) store.set(CK("disc"), disciplines); }, [disciplines, loading]);
@@ -237,7 +246,8 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
     setReviews((p) => p.map((r) => (r.id === rid ? { ...r, done: true } : r)));
   }
 
-  if (loading) return <div className="h-screen flex items-center justify-center" style={{ background: LIGHT.bg }}><div className="text-center"><BookOpen size={40} color={LIGHT.ink} className="mx-auto animate-pulse" /><p className="mt-3 text-sm" style={{ color: LIGHT.muted }}>Carregando seus estudos…</p></div></div>;
+  if (loading) return <Preloader exiting={false} />;
+  if (showPreloader) return <Preloader exiting={preloaderExiting} />;
 
   const shared = { concurso, disciplines, setDisciplines, sessions, setSessions, reviews, setReviews, cycle, setCycle, plan, setPlan, goals, setGoals, simulados, setSimulados, discById, registerStudy, markReviewDone, setView };
   const NAV = [
@@ -1058,6 +1068,31 @@ function StudyAppWithConcurso({ onLogout }) {
   }
 
   return <StudyApp key={concurso.id} concurso={concurso} setConcurso={setConcurso} onLogout={onLogout} />;
+}
+
+function Preloader({ exiting, label }) {
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 999,
+      background: "#0A0F1C",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      transition: "transform 1s cubic-bezier(0.7,0,0.3,1), opacity .4s ease",
+      transform: exiting ? "translateY(-100%)" : "translateY(0)",
+    }}>
+      <div style={{
+        textAlign: "center",
+        transition: "opacity .4s ease, transform .4s ease",
+        opacity: exiting ? 0.1 : 1,
+        transform: exiting ? "translateY(-80px)" : "translateY(0)",
+      }}>
+        <div style={{ position: "relative", width: 80, height: 80, margin: "0 auto" }}>
+          <span style={{ position: "absolute", width: 80, height: 80, border: "8px solid #F5B301", borderTop: "8px solid transparent", borderRadius: 999, animation: "pl-spin-1 2s infinite linear" }} />
+          <span style={{ position: "absolute", top: 20, left: 20, width: 40, height: 40, border: "8px solid #F5B301", borderTop: "8px solid transparent", borderRadius: 999, animation: "pl-spin-2 1s infinite linear" }} />
+        </div>
+        {label && <p style={{ marginTop: 18, fontSize: 11, fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: "#F5B301" }}>{label}</p>}
+      </div>
+    </div>
+  );
 }
 
 /* ============================ Autenticação ============================ */

@@ -9,3 +9,15 @@ body { margin: 0; -webkit-font-smoothing: antialiased; }
 @keyframes ln-rotate { to { transform:rotate(360deg);} }
 @keyframes ln-rotateRev { to { transform:rotate(-360deg);} }
 @keyframes ln-spin { to { transform:rotate(360deg);} }
+
+/* ==== Preloader ==== */
+@keyframes pl-spin-1 {
+  0% { transform: rotate(360deg); opacity: 1; }
+  50% { transform: rotate(180deg); opacity: .5; }
+  100% { transform: rotate(0deg); opacity: 1; }
+}
+@keyframes pl-spin-2 {
+  0% { transform: rotate(0deg); opacity: .5; }
+  50% { transform: rotate(180deg); opacity: 1; }
+  100% { transform: rotate(360deg); opacity: .5; }
+}
