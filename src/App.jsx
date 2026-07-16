@@ -62,7 +62,7 @@ const DAYS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
 /* ============================ Helpers ============================ */
 const uid = () => Math.random().toString(36).slice(2, 10);
-const todayISO = () => new Date().toISOString().slice(0, 10);
+const todayISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
 const addDays = (iso, n) => { const d = new Date(iso + "T00:00:00"); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
 const fmtMin = (m) => { const h = Math.floor(m / 60), mm = m % 60; return h ? `${h}h${mm ? String(mm).padStart(2, "0") : ""}` : `${mm}min`; };
 const fmtDate = (iso) => new Date(iso + "T00:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
@@ -183,6 +183,7 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
   const [plan, setPlan] = useState([]);
   const [goals, setGoals] = useState({ hours: 20, questions: 200 });
   const [simulados, setSimulados] = useState([]);
+  const [streakDays, setStreakDays] = useState({});
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
 
@@ -203,6 +204,7 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
       setPlan(await store.get(CK("plan"), []));
       let sm = await store.get(CK("sim"), null); if (!sm) { sm = seedSims(d, concurso.seedSimsData); await store.set(CK("sim"), sm); } setSimulados(sm);
       setGoals(await store.get(CK("goals"), { hours: 20, questions: 200 }));
+      setStreakDays(await store.get(CK("streakDays"), {}));
       let cy = await store.get(CK("cycle"), null);
       if (!cy) { cy = { mode: "auto", blocks: autoCycle(d) }; await store.set(CK("cycle"), cy); }
       setCycle(cy);
@@ -225,6 +227,7 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
   useEffect(() => { if (!loading) store.set(CK("cycle"), cycle); }, [cycle, loading]);
   useEffect(() => { if (!loading) store.set(CK("plan"), plan); }, [plan, loading]);
   useEffect(() => { if (!loading) store.set(CK("goals"), goals); }, [goals, loading]);
+  useEffect(() => { if (!loading) store.set(CK("streakDays"), streakDays); }, [streakDays, loading]);
   useEffect(() => { if (!loading) store.set(CK("sim"), simulados); }, [simulados, loading]);
 
   useEffect(() => {
@@ -251,7 +254,7 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
   if (loading) return <Preloader exiting={false} />;
   if (showPreloader) return <Preloader exiting={preloaderExiting} />;
 
-  const shared = { concurso, disciplines, setDisciplines, sessions, setSessions, reviews, setReviews, cycle, setCycle, plan, setPlan, goals, setGoals, simulados, setSimulados, discById, registerStudy, markReviewDone, setView };
+  const shared = { concurso, disciplines, setDisciplines, sessions, setSessions, reviews, setReviews, cycle, setCycle, plan, setPlan, goals, setGoals, simulados, setSimulados, streakDays, setStreakDays, discById, registerStudy, markReviewDone, setView };
   const NAV = [
     ["home", "Início", Home], ["raiox", "Raio-X da prova", Crosshair],
     ["ciclo", "Ciclo de estudo", RefreshCw], ["plano", "Planejamento", CalendarDays], ["revisoes", "Revisões", ListChecks],
@@ -357,25 +360,29 @@ function Field({ label, children }) { const C = useC(); return <label className=
 function Empty({ msg }) { const C = useC(); return <p className="text-sm py-4 text-center" style={{ color: C.muted }}>{msg}</p>; }
 
 /* ============================ Métricas ============================ */
-function useMetrics(sessions, disciplines) {
+function useMetrics(sessions, disciplines, streakDays = {}) {
   return useMemo(() => {
     const byDisc = {}; disciplines.forEach((d) => (byDisc[d.id] = { minutes: 0, right: 0, wrong: 0, name: d.name, color: d.color }));
     sessions.forEach((s) => { const b = byDisc[s.disciplineId]; if (b) { b.minutes += s.minutes; b.right += s.right; b.wrong += s.wrong; } });
-    const days = [...new Set(sessions.map((s) => s.date))].sort().reverse();
+    const sessDays = new Set(sessions.map((s) => s.date));
+    // Marcação manual (streakDays) tem prioridade sobre as sessões registradas
+    const dayDone = (d) => (streakDays[d] !== undefined ? streakDays[d] : sessDays.has(d));
+    // Sequência: conta dias consecutivos até hoje (ou ontem); qualquer dia sem estudo zera
     let streak = 0; let cur = todayISO();
-    if (days.includes(cur) || days.includes(addDays(cur, -1))) { if (!days.includes(cur)) cur = addDays(cur, -1); while (days.includes(cur)) { streak++; cur = addDays(cur, -1); } }
+    if (!dayDone(cur)) cur = addDays(cur, -1);
+    while (dayDone(cur)) { streak++; cur = addDays(cur, -1); }
     const wk = startOfWeek(todayISO()); const weekSess = sessions.filter((s) => s.date >= wk);
-    return { byDisc, streak, weekMin: weekSess.reduce((a, s) => a + s.minutes, 0), weekQ: weekSess.reduce((a, s) => a + s.right + s.wrong, 0), totalMin: sessions.reduce((a, s) => a + s.minutes, 0) };
-  }, [sessions, disciplines]);
+    return { byDisc, dayDone, streak, weekMin: weekSess.reduce((a, s) => a + s.minutes, 0), weekQ: weekSess.reduce((a, s) => a + s.right + s.wrong, 0), totalMin: sessions.reduce((a, s) => a + s.minutes, 0) };
+  }, [sessions, disciplines, streakDays]);
 }
 function usePriority(disciplines) {
   return useMemo(() => { const list = []; disciplines.forEach((d) => d.topics.forEach((t) => list.push({ disc: d, topic: t, score: (t.hits || 0) * d.peso }))); return list.filter((x) => !x.topic.studied && x.topic.hits > 0).sort((a, b) => b.score - a.score); }, [disciplines]);
 }
 
 /* ============================ HOME ============================ */
-function HomeView({ sessions, disciplines, reviews, goals, markReviewDone, setView, discById, cycle, concurso }) {
+function HomeView({ sessions, disciplines, reviews, goals, markReviewDone, setView, discById, cycle, concurso, streakDays, setStreakDays }) {
   const C = useC();
-  const m = useMetrics(sessions, disciplines);
+  const m = useMetrics(sessions, disciplines, streakDays);
   const priority = usePriority(disciplines);
   const dueToday = reviews.filter((r) => !r.done && r.due <= todayISO());
   const hoursPct = Math.min(100, Math.round((m.weekMin / 60 / goals.hours) * 100));
@@ -426,7 +433,7 @@ function HomeView({ sessions, disciplines, reviews, goals, markReviewDone, setVi
             <span className="text-4xl font-extrabold">{m.streak}</span>
             <span className="text-[13px]" style={{ color: C.muted }}>{m.streak === 1 ? "dia seguido" : "dias seguidos"}</span>
           </div>
-          <StreakDots sessions={sessions} />
+          <StreakDots dayDone={m.dayDone} onToggle={(d) => setStreakDays((prev) => ({ ...prev, [d]: !m.dayDone(d) }))} />
           <div className="flex gap-6 pt-4" style={{ borderTop: `1px solid ${C.line}` }}>
             <div>
               <div className="text-[11px] mb-0.5" style={{ color: C.muted }}>Hoje estudado</div>
@@ -493,13 +500,12 @@ function HomeView({ sessions, disciplines, reviews, goals, markReviewDone, setVi
     </div>
   );
 }
-function StreakDots({ sessions }) {
+function StreakDots({ dayDone, onToggle }) {
   const C = useC();
-  const days = new Set(sessions.map((s) => s.date));
   const last = Array.from({ length: 7 }, (_, i) => addDays(todayISO(), -(6 - i)));
   return <div className="flex gap-2">{last.map((d, i) => {
-    const done = days.has(d); const today = i === 6;
-    return <div key={d} className="w-[34px] h-[34px] rounded-lg flex items-center justify-center text-[13px] font-bold" style={{ background: done ? C.gold : C.chip, color: done ? "#12161F" : C.muted, boxShadow: today ? `0 0 0 2px ${C.gold}` : "none" }}>{DAYS[new Date(d + "T00:00:00").getDay()][0]}</div>;
+    const done = dayDone(d); const today = i === 6;
+    return <button key={d} onClick={() => onToggle(d)} title={d.split("-").reverse().join("/")} className="w-[34px] h-[34px] rounded-lg flex items-center justify-center text-[13px] font-bold transition-all cursor-pointer" style={{ background: done ? C.gold : C.chip, color: done ? "#12161F" : C.muted, boxShadow: today ? `0 0 0 2px ${C.gold}` : "none" }}>{DAYS[new Date(d + "T00:00:00").getDay()][0]}</button>;
   })}</div>;
 }
 function GoalBar({ label, value, target, pct, unit, color }) {
