@@ -18,16 +18,18 @@ import { PROVAS } from "./data/provas";
 const BRAND = "#0B2A5B";        // navy da marca (fixo nos dois temas)
 const DISC_COLORS = ["#2D6BE0", "#F5B301", "#159A6C", "#7C5CFC", "#E5484D", "#0EA5B7", "#EC6D1F", "#3B82F6", "#DB2777"];
 const LIGHT = {
-  bg: "#F5F7FA", surface: "#FFFFFF", surface2: "#FFFFFF",
+  bg: "#F5F7FA", surface: "#FFFFFF", surface2: "#FFFFFF", sidebar: "#FFFFFF",
   ink: "#0B2A5B", inkSoft: "#1E3A6B", muted: "#6B7280", line: "#E6EAF0",
   gold: "#C98A00", goldSoft: "#FFF4D6", green: "#159A6C", greenSoft: "#E4F5EE",
   red: "#D5383D", redSoft: "#FCE9E9",
+  navActiveBg: BRAND, navActiveInk: "#FFFFFF", chip: "#FFFFFF",
 };
 const DARK = {
-  bg: "#0E1420", surface: "#161E2E", surface2: "#1B2536",
-  ink: "#E8EDF5", inkSoft: "#B7C2D6", muted: "#8A96AC", line: "#28324A",
-  gold: "#F5B301", goldSoft: "#33290F", green: "#37C79A", greenSoft: "#122E26",
-  red: "#F0686C", redSoft: "#3A1E20",
+  bg: "#0A0F1C", surface: "#111726", surface2: "#0D1220", sidebar: "#0D1220",
+  ink: "#F2F4F8", inkSoft: "#AEB6C7", muted: "#8A96AC", line: "rgba(255,255,255,.07)",
+  gold: "#F5B301", goldSoft: "rgba(245,179,1,.14)", green: "#3DBE7A", greenSoft: "rgba(61,190,122,.14)",
+  red: "#E5544F", redSoft: "rgba(229,84,79,.14)",
+  navActiveBg: "rgba(245,179,1,.12)", navActiveInk: "#F5B301", chip: "rgba(255,255,255,.05)",
 };
 const ThemeCtx = createContext(LIGHT);
 const useC = () => useContext(ThemeCtx);
@@ -261,12 +263,12 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
     <ThemeCtx.Provider value={C}>
       <div style={{ background: C.bg, minHeight: "100vh", color: C.ink, fontFamily: "'Inter',ui-sans-serif,system-ui,sans-serif" }}>
         <div className="flex">
-          <aside className="hidden md:flex flex-col w-64 shrink-0 h-screen sticky top-0 border-r" style={{ background: C.surface, borderColor: C.line }}>
+          <aside className="hidden md:flex flex-col w-64 shrink-0 h-screen sticky top-0 border-r" style={{ background: C.sidebar, borderColor: C.line }}>
             <Brand concurso={concurso} setConcurso={setConcurso} />
             <nav className="px-3 flex-1 space-y-1 overflow-auto">{NAV.map(([id, label, Icon]) => <NavItem key={id} active={view === id} onClick={() => setView(id)} Icon={Icon} label={label} />)}</nav>
             <div className="p-3 border-t" style={{ borderColor: C.line }}>
               <ThemeToggle theme={theme} setTheme={setTheme} />
-              <button onClick={onLogout} className="w-full flex items-center gap-3 px-3 py-2.5 mt-2 rounded-xl text-sm font-medium" style={{ background: "transparent", color: C.muted, border: `1px solid ${C.line}` }}><LogOut size={18} color={C.muted} /> Sair</button>
+              <button onClick={onLogout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold" style={{ background: "transparent", color: C.inkSoft }}><LogOut size={16} color={C.inkSoft} /> Sair</button>
               <div className="px-1 pt-3 text-xs" style={{ color: C.muted }}>{concurso.label} · {concurso.subtitle}</div>
             </div>
           </aside>
@@ -274,7 +276,7 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
           {navOpen && (
             <div className="md:hidden fixed inset-0 z-40" onClick={() => setNavOpen(false)}>
               <div className="absolute inset-0 bg-black/50" />
-              <aside className="absolute left-0 top-0 bottom-0 w-64 flex flex-col overflow-auto" style={{ background: C.surface }} onClick={(e) => e.stopPropagation()}>
+              <aside className="absolute left-0 top-0 bottom-0 w-64 flex flex-col overflow-auto" style={{ background: C.sidebar }} onClick={(e) => e.stopPropagation()}>
                 <Brand concurso={concurso} setConcurso={setConcurso} />
                 <nav className="px-3 flex-1 space-y-1">{NAV.map(([id, label, Icon]) => <NavItem key={id} active={view === id} onClick={() => { setView(id); setNavOpen(false); }} Icon={Icon} label={label} />)}</nav>
                 <div className="p-3 border-t" style={{ borderColor: C.line }}><ThemeToggle theme={theme} setTheme={setTheme} /></div>
@@ -316,23 +318,25 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
 /* ============================ Base ============================ */
 function ThemeToggle({ theme, setTheme }) {
   const C = useC(); const dark = theme === "dark";
-  return <button onClick={() => setTheme(dark ? "light" : "dark")} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium" style={{ background: C.surface2, color: C.inkSoft, border: `1px solid ${C.line}` }}>
-    {dark ? <Sun size={18} color={C.gold} /> : <Moon size={18} color={C.inkSoft} />} {dark ? "Tema claro" : "Tema escuro"}
+  return <button onClick={() => setTheme(dark ? "light" : "dark")} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold" style={{ background: "transparent", color: C.inkSoft }}>
+    {dark ? <Sun size={16} color={C.inkSoft} /> : <Moon size={16} color={C.inkSoft} />} {dark ? "Tema claro" : "Tema escuro"}
   </button>;
 }
 function Brand({ concurso, setConcurso }) {
   const C = useC();
   return (
-    <div className="px-4 pt-5 pb-3">
-      <div className="flex items-center gap-2.5 mb-3">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: BRAND }}><BookOpen size={18} color="#F5B301" /></div>
-        <div className="font-extrabold text-lg leading-none" style={{ color: C.ink }}>Studora</div>
+    <div className="px-4 pt-6 pb-4">
+      <div className="flex items-center gap-3 mb-5">
+        <div className="w-8 h-8 flex items-center justify-center shrink-0" style={{ border: "1px solid #F5B301", transform: "rotate(45deg)" }}>
+          <BookOpen size={15} color="#F5B301" style={{ transform: "rotate(-45deg)" }} />
+        </div>
+        <div className="font-extrabold text-lg leading-none tracking-tight" style={{ color: C.ink }}>Studora</div>
       </div>
-      <div className="flex gap-1.5">
+      <div className="flex gap-1.5 p-1 rounded-lg" style={{ background: C.chip }}>
         {CONCURSOS.map((c) => (
           <button key={c.id} onClick={() => setConcurso(c.id)}
-            className="flex-1 text-[11px] font-semibold px-2 py-1.5 rounded-lg transition-all"
-            style={{ background: concurso?.id === c.id ? BRAND : C.surface2, color: concurso?.id === c.id ? "#fff" : C.muted, border: `1px solid ${concurso?.id === c.id ? BRAND : C.line}` }}>
+            className="flex-1 text-[13px] font-bold px-2 py-1.5 rounded-md transition-all"
+            style={{ background: concurso?.id === c.id ? C.navActiveBg : "transparent", color: concurso?.id === c.id ? C.navActiveInk : C.muted }}>
             {c.label}
           </button>
         ))}
@@ -340,7 +344,7 @@ function Brand({ concurso, setConcurso }) {
     </div>
   );
 }
-function NavItem({ active, onClick, Icon, label }) { const C = useC(); return <button onClick={onClick} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition" style={{ background: active ? BRAND : "transparent", color: active ? "#fff" : C.inkSoft }}><Icon size={18} color={active ? "#F5B301" : C.muted} /> {label}</button>; }
+function NavItem({ active, onClick, Icon, label }) { const C = useC(); return <button onClick={onClick} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition" style={{ background: active ? C.navActiveBg : "transparent", color: active ? C.navActiveInk : C.inkSoft }}><Icon size={18} color={active ? C.navActiveInk : C.muted} /> {label}</button>; }
 function Card({ children, className = "", style = {} }) { const C = useC(); return <div className={`rounded-2xl p-5 ${className}`} style={{ background: C.surface, border: `1px solid ${C.line}`, ...style }}>{children}</div>; }
 function PageTitle({ children, sub }) { const C = useC(); return <div className="mb-6"><h1 className="text-2xl font-extrabold">{children}</h1>{sub && <p className="text-sm mt-1" style={{ color: C.muted }}>{sub}</p>}</div>; }
 function Btn({ children, onClick, variant = "primary", className = "", ...p }) {
@@ -369,7 +373,7 @@ function usePriority(disciplines) {
 }
 
 /* ============================ HOME ============================ */
-function HomeView({ sessions, disciplines, reviews, goals, markReviewDone, setView, discById }) {
+function HomeView({ sessions, disciplines, reviews, goals, markReviewDone, setView, discById, cycle, concurso }) {
   const C = useC();
   const m = useMetrics(sessions, disciplines);
   const priority = usePriority(disciplines);
@@ -377,41 +381,137 @@ function HomeView({ sessions, disciplines, reviews, goals, markReviewDone, setVi
   const hoursPct = Math.min(100, Math.round((m.weekMin / 60 / goals.hours) * 100));
   const qPct = Math.min(100, Math.round((m.weekQ / goals.questions) * 100));
   const activeDisc = Object.entries(m.byDisc).filter(([, v]) => v.minutes > 0);
+  const todayMin = sessions.filter((s) => s.date === todayISO()).reduce((a, s) => a + s.minutes, 0);
+  const curBlock = cycle?.blocks?.find((b) => (b.doneMinutes || 0) < b.targetMinutes);
+  const cicloHoje = curBlock ? discById[curBlock.disciplineId]?.name : null;
+  const daysToProva = concurso?.provaDate ? Math.max(0, Math.ceil((new Date(concurso.provaDate + "T00:00:00") - new Date(todayISO() + "T00:00:00")) / 86400000)) : null;
+  const pctColor = (p) => (p >= 60 ? C.green : C.gold);
   return (
-    <div>
-      <PageTitle sub="Sua central de comando — tudo atualizado em tempo real.">Bom estudo 👋</PageTitle>
-      <div className="grid md:grid-cols-3 gap-4 mb-4">
-        <Card className="md:col-span-1 flex flex-col justify-between" style={{ background: BRAND, color: "#fff", border: "none" }}>
-          <div className="flex items-center gap-2 text-sm" style={{ color: "#F5B301" }}><Flame size={18} /> Constância</div>
-          <div className="my-2"><span className="text-5xl font-extrabold">{m.streak}</span><span className="ml-2 text-sm opacity-80">{m.streak === 1 ? "dia" : "dias"} seguidos</span></div>
+    <div className="flex flex-col gap-5">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-extrabold">Bom estudo</h1>
+          <p className="text-sm mt-1" style={{ color: C.muted }}>Aqui está o seu progresso atualizado.</p>
+        </div>
+        {daysToProva !== null && (
+          <div className="flex items-center gap-2 px-3.5 py-2 rounded-lg" style={{ background: C.chip, border: `1px solid ${C.line}` }}>
+            <Clock size={15} color={C.gold} />
+            <span className="text-[13px] font-semibold" style={{ color: C.inkSoft }}>Prova em {daysToProva} dias</span>
+          </div>
+        )}
+      </div>
+
+      {/* Comece por aqui */}
+      <div className="rounded-xl px-5 py-4" style={{ background: `linear-gradient(135deg, ${C.goldSoft}, transparent)`, border: `1px solid ${C.gold}55` }}>
+        <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center gap-2 text-[13px] font-bold" style={{ color: C.gold }}><Zap size={15} /> Comece por aqui</div>
+          <button className="text-xs font-semibold" style={{ color: C.gold }} onClick={() => setView("raiox")}>Ver raio-x completo →</button>
+        </div>
+        {priority.length === 0 ? <Empty msg="Sem tópicos prioritários pendentes — bom trabalho!" /> : priority.slice(0, 3).map(({ disc, topic }, i) => {
+          const alta = i < 2;
+          return (
+            <div key={topic.id} className="flex items-center gap-3 py-2" style={{ borderTop: `1px solid ${C.gold}26` }}>
+              <span className="text-[11px] font-extrabold px-2.5 py-0.5 rounded-md shrink-0 tracking-wide" style={{ background: alta ? C.gold : C.goldSoft, color: alta ? "#12161F" : C.gold }}>{alta ? "PRIORIDADE ALTA" : "PRIORIDADE MÉDIA"}</span>
+              <span className="text-[13px] min-w-0 truncate" style={{ color: C.ink }}>{disc.name}: {topic.name}</span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Constância + Metas */}
+      <Card className="grid md:grid-cols-[1fr_1px_1.4fr] gap-7 items-start !p-6">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-2 text-[13px] font-semibold" style={{ color: C.muted }}><Flame size={15} /> Constância</div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-4xl font-extrabold">{m.streak}</span>
+            <span className="text-[13px]" style={{ color: C.muted }}>{m.streak === 1 ? "dia seguido" : "dias seguidos"}</span>
+          </div>
           <StreakDots sessions={sessions} />
-        </Card>
-        <Card className="md:col-span-2">
-          <div className="flex items-center gap-2 mb-4 text-sm font-semibold"><Target size={16} color={C.gold} /> Metas da semana</div>
-          <GoalBar label="Horas de estudo" value={m.weekMin / 60} target={goals.hours} pct={hoursPct} unit="h" />
-          <div className="h-4" /><GoalBar label="Questões resolvidas" value={m.weekQ} target={goals.questions} pct={qPct} unit="" />
-        </Card>
-      </div>
-      <Card className="mb-4" style={{ borderColor: C.gold, background: C.goldSoft }}>
-        <div className="flex items-center justify-between mb-2"><div className="flex items-center gap-2 text-sm font-semibold" style={{ color: C.ink }}><Zap size={16} color={C.gold} /> Onde focar agora</div><button className="text-xs font-semibold" style={{ color: C.inkSoft }} onClick={() => setView("raiox")}>Ver raio-x <ChevronRight size={12} className="inline" /></button></div>
-        {priority.slice(0, 3).map(({ disc, topic }) => (<div key={topic.id} className="flex items-center gap-2 py-1.5 text-sm"><span className="w-2 h-2 rounded-full shrink-0" style={{ background: disc.color }} /><span className="flex-1 min-w-0 truncate">{topic.name}</span><span className="text-[10px] px-2 py-0.5 rounded-full shrink-0" style={{ background: C.surface, color: C.ink }}>cai muito</span></div>))}
+          <div className="flex gap-6 pt-4" style={{ borderTop: `1px solid ${C.line}` }}>
+            <div>
+              <div className="text-[11px] mb-0.5" style={{ color: C.muted }}>Hoje estudado</div>
+              <div className="text-[15px] font-bold">{todayMin ? fmtMin(todayMin) : "—"}</div>
+            </div>
+            <div>
+              <div className="text-[11px] mb-0.5" style={{ color: C.muted }}>Ciclo de hoje</div>
+              <div className="text-[15px] font-bold">{cicloHoje || "—"}</div>
+            </div>
+          </div>
+        </div>
+        <div className="hidden md:block h-full" style={{ background: C.line }} />
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-2 text-[13px] font-semibold" style={{ color: C.muted }}><Target size={15} /> Metas da semana</div>
+          <GoalBar label="Horas de estudo" value={m.weekMin / 60} target={goals.hours} pct={hoursPct} unit="h" color={pctColor(hoursPct)} />
+          <GoalBar label="Questões resolvidas" value={m.weekQ} target={goals.questions} pct={qPct} unit="" color={pctColor(qPct)} />
+        </div>
       </Card>
-      <div className="grid md:grid-cols-2 gap-4">
+
+      <div className="grid md:grid-cols-[1fr_1.3fr] gap-5 items-start">
         <Card>
-          <div className="flex items-center justify-between mb-3"><div className="flex items-center gap-2 text-sm font-semibold"><ListChecks size={16} color={C.gold} /> Revisões de hoje</div><button className="text-xs font-semibold" style={{ color: C.muted }} onClick={() => setView("revisoes")}>Ver todas <ChevronRight size={12} className="inline" /></button></div>
-          {dueToday.length === 0 ? <Empty msg="Nada para revisar hoje. Bom dia livre!" /> : dueToday.slice(0, 5).map((r) => (<div key={r.id} className="flex items-center gap-3 py-2 border-b last:border-0" style={{ borderColor: C.line }}><button onClick={() => markReviewDone(r.id)}><Circle size={20} color={C.muted} /></button><div className="flex-1 min-w-0"><div className="text-sm font-medium truncate">{r.label}</div><div className="text-xs" style={{ color: C.muted }}>{discById[r.disciplineId]?.name} · {REVIEW_INTERVALS[r.intervalIdx]}d</div></div>{r.due < todayISO() && <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: C.redSoft, color: C.red }}>atrasada</span>}</div>))}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2 text-sm font-bold"><ListChecks size={16} /> Revisões de hoje</div>
+            <button className="text-xs font-semibold" style={{ color: C.gold }} onClick={() => setView("revisoes")}>Ver todas →</button>
+          </div>
+          {dueToday.length === 0 ? (
+            <div className="flex flex-col items-center text-center gap-2.5 px-2 pt-4 pb-1">
+              <CheckCircle2 size={32} color={C.green} />
+              <div className="text-sm font-bold">Nada para revisar hoje</div>
+              <div className="text-[13px] leading-relaxed" style={{ color: C.muted }}>Aproveite para adiantar o foco recomendado acima, ou resolver questões extras.</div>
+            </div>
+          ) : dueToday.slice(0, 5).map((r) => (
+            <div key={r.id} className="flex items-center gap-3 py-2 border-b last:border-0" style={{ borderColor: C.line }}>
+              <button onClick={() => markReviewDone(r.id)}><Circle size={20} color={C.muted} /></button>
+              <div className="flex-1 min-w-0"><div className="text-sm font-medium truncate">{r.label}</div><div className="text-xs" style={{ color: C.muted }}>{discById[r.disciplineId]?.name} · {REVIEW_INTERVALS[r.intervalIdx]}d</div></div>
+              {r.due < todayISO() && <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: C.redSoft, color: C.red }}>atrasada</span>}
+            </div>
+          ))}
         </Card>
         <Card>
-          <div className="flex items-center gap-2 mb-3 text-sm font-semibold"><BarChart3 size={16} color={C.gold} /> Desempenho por disciplina</div>
-          {activeDisc.length === 0 ? <Empty msg="Registre um estudo para ver seu desempenho aqui." /> : activeDisc.slice(0, 7).map(([id, v]) => { const tot = v.right + v.wrong; const acc = tot ? Math.round((v.right / tot) * 100) : 0; return <div key={id} className="py-2 border-b last:border-0" style={{ borderColor: C.line }}><div className="flex items-center justify-between text-sm"><span className="font-medium flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full" style={{ background: v.color }} />{v.name}</span><span style={{ color: C.muted }}>{fmtMin(v.minutes)}</span></div><div className="flex items-center gap-3 text-xs mt-1" style={{ color: C.muted }}><span style={{ color: C.green }}>✓ {v.right}</span><span style={{ color: C.red }}>✕ {v.wrong}</span>{tot > 0 && <span className="ml-auto font-semibold" style={{ color: acc >= 70 ? C.green : acc >= 50 ? C.gold : C.red }}>{acc}% acerto</span>}</div></div>; })}
+          <div className="flex items-center gap-2 mb-2 text-sm font-bold"><BarChart3 size={16} /> Desempenho por disciplina</div>
+          {activeDisc.length === 0 ? <Empty msg="Registre um estudo para ver seu desempenho aqui." /> : activeDisc.slice(0, 7).map(([id, v]) => {
+            const tot = v.right + v.wrong; const acc = tot ? Math.round((v.right / tot) * 100) : null;
+            return (
+              <div key={id} className="flex items-center justify-between py-3 border-t" style={{ borderColor: C.line }}>
+                <div className="flex flex-col gap-1 min-w-0">
+                  <div className="text-sm font-semibold truncate">{v.name}</div>
+                  <div className="flex gap-3 text-xs">
+                    <span className="flex items-center gap-1" style={{ color: C.green }}><Check size={11} />{v.right}</span>
+                    <span className="flex items-center gap-1" style={{ color: C.red }}><X size={11} />{v.wrong}</span>
+                  </div>
+                </div>
+                <div className="text-right flex flex-col gap-0.5 shrink-0">
+                  <span className="text-xs" style={{ color: C.muted }}>{fmtMin(v.minutes)}</span>
+                  <span className="text-[13px] font-bold" style={{ color: acc === null ? C.muted : acc >= 60 ? C.green : C.red }}>{acc === null ? "—" : `${acc}% acerto`}</span>
+                </div>
+              </div>
+            );
+          })}
         </Card>
       </div>
-      <div className="mt-4 flex gap-2"><Btn onClick={() => setView("ciclo")}><Play size={16} /> Estudar pelo ciclo</Btn></div>
+
+      <div className="flex gap-2"><Btn onClick={() => setView("ciclo")}><Play size={16} /> Estudar pelo ciclo</Btn></div>
     </div>
   );
 }
-function StreakDots({ sessions }) { const days = new Set(sessions.map((s) => s.date)); const last = Array.from({ length: 7 }, (_, i) => addDays(todayISO(), -(6 - i))); return <div className="flex gap-1.5">{last.map((d) => (<div key={d} className="flex-1 h-8 rounded-md flex items-center justify-center text-[10px]" style={{ background: days.has(d) ? "#F5B301" : "rgba(255,255,255,.12)", color: days.has(d) ? BRAND : "rgba(255,255,255,.5)" }}>{DAYS[new Date(d + "T00:00:00").getDay()][0]}</div>))}</div>; }
-function GoalBar({ label, value, target, pct, unit }) { const C = useC(); return <div><div className="flex justify-between text-sm mb-1.5"><span className="font-medium">{label}</span><span style={{ color: C.muted }}>{Math.round(value * 10) / 10}{unit} / {target}{unit}</span></div><div className="h-2.5 rounded-full overflow-hidden" style={{ background: C.line }}><div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: pct >= 100 ? C.green : C.gold }} /></div></div>; }
+function StreakDots({ sessions }) {
+  const C = useC();
+  const days = new Set(sessions.map((s) => s.date));
+  const last = Array.from({ length: 7 }, (_, i) => addDays(todayISO(), -(6 - i)));
+  return <div className="flex gap-2">{last.map((d, i) => {
+    const done = days.has(d); const today = i === 6;
+    return <div key={d} className="w-[34px] h-[34px] rounded-lg flex items-center justify-center text-[13px] font-bold" style={{ background: done ? C.gold : C.chip, color: done ? "#12161F" : C.muted, boxShadow: today ? `0 0 0 2px ${C.gold}` : "none" }}>{DAYS[new Date(d + "T00:00:00").getDay()][0]}</div>;
+  })}</div>;
+}
+function GoalBar({ label, value, target, pct, unit, color }) {
+  const C = useC(); const barColor = color || (pct >= 100 ? C.green : C.gold);
+  return <div>
+    <div className="flex justify-between text-[13px] mb-1.5"><span style={{ color: C.inkSoft }}>{label}</span><span style={{ color: C.muted, fontVariantNumeric: "tabular-nums" }}>{Math.round(value * 10) / 10}{unit} / {target}{unit}</span></div>
+    <div className="flex items-center gap-2">
+      <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: C.chip === "#FFFFFF" ? C.line : "rgba(255,255,255,.08)" }}><div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: barColor }} /></div>
+      <span className="text-xs font-bold w-9 text-right" style={{ color: barColor }}>{pct}%</span>
+    </div>
+  </div>;
+}
 
 /* ============================ RAIO-X ============================ */
 function RaioXView({ disciplines }) {
@@ -1113,11 +1213,7 @@ export default function App() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  if (!ready) {
-    return <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: LIGHT.bg }}>
-      <div style={{ textAlign: "center" }}><BookOpen size={40} color={LIGHT.ink} /><p style={{ marginTop: 12, fontSize: 14, color: LIGHT.muted }}>Carregando…</p></div>
-    </div>;
-  }
+  if (!ready) return <Preloader exiting={false} />;
   if (!session) return <Login />;
   return <StudyAppWithConcurso onLogout={() => supabase.auth.signOut()} />;
 }
