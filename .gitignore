@@ -8,3 +8,4 @@ dist
 supabase/seed.sql
 # notas de trabalho locais
 CONTEXTO.md
+modelo-preloader/
