@@ -111,7 +111,12 @@ export const SEED_DATAPREV = [
     { num: "9", name: "Kubernetes, VMware NSX, VMware vCenter Server, VMware vCloud Director, VMware vRealize Automation, VMware vRealize Log Insight, VMware vRealize Operations, VMware vRealize Orchestrator.", hits: 3 },
   ]},
   { name: "Linguagem de Programação, Frameworks e Versionamento", block: "Específicos", peso: 5, q: 2, topics: [
-    { num: "1", name: "Gitlab, HTML5, CSS3, Java e Javascript React.js; Java EE (EJB, JPA, JMS); Spring Boot; Spring Cloud; Confluent Kafka.", hits: 5 },
+    { num: "1", name: "Gitlab (versionamento).", hits: 1 },
+    { num: "2", name: "HTML5, CSS3.", hits: 1 },
+    { num: "3", name: "Java e Javascript, React.js.", hits: 1 },
+    { num: "4", name: "Java EE (EJB, JPA, JMS).", hits: 1 },
+    { num: "5", name: "Spring Boot; Spring Cloud.", hits: 1 },
+    { num: "6", name: "Confluent Kafka.", hits: 1 },
   ]},
   { name: "Segurança da Informação", block: "Específicos", peso: 8, q: 3, topics: [
     { num: "1",   name: "Políticas de segurança da informação.", hits: 3 },
