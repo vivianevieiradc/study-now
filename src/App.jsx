@@ -4,7 +4,8 @@ import {
   ClipboardList, Play, Plus, Flame, Target, Clock, Check,
   Trash2, Pencil, X, ChevronRight, TrendingUp, Circle, CheckCircle2,
   Timer as TimerIcon, Menu, Crosshair, Zap, Sun, Moon, RotateCcw, LogOut,
-  GraduationCap, FileText, ChevronLeft, AlertCircle, Award, Filter, History
+  GraduationCap, FileText, ChevronLeft, AlertCircle, Award, Filter, History,
+  Layers
 } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis,
@@ -59,6 +60,12 @@ const CONCURSOS = [
 
 const REVIEW_INTERVALS = [1, 3, 7, 15, 30];
 const DAYS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+
+/* ============================ Flashcards (Leitner) ============================ */
+const DAY_MS = 24 * 60 * 60 * 1000;
+const BOX_DAYS = { 1: 1, 2: 3, 3: 7 };
+const MOTIVOS_ERRO = ["Não sabia o conteúdo", "Desatenção / leitura apressada", "Interpretação do enunciado", "Chutei"];
+const makeCard = (front, back, disciplineId) => ({ id: uid(), front, back, disciplineId, box: 1, due: Date.now(), created: Date.now() });
 
 /* ============================ Helpers ============================ */
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -184,6 +191,8 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
   const [goals, setGoals] = useState({ hours: 20, questions: 200 });
   const [simulados, setSimulados] = useState([]);
   const [streakDays, setStreakDays] = useState({});
+  const [cards, setCards] = useState([]);
+  const [erros, setErros] = useState([]);
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
 
@@ -205,6 +214,8 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
       let sm = await store.get(CK("sim"), null); if (!sm) { sm = seedSims(d, concurso.seedSimsData); await store.set(CK("sim"), sm); } setSimulados(sm);
       setGoals(await store.get(CK("goals"), { hours: 20, questions: 200 }));
       setStreakDays(await store.get(CK("streakDays"), {}));
+      setCards(await store.get(CK("cards"), []));
+      setErros(await store.get(CK("erros"), []));
       let cy = await store.get(CK("cycle"), null);
       if (!cy) { cy = { mode: "auto", blocks: autoCycle(d) }; await store.set(CK("cycle"), cy); }
       setCycle(cy);
@@ -229,6 +240,8 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
   useEffect(() => { if (!loading) store.set(CK("goals"), goals); }, [goals, loading]);
   useEffect(() => { if (!loading) store.set(CK("streakDays"), streakDays); }, [streakDays, loading]);
   useEffect(() => { if (!loading) store.set(CK("sim"), simulados); }, [simulados, loading]);
+  useEffect(() => { if (!loading) store.set(CK("cards"), cards); }, [cards, loading]);
+  useEffect(() => { if (!loading) store.set(CK("erros"), erros); }, [erros, loading]);
 
   useEffect(() => {
     if (!timerRunning) return;
@@ -254,10 +267,11 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
   if (loading) return <Preloader exiting={false} />;
   if (showPreloader) return <Preloader exiting={preloaderExiting} />;
 
-  const shared = { concurso, disciplines, setDisciplines, sessions, setSessions, reviews, setReviews, cycle, setCycle, plan, setPlan, goals, setGoals, simulados, setSimulados, streakDays, setStreakDays, discById, registerStudy, markReviewDone, setView };
+  const shared = { concurso, disciplines, setDisciplines, sessions, setSessions, reviews, setReviews, cycle, setCycle, plan, setPlan, goals, setGoals, simulados, setSimulados, streakDays, setStreakDays, cards, setCards, erros, setErros, discById, registerStudy, markReviewDone, setView };
   const NAV = [
     ["home", "Início", Home], ["raiox", "Raio-X da prova", Crosshair],
     ["ciclo", "Ciclo de estudo", RefreshCw], ["plano", "Planejamento", CalendarDays], ["revisoes", "Revisões", ListChecks],
+    ["flashcards", "Flashcards", Layers],
     ["edital", "Edital verticalizado", BookOpen], ["historico", "Histórico", History], ["stats", "Estatísticas", BarChart3], ["simulados", "Simulados", ClipboardList],
     ["provas", `Provas ${concurso.label}`, GraduationCap],
   ];
@@ -299,6 +313,7 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
               {view === "ciclo" && <CicloView {...shared} />}
               {view === "plano" && <PlanoView {...shared} />}
               {view === "revisoes" && <RevisoesView {...shared} />}
+              {view === "flashcards" && <FlashcardsView {...shared} />}
               {view === "edital" && <EditalView {...shared} />}
               {view === "historico" && <HistoricoView {...shared} />}
               {view === "stats" && <StatsView {...shared} />}
@@ -809,6 +824,217 @@ function RevisoesView({ reviews, setReviews, markReviewDone, discById, disciplin
     </div>
     {pend.length === 0 && <Empty msg="Nenhuma revisão pendente. Use o formulário acima para criar a primeira." />}
     <Group title="Atrasadas" items={late} color={C.red} /><Group title="Hoje" items={today} color={C.gold} /><Group title="Próximas" items={upcoming} color={C.green} />
+  </div>;
+}
+
+/* ============================ FLASHCARDS (LEITNER) + CADERNO DE ERROS ============================ */
+function FlashcardsView({ cards, setCards, erros, setErros, disciplines, discById }) {
+  const C = useC();
+  const [sub, setSub] = useState("estudar");
+  const [queue, setQueue] = useState([]);
+  const [freeMode, setFreeMode] = useState(false);
+  const [flipped, setFlipped] = useState(false);
+  const [stamp, setStamp] = useState(null);
+  const [filtro, setFiltro] = useState("todas");
+  const [cardForm, setCardForm] = useState({ front: "", back: "", disciplineId: disciplines[0]?.id || "" });
+  const [erroForm, setErroForm] = useState({ disciplineId: disciplines[0]?.id || "", tema: "", motivo: MOTIVOS_ERRO[0], licao: "" });
+
+  const buildQueue = (all, free) => {
+    const now = Date.now();
+    const due = free ? [...all] : all.filter((c) => c.due <= now);
+    due.sort((a, b) => a.due - b.due);
+    return due.map((c) => c.id);
+  };
+  useEffect(() => { setQueue(buildQueue(cards, freeMode)); }, [sub, freeMode]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const current = queue.length ? cards.find((c) => c.id === queue[0]) : null;
+  const dueCount = cards.filter((c) => c.due <= Date.now()).length;
+
+  function answer(correct) {
+    if (!current || stamp) return;
+    setStamp(correct ? "acertou" : "errou");
+    setTimeout(() => {
+      setCards((prev) => prev.map((c) => {
+        if (c.id !== current.id) return c;
+        if (correct) { const box = Math.min(3, c.box + 1); return { ...c, box, due: Date.now() + BOX_DAYS[box] * DAY_MS }; }
+        return { ...c, box: 1, due: Date.now() + DAY_MS };
+      }));
+      setQueue((q) => q.slice(1));
+      setFlipped(false);
+      setStamp(null);
+    }, 550);
+  }
+
+  function addCard() {
+    if (!cardForm.front.trim() || !cardForm.back.trim() || !cardForm.disciplineId) return;
+    setCards((p) => [makeCard(cardForm.front.trim(), cardForm.back.trim(), cardForm.disciplineId), ...p]);
+    setCardForm({ front: "", back: "", disciplineId: cardForm.disciplineId });
+  }
+  function removeCard(id) { setCards((p) => p.filter((c) => c.id !== id)); setQueue((q) => q.filter((x) => x !== id)); }
+
+  function addErro() {
+    if (!erroForm.tema.trim() || !erroForm.disciplineId) return;
+    const e = { id: uid(), disciplineId: erroForm.disciplineId, tema: erroForm.tema.trim(), motivo: erroForm.motivo, licao: erroForm.licao.trim(), data: Date.now(), virouFicha: false };
+    setErros((p) => [e, ...p]);
+    setErroForm({ disciplineId: erroForm.disciplineId, tema: "", motivo: MOTIVOS_ERRO[0], licao: "" });
+  }
+  function removeErro(id) { setErros((p) => p.filter((e) => e.id !== id)); }
+  function erroParaFicha(e) {
+    const back = e.licao || "Revisar este conceito — complete a resposta editando a ficha.";
+    setCards((p) => [makeCard(e.tema, back, e.disciplineId), ...p]);
+    setErros((p) => p.map((x) => (x.id === e.id ? { ...x, virouFicha: true } : x)));
+  }
+
+  const countBy = (arr) => {
+    const m = {};
+    arr.forEach((x) => { m[x.disciplineId] = (m[x.disciplineId] || 0) + 1; });
+    return Object.entries(m).sort((a, b) => b[1] - a[1]);
+  };
+  const porMateria = countBy(erros);
+  const maxMat = porMateria.length ? porMateria[0][1] : 1;
+  const drillDaSemana = porMateria.length ? discById[porMateria[0][0]]?.name : null;
+
+  const fmtDue = (due) => {
+    const diff = due - Date.now();
+    if (diff <= 0) return "hoje";
+    const d = Math.ceil(diff / DAY_MS);
+    return d === 1 ? "em 1 dia" : `em ${d} dias`;
+  };
+  const filteredCards = filtro === "todas" ? cards : cards.filter((c) => c.disciplineId === filtro);
+
+  const SUBTABS = [["estudar", "Estudar"], ["fichas", "Fichas"], ["erros", "Caderno de erros"]];
+
+  return <div>
+    <PageTitle sub="Erro vira ficha → revisão espaçada (caixa 1: 1 dia · caixa 2: 3 dias · caixa 3: 7 dias). Errou, volta pra caixa 1.">Flashcards</PageTitle>
+
+    <div className="flex gap-2 mb-5">
+      {SUBTABS.map(([id, label]) => (
+        <button key={id} onClick={() => { setSub(id); setFlipped(false); setStamp(null); }}
+          className="px-3 py-2 rounded-lg text-sm font-semibold flex items-center gap-2"
+          style={{ background: sub === id ? C.navActiveBg : "transparent", color: sub === id ? C.navActiveInk : C.inkSoft, border: `1px solid ${sub === id ? "transparent" : C.line}` }}>
+          {label}{id === "estudar" && dueCount > 0 && <span className="text-xs rounded-full px-1.5" style={{ background: C.red, color: "#fff" }}>{dueCount}</span>}
+        </button>
+      ))}
+    </div>
+
+    {sub === "estudar" && (
+      current ? (
+        <div>
+          <div className="flex justify-between text-xs mb-2" style={{ color: C.muted }}>
+            <span>{discById[current.disciplineId]?.name || "?"}</span>
+            <span>CAIXA {current.box} / 3 · {queue.length} na fila</span>
+          </div>
+          <Card className="min-h-[220px] flex flex-col justify-between cursor-pointer" onClick={() => !stamp && setFlipped((f) => !f)}>
+            <div>
+              <div className="text-xs font-semibold mb-3" style={{ color: C.muted }}>{flipped ? "RESPOSTA" : "PERGUNTA"}</div>
+              <p className="text-lg font-semibold leading-snug">{flipped ? current.back : current.front}</p>
+            </div>
+            {!flipped && <div className="text-xs mt-4" style={{ color: C.muted }}>toque para virar</div>}
+            {stamp && <div className="text-sm font-bold mt-4" style={{ color: stamp === "acertou" ? C.green : C.red }}>{stamp === "acertou" ? "FIXADA" : "REVISAR"}</div>}
+          </Card>
+          {flipped && !stamp && (
+            <div className="flex gap-3 mt-4">
+              <Btn variant="ghost" onClick={() => answer(false)} style={{ flex: 1, justifyContent: "center", color: C.red, borderColor: C.red }}><X size={16} /> Errei</Btn>
+              <Btn onClick={() => answer(true)} style={{ flex: 1, justifyContent: "center", background: C.green, borderColor: C.green, color: "#fff" }}><Check size={16} /> Acertei</Btn>
+            </div>
+          )}
+        </div>
+      ) : (
+        <Card className="text-center py-10">
+          <CheckCircle2 size={28} color={C.green} className="mx-auto mb-3" />
+          <p className="text-sm mb-3" style={{ color: C.muted }}>Nenhuma ficha vence hoje.</p>
+          {cards.length > 0 && <Btn variant="ghost" onClick={() => { setFreeMode(true); setQueue(buildQueue(cards, true)); }}><RotateCcw size={15} /> Revisão livre (todas as fichas)</Btn>}
+        </Card>
+      )
+    )}
+
+    {sub === "fichas" && (
+      <div>
+        <Card className="mb-4">
+          <div className="flex items-center gap-2 text-sm font-semibold mb-4"><Plus size={16} color={C.gold} /> Nova ficha</div>
+          <div className="grid md:grid-cols-2 gap-3 mb-3">
+            <Field label="Matéria">
+              <select value={cardForm.disciplineId} onChange={(e) => setCardForm({ ...cardForm, disciplineId: e.target.value })} className={inputCls} style={inputStyle(C)}>
+                {disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+              </select>
+            </Field>
+          </div>
+          <Field label="Pergunta"><textarea rows={2} value={cardForm.front} onChange={(e) => setCardForm({ ...cardForm, front: e.target.value })} className={inputCls} style={inputStyle(C)} placeholder="Ex.: O que é subnetting?" /></Field>
+          <Field label="Resposta"><textarea rows={3} value={cardForm.back} onChange={(e) => setCardForm({ ...cardForm, back: e.target.value })} className={inputCls} style={inputStyle(C)} placeholder="A resposta que você quer lembrar na prova." /></Field>
+          <div className="flex justify-end"><Btn onClick={addCard}><Plus size={16} /> Registrar ficha</Btn></div>
+        </Card>
+        <select value={filtro} onChange={(e) => setFiltro(e.target.value)} className={`${inputCls} mb-3`} style={inputStyle(C)}>
+          <option value="todas">Todas as matérias</option>
+          {disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+        </select>
+        {filteredCards.length === 0 && <Empty msg="Nenhuma ficha nesta matéria." />}
+        <div className="space-y-2">
+          {filteredCards.map((c) => (
+            <Card key={c.id} className="!p-3">
+              <div className="flex justify-between text-xs mb-1" style={{ color: C.muted }}><span>{discById[c.disciplineId]?.name || "?"}</span><span>CX {c.box} · {fmtDue(c.due)}</span></div>
+              <div className="font-medium text-sm">{c.front}</div>
+              <div className="text-sm mt-1" style={{ color: C.muted }}>{c.back}</div>
+              <div className="flex justify-end mt-2"><button onClick={() => removeCard(c.id)}><Trash2 size={15} color={C.red} /></button></div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {sub === "erros" && (
+      <div>
+        {erros.length > 0 && (
+          <Card className="mb-4">
+            <div className="flex items-center gap-2 text-sm font-semibold mb-3"><AlertCircle size={16} color={C.gold} /> Raio-X dos erros</div>
+            {drillDaSemana && <p className="text-sm mb-3" style={{ color: C.inkSoft }}>Drill recomendado: <b>{drillDaSemana}</b> — sua matéria com mais erros.</p>}
+            <div className="space-y-2">
+              {porMateria.slice(0, 5).map(([discId, n]) => (
+                <div key={discId} className="flex items-center gap-2">
+                  <span className="text-xs w-32 truncate" style={{ color: C.muted }}>{discById[discId]?.name || "?"}</span>
+                  <div className="flex-1 h-2 rounded-full" style={{ background: C.surface2, border: `1px solid ${C.line}` }}>
+                    <div className="h-full rounded-full" style={{ width: `${(n / maxMat) * 100}%`, background: C.red }} />
+                  </div>
+                  <span className="text-xs w-5 text-right">{n}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+
+        <Card className="mb-4">
+          <div className="flex items-center gap-2 text-sm font-semibold mb-4"><Plus size={16} color={C.gold} /> Registrar erro</div>
+          <Field label="Matéria">
+            <select value={erroForm.disciplineId} onChange={(e) => setErroForm({ ...erroForm, disciplineId: e.target.value })} className={inputCls} style={inputStyle(C)}>
+              {disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+            </select>
+          </Field>
+          <Field label="Questão / tema do erro"><textarea rows={2} value={erroForm.tema} onChange={(e) => setErroForm({ ...erroForm, tema: e.target.value })} className={inputCls} style={inputStyle(C)} placeholder="Ex.: Cálculo de broadcast em sub-rede /27" /></Field>
+          <Field label="Por que errei">
+            <select value={erroForm.motivo} onChange={(e) => setErroForm({ ...erroForm, motivo: e.target.value })} className={inputCls} style={inputStyle(C)}>
+              {MOTIVOS_ERRO.map((m) => <option key={m}>{m}</option>)}
+            </select>
+          </Field>
+          <Field label="O que aprendi (vira a resposta do flashcard)"><textarea rows={3} value={erroForm.licao} onChange={(e) => setErroForm({ ...erroForm, licao: e.target.value })} className={inputCls} style={inputStyle(C)} placeholder="O conceito certo, com suas palavras." /></Field>
+          <div className="flex justify-end"><Btn onClick={addErro}><Plus size={16} /> Registrar erro</Btn></div>
+        </Card>
+
+        {erros.length === 0 && <Empty msg="Caderno vazio. Errar e registrar é como se aprende — cada erro aqui é um ponto a mais na prova." />}
+        <div className="space-y-2">
+          {erros.map((e) => (
+            <Card key={e.id} className="!p-3">
+              <div className="flex justify-between text-xs mb-1" style={{ color: C.muted }}><span>{discById[e.disciplineId]?.name || "?"}</span><span>{fmtDate(new Date(e.data).toISOString().slice(0, 10))}</span></div>
+              <div className="font-medium text-sm">{e.tema}</div>
+              <div className="text-sm mt-1" style={{ color: C.muted }}><span style={{ color: C.red }}>{e.motivo}</span>{e.licao && <> — {e.licao}</>}</div>
+              <div className="flex justify-between items-center mt-2">
+                {e.virouFicha ? <span className="text-xs flex items-center gap-1" style={{ color: C.green }}><CheckCircle2 size={13} /> virou ficha</span>
+                  : <button onClick={() => erroParaFicha(e)} className="text-xs font-semibold px-2 py-1 rounded-lg" style={{ background: C.navActiveBg, color: C.navActiveInk }}>Virar flashcard</button>}
+                <button onClick={() => removeErro(e.id)}><Trash2 size={15} color={C.red} /></button>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    )}
   </div>;
 }
 
