@@ -271,7 +271,7 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
   const NAV = [
     ["home", "Início", Home], ["raiox", "Raio-X da prova", Crosshair],
     ["ciclo", "Ciclo de estudo", RefreshCw], ["plano", "Planejamento", CalendarDays], ["revisoes", "Revisões", ListChecks],
-    ["flashcards", "Flashcards", Layers],
+    ["flashcards", "Flashcards", Layers], ["erros", "Caderno de erros", AlertCircle],
     ["edital", "Edital verticalizado", BookOpen], ["historico", "Histórico", History], ["stats", "Estatísticas", BarChart3], ["simulados", "Simulados", ClipboardList],
     ["provas", `Provas ${concurso.label}`, GraduationCap],
   ];
@@ -314,6 +314,7 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
               {view === "plano" && <PlanoView {...shared} />}
               {view === "revisoes" && <RevisoesView {...shared} />}
               {view === "flashcards" && <FlashcardsView {...shared} />}
+              {view === "erros" && <ErrosView {...shared} />}
               {view === "edital" && <EditalView {...shared} />}
               {view === "historico" && <HistoricoView {...shared} />}
               {view === "stats" && <StatsView {...shared} />}
@@ -363,7 +364,7 @@ function Brand({ concurso, setConcurso }) {
   );
 }
 function NavItem({ active, onClick, Icon, label }) { const C = useC(); return <button onClick={onClick} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition" style={{ background: active ? C.navActiveBg : "transparent", color: active ? C.navActiveInk : C.inkSoft }}><Icon size={18} color={active ? C.navActiveInk : C.muted} /> {label}</button>; }
-function Card({ children, className = "", style = {} }) { const C = useC(); return <div className={`rounded-2xl p-5 ${className}`} style={{ background: C.surface, border: `1px solid ${C.line}`, ...style }}>{children}</div>; }
+function Card({ children, className = "", style = {}, onClick }) { const C = useC(); return <div onClick={onClick} className={`rounded-2xl p-5 ${className}`} style={{ background: C.surface, border: `1px solid ${C.line}`, ...style }}>{children}</div>; }
 function PageTitle({ children, sub }) { const C = useC(); return <div className="mb-6"><h1 className="text-2xl font-extrabold">{children}</h1>{sub && <p className="text-sm mt-1" style={{ color: C.muted }}>{sub}</p>}</div>; }
 function Btn({ children, onClick, variant = "primary", className = "", ...p }) {
   const C = useC();
@@ -827,8 +828,8 @@ function RevisoesView({ reviews, setReviews, markReviewDone, discById, disciplin
   </div>;
 }
 
-/* ============================ FLASHCARDS (LEITNER) + CADERNO DE ERROS ============================ */
-function FlashcardsView({ cards, setCards, erros, setErros, disciplines, discById }) {
+/* ============================ FLASHCARDS (LEITNER) ============================ */
+function FlashcardsView({ cards, setCards, disciplines, discById }) {
   const C = useC();
   const [sub, setSub] = useState("estudar");
   const [queue, setQueue] = useState([]);
@@ -837,7 +838,6 @@ function FlashcardsView({ cards, setCards, erros, setErros, disciplines, discByI
   const [stamp, setStamp] = useState(null);
   const [filtro, setFiltro] = useState("todas");
   const [cardForm, setCardForm] = useState({ front: "", back: "", disciplineId: disciplines[0]?.id || "" });
-  const [erroForm, setErroForm] = useState({ disciplineId: disciplines[0]?.id || "", tema: "", motivo: MOTIVOS_ERRO[0], licao: "" });
 
   const buildQueue = (all, free) => {
     const now = Date.now();
@@ -872,28 +872,6 @@ function FlashcardsView({ cards, setCards, erros, setErros, disciplines, discByI
   }
   function removeCard(id) { setCards((p) => p.filter((c) => c.id !== id)); setQueue((q) => q.filter((x) => x !== id)); }
 
-  function addErro() {
-    if (!erroForm.tema.trim() || !erroForm.disciplineId) return;
-    const e = { id: uid(), disciplineId: erroForm.disciplineId, tema: erroForm.tema.trim(), motivo: erroForm.motivo, licao: erroForm.licao.trim(), data: Date.now(), virouFicha: false };
-    setErros((p) => [e, ...p]);
-    setErroForm({ disciplineId: erroForm.disciplineId, tema: "", motivo: MOTIVOS_ERRO[0], licao: "" });
-  }
-  function removeErro(id) { setErros((p) => p.filter((e) => e.id !== id)); }
-  function erroParaFicha(e) {
-    const back = e.licao || "Revisar este conceito — complete a resposta editando a ficha.";
-    setCards((p) => [makeCard(e.tema, back, e.disciplineId), ...p]);
-    setErros((p) => p.map((x) => (x.id === e.id ? { ...x, virouFicha: true } : x)));
-  }
-
-  const countBy = (arr) => {
-    const m = {};
-    arr.forEach((x) => { m[x.disciplineId] = (m[x.disciplineId] || 0) + 1; });
-    return Object.entries(m).sort((a, b) => b[1] - a[1]);
-  };
-  const porMateria = countBy(erros);
-  const maxMat = porMateria.length ? porMateria[0][1] : 1;
-  const drillDaSemana = porMateria.length ? discById[porMateria[0][0]]?.name : null;
-
   const fmtDue = (due) => {
     const diff = due - Date.now();
     if (diff <= 0) return "hoje";
@@ -902,10 +880,10 @@ function FlashcardsView({ cards, setCards, erros, setErros, disciplines, discByI
   };
   const filteredCards = filtro === "todas" ? cards : cards.filter((c) => c.disciplineId === filtro);
 
-  const SUBTABS = [["estudar", "Estudar"], ["fichas", "Fichas"], ["erros", "Caderno de erros"]];
+  const SUBTABS = [["estudar", "Estudar"], ["fichas", "Fichas"]];
 
   return <div>
-    <PageTitle sub="Erro vira ficha → revisão espaçada (caixa 1: 1 dia · caixa 2: 3 dias · caixa 3: 7 dias). Errou, volta pra caixa 1.">Flashcards</PageTitle>
+    <PageTitle sub="Revisão espaçada por caixas Leitner: caixa 1 = 1 dia · caixa 2 = 3 dias · caixa 3 = 7 dias. Errou, volta pra caixa 1.">Flashcards</PageTitle>
 
     <div className="flex gap-2 mb-5">
       {SUBTABS.map(([id, label]) => (
@@ -981,60 +959,90 @@ function FlashcardsView({ cards, setCards, erros, setErros, disciplines, discByI
       </div>
     )}
 
-    {sub === "erros" && (
-      <div>
-        {erros.length > 0 && (
-          <Card className="mb-4">
-            <div className="flex items-center gap-2 text-sm font-semibold mb-3"><AlertCircle size={16} color={C.gold} /> Raio-X dos erros</div>
-            {drillDaSemana && <p className="text-sm mb-3" style={{ color: C.inkSoft }}>Drill recomendado: <b>{drillDaSemana}</b> — sua matéria com mais erros.</p>}
-            <div className="space-y-2">
-              {porMateria.slice(0, 5).map(([discId, n]) => (
-                <div key={discId} className="flex items-center gap-2">
-                  <span className="text-xs w-32 truncate" style={{ color: C.muted }}>{discById[discId]?.name || "?"}</span>
-                  <div className="flex-1 h-2 rounded-full" style={{ background: C.surface2, border: `1px solid ${C.line}` }}>
-                    <div className="h-full rounded-full" style={{ width: `${(n / maxMat) * 100}%`, background: C.red }} />
-                  </div>
-                  <span className="text-xs w-5 text-right">{n}</span>
-                </div>
-              ))}
-            </div>
-          </Card>
-        )}
+  </div>;
+}
 
-        <Card className="mb-4">
-          <div className="flex items-center gap-2 text-sm font-semibold mb-4"><Plus size={16} color={C.gold} /> Registrar erro</div>
-          <Field label="Matéria">
-            <select value={erroForm.disciplineId} onChange={(e) => setErroForm({ ...erroForm, disciplineId: e.target.value })} className={inputCls} style={inputStyle(C)}>
-              {disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
-            </select>
-          </Field>
-          <Field label="Questão / tema do erro"><textarea rows={2} value={erroForm.tema} onChange={(e) => setErroForm({ ...erroForm, tema: e.target.value })} className={inputCls} style={inputStyle(C)} placeholder="Ex.: Cálculo de broadcast em sub-rede /27" /></Field>
-          <Field label="Por que errei">
-            <select value={erroForm.motivo} onChange={(e) => setErroForm({ ...erroForm, motivo: e.target.value })} className={inputCls} style={inputStyle(C)}>
-              {MOTIVOS_ERRO.map((m) => <option key={m}>{m}</option>)}
-            </select>
-          </Field>
-          <Field label="O que aprendi (vira a resposta do flashcard)"><textarea rows={3} value={erroForm.licao} onChange={(e) => setErroForm({ ...erroForm, licao: e.target.value })} className={inputCls} style={inputStyle(C)} placeholder="O conceito certo, com suas palavras." /></Field>
-          <div className="flex justify-end"><Btn onClick={addErro}><Plus size={16} /> Registrar erro</Btn></div>
-        </Card>
+/* ============================ CADERNO DE ERROS ============================ */
+function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, setView }) {
+  const C = useC();
+  const [erroForm, setErroForm] = useState({ disciplineId: disciplines[0]?.id || "", tema: "", motivo: MOTIVOS_ERRO[0], licao: "" });
 
-        {erros.length === 0 && <Empty msg="Caderno vazio. Errar e registrar é como se aprende — cada erro aqui é um ponto a mais na prova." />}
-        <div className="space-y-2">
-          {erros.map((e) => (
-            <Card key={e.id} className="!p-3">
-              <div className="flex justify-between text-xs mb-1" style={{ color: C.muted }}><span>{discById[e.disciplineId]?.name || "?"}</span><span>{fmtDate(new Date(e.data).toISOString().slice(0, 10))}</span></div>
-              <div className="font-medium text-sm">{e.tema}</div>
-              <div className="text-sm mt-1" style={{ color: C.muted }}><span style={{ color: C.red }}>{e.motivo}</span>{e.licao && <> — {e.licao}</>}</div>
-              <div className="flex justify-between items-center mt-2">
-                {e.virouFicha ? <span className="text-xs flex items-center gap-1" style={{ color: C.green }}><CheckCircle2 size={13} /> virou ficha</span>
-                  : <button onClick={() => erroParaFicha(e)} className="text-xs font-semibold px-2 py-1 rounded-lg" style={{ background: C.navActiveBg, color: C.navActiveInk }}>Virar flashcard</button>}
-                <button onClick={() => removeErro(e.id)}><Trash2 size={15} color={C.red} /></button>
+  function addErro() {
+    if (!erroForm.tema.trim() || !erroForm.disciplineId) return;
+    const e = { id: uid(), disciplineId: erroForm.disciplineId, tema: erroForm.tema.trim(), motivo: erroForm.motivo, licao: erroForm.licao.trim(), data: Date.now(), virouFicha: false };
+    setErros((p) => [e, ...p]);
+    setErroForm({ disciplineId: erroForm.disciplineId, tema: "", motivo: MOTIVOS_ERRO[0], licao: "" });
+  }
+  function removeErro(id) { setErros((p) => p.filter((e) => e.id !== id)); }
+  function erroParaFicha(e) {
+    const back = e.licao || "Revisar este conceito — complete a resposta editando a ficha.";
+    setCards((p) => [makeCard(e.tema, back, e.disciplineId), ...p]);
+    setErros((p) => p.map((x) => (x.id === e.id ? { ...x, virouFicha: true } : x)));
+  }
+
+  const countBy = (arr) => {
+    const m = {};
+    arr.forEach((x) => { m[x.disciplineId] = (m[x.disciplineId] || 0) + 1; });
+    return Object.entries(m).sort((a, b) => b[1] - a[1]);
+  };
+  const porMateria = countBy(erros);
+  const maxMat = porMateria.length ? porMateria[0][1] : 1;
+  const drillDaSemana = porMateria.length ? discById[porMateria[0][0]]?.name : null;
+
+  return <div>
+    <PageTitle sub="Errou uma questão → registra aqui → converte em flashcard quando quiser revisar por repetição espaçada.">Caderno de erros</PageTitle>
+
+    {erros.length > 0 && (
+      <Card className="mb-4">
+        <div className="flex items-center gap-2 text-sm font-semibold mb-3"><AlertCircle size={16} color={C.gold} /> Raio-X dos erros</div>
+        {drillDaSemana && <p className="text-sm mb-3" style={{ color: C.inkSoft }}>Drill recomendado: <b>{drillDaSemana}</b> — sua matéria com mais erros.</p>}
+        <div className="space-y-2 mb-3">
+          {porMateria.slice(0, 5).map(([discId, n]) => (
+            <div key={discId} className="flex items-center gap-2">
+              <span className="text-xs w-32 truncate" style={{ color: C.muted }}>{discById[discId]?.name || "?"}</span>
+              <div className="flex-1 h-2 rounded-full" style={{ background: C.surface2, border: `1px solid ${C.line}` }}>
+                <div className="h-full rounded-full" style={{ width: `${(n / maxMat) * 100}%`, background: C.red }} />
               </div>
-            </Card>
+              <span className="text-xs w-5 text-right">{n}</span>
+            </div>
           ))}
         </div>
-      </div>
+        <button className="text-xs font-semibold" style={{ color: C.gold }} onClick={() => setView("flashcards")}>Ver flashcards →</button>
+      </Card>
     )}
+
+    <Card className="mb-4">
+      <div className="flex items-center gap-2 text-sm font-semibold mb-4"><Plus size={16} color={C.gold} /> Registrar erro</div>
+      <Field label="Matéria">
+        <select value={erroForm.disciplineId} onChange={(e) => setErroForm({ ...erroForm, disciplineId: e.target.value })} className={inputCls} style={inputStyle(C)}>
+          {disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+        </select>
+      </Field>
+      <Field label="Questão / tema do erro"><textarea rows={2} value={erroForm.tema} onChange={(e) => setErroForm({ ...erroForm, tema: e.target.value })} className={inputCls} style={inputStyle(C)} placeholder="Ex.: Cálculo de broadcast em sub-rede /27" /></Field>
+      <Field label="Por que errei">
+        <select value={erroForm.motivo} onChange={(e) => setErroForm({ ...erroForm, motivo: e.target.value })} className={inputCls} style={inputStyle(C)}>
+          {MOTIVOS_ERRO.map((m) => <option key={m}>{m}</option>)}
+        </select>
+      </Field>
+      <Field label="O que aprendi (vira a resposta do flashcard)"><textarea rows={3} value={erroForm.licao} onChange={(e) => setErroForm({ ...erroForm, licao: e.target.value })} className={inputCls} style={inputStyle(C)} placeholder="O conceito certo, com suas palavras." /></Field>
+      <div className="flex justify-end"><Btn onClick={addErro}><Plus size={16} /> Registrar erro</Btn></div>
+    </Card>
+
+    {erros.length === 0 && <Empty msg="Caderno vazio. Errar e registrar é como se aprende — cada erro aqui é um ponto a mais na prova." />}
+    <div className="space-y-2">
+      {erros.map((e) => (
+        <Card key={e.id} className="!p-3">
+          <div className="flex justify-between text-xs mb-1" style={{ color: C.muted }}><span>{discById[e.disciplineId]?.name || "?"}</span><span>{fmtDate(new Date(e.data).toISOString().slice(0, 10))}</span></div>
+          <div className="font-medium text-sm">{e.tema}</div>
+          <div className="text-sm mt-1" style={{ color: C.muted }}><span style={{ color: C.red }}>{e.motivo}</span>{e.licao && <> — {e.licao}</>}</div>
+          <div className="flex justify-between items-center mt-2">
+            {e.virouFicha ? <span className="text-xs flex items-center gap-1" style={{ color: C.green }}><CheckCircle2 size={13} /> virou ficha</span>
+              : <button onClick={() => erroParaFicha(e)} className="text-xs font-semibold px-2 py-1 rounded-lg" style={{ background: C.navActiveBg, color: C.navActiveInk }}>Virar flashcard</button>}
+            <button onClick={() => removeErro(e.id)}><Trash2 size={15} color={C.red} /></button>
+          </div>
+        </Card>
+      ))}
+    </div>
   </div>;
 }
 
