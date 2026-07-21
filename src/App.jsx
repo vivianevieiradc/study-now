@@ -5,7 +5,7 @@ import {
   Trash2, Pencil, X, ChevronRight, TrendingUp, Circle, CheckCircle2,
   Timer as TimerIcon, Menu, Crosshair, Zap, Sun, Moon, RotateCcw, LogOut,
   GraduationCap, FileText, ChevronLeft, AlertCircle, Award, Filter, History,
-  Layers, ChevronDown
+  Layers, ChevronDown, ClipboardCheck
 } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis,
@@ -269,6 +269,7 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
   const NAV = [
     ["home", "Início", Home], ["raiox", "Raio-X da prova", Crosshair],
     ["plano", "Planejamento", CalendarDays], ["revisoes", "Revisões", ListChecks],
+    ["questoes", "Questões", ClipboardCheck],
     ["flashcards", "Flashcards", Layers], ["erros", "Caderno de erros", AlertCircle],
     ["edital", "Edital verticalizado", BookOpen], ["historico", "Histórico", History], ["stats", "Estatísticas", BarChart3], ["simulados", "Simulados", ClipboardList],
     ["provas", `Provas ${concurso.label}`, GraduationCap],
@@ -309,6 +310,7 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
               {view === "raiox" && <RaioXView {...shared} />}
               {view === "plano" && <PlanoView {...shared} />}
               {view === "revisoes" && <RevisoesView {...shared} />}
+              {view === "questoes" && <QuestoesView {...shared} />}
               {view === "flashcards" && <FlashcardsView {...shared} />}
               {view === "erros" && <ErrosView {...shared} />}
               {view === "edital" && <EditalView {...shared} />}
@@ -1119,6 +1121,107 @@ function HistoricoView({ sessions, setSessions, discById, disciplines, registerS
       return <Card key={s.id} className="!p-3 flex items-center gap-3 group"><span className="w-1.5 h-10 rounded-full" style={{ background: d?.color }} /><div className="flex-1 min-w-0"><div className="text-sm font-semibold truncate">{d?.name} {topic && <span className="font-normal" style={{ color: C.muted }}>· {topic.name}</span>}</div><div className="text-xs flex gap-3 mt-0.5" style={{ color: C.muted }}><span>{fmtDate(s.date)}</span><span><Clock size={11} className="inline" /> {fmtMin(s.minutes)}</span>{tot > 0 && <span style={{ color: C.green }}>✓{s.right}</span>}{tot > 0 && <span style={{ color: C.red }}>✕{s.wrong}</span>}</div>{s.note && <div className="text-xs mt-0.5 italic" style={{ color: C.muted }}>{s.note}</div>}</div><button onClick={() => setEdit(s)} className="p-1"><Pencil size={15} color={C.muted} /></button><button onClick={() => remove(s.id)} className="p-1"><Trash2 size={15} color={C.red} /></button></Card>; })}</div>}
     {edit && <ManualModal disciplines={disciplines} discById={discById} initial={edit} onClose={() => setEdit(null)} onSave={(data) => save(edit.id, data)} />}
     {novoOpen && <ManualModal disciplines={disciplines} discById={discById} onClose={() => setNovoOpen(false)} onSave={(data) => { registerStudy(data); setNovoOpen(false); }} />}
+  </div>;
+}
+
+/* ============================ QUESTÕES ============================ */
+function QuestoesView({ sessions, setSessions, disciplines, discById, registerStudy }) {
+  const C = useC();
+  const [discId, setDiscId] = useState(disciplines[0]?.id || "");
+  const [topicId, setTopicId] = useState("");
+  const [right, setRight] = useState("");
+  const [wrong, setWrong] = useState("");
+  const [date, setDate] = useState(todayISO());
+  const [filtroDisc, setFiltroDisc] = useState("todas");
+  const [edit, setEdit] = useState(null);
+  const topics = discById[discId]?.topics || [];
+
+  const qSessions = useMemo(() => sessions.filter((s) => s.studyType === "questoes" && (s.right + s.wrong) > 0), [sessions]);
+  const visible = filtroDisc === "todas" ? qSessions : qSessions.filter((s) => s.disciplineId === filtroDisc);
+  const sorted = [...visible].sort((a, b) => b.date.localeCompare(a.date));
+
+  const totalQ = qSessions.reduce((a, s) => a + s.right + s.wrong, 0);
+  const totalR = qSessions.reduce((a, s) => a + s.right, 0);
+  const accGeral = totalQ ? Math.round((totalR / totalQ) * 100) : null;
+
+  const ranking = useMemo(() => {
+    const map = {};
+    qSessions.forEach((s) => {
+      const d = discById[s.disciplineId];
+      const topic = s.topicId ? d?.topics.find((t) => t.id === s.topicId) : null;
+      const key = s.topicId || `disc-${s.disciplineId}`;
+      if (!map[key]) map[key] = { name: topic ? topic.name : (d?.name || "?"), discName: d?.name || "?", r: 0, w: 0 };
+      map[key].r += s.right; map[key].w += s.wrong;
+    });
+    return Object.values(map).map((t) => ({ ...t, total: t.r + t.w, acc: Math.round((t.r / (t.r + t.w)) * 100) })).sort((a, b) => a.acc - b.acc);
+  }, [qSessions, discById]);
+
+  function submit() {
+    const r = +right || 0, w = +wrong || 0;
+    if (r + w <= 0 || !discId) return;
+    registerStudy({ disciplineId: discId, topicId: topicId || null, studyType: "questoes", minutes: 0, right: r, wrong: w, date });
+    setRight(""); setWrong("");
+  }
+  function remove(id) { setSessions((p) => p.filter((s) => s.id !== id)); }
+  function save(id, data) { setSessions((p) => p.map((s) => s.id === id ? { ...s, ...data } : s)); setEdit(null); }
+
+  return <div>
+    <PageTitle sub="Registre quantas questões fez, acertou e errou por tópico do edital.">Questões</PageTitle>
+
+    <Card className="mb-4">
+      <div className="text-sm font-bold mb-3">Registrar questões</div>
+      <div className="grid md:grid-cols-2 gap-3">
+        <Field label="Disciplina"><select value={discId} onChange={(e) => { setDiscId(e.target.value); setTopicId(""); }} className={inputCls} style={inputStyle(C)}>{disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></Field>
+        <Field label="Tópico (opcional)"><select value={topicId} onChange={(e) => setTopicId(e.target.value)} className={inputCls} style={inputStyle(C)}><option value="">— geral —</option>{topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></Field>
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        <Field label="Acertos"><input type="number" min={0} value={right} onChange={(e) => setRight(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="0" /></Field>
+        <Field label="Erros"><input type="number" min={0} value={wrong} onChange={(e) => setWrong(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="0" /></Field>
+        <Field label="Data"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputCls} style={inputStyle(C)} /></Field>
+      </div>
+      <Btn className="w-full justify-center" onClick={submit}><Plus size={16} /> Registrar</Btn>
+    </Card>
+
+    <div className="grid md:grid-cols-3 gap-3 mb-4">
+      <Card className="!p-4"><div className="text-[11px] mb-1" style={{ color: C.muted }}>Questões feitas</div><div className="text-2xl font-extrabold">{totalQ}</div></Card>
+      <Card className="!p-4"><div className="text-[11px] mb-1" style={{ color: C.muted }}>Acertos</div><div className="text-2xl font-extrabold" style={{ color: C.green }}>{totalR}</div></Card>
+      <Card className="!p-4"><div className="text-[11px] mb-1" style={{ color: C.muted }}>Aproveitamento geral</div><div className="text-2xl font-extrabold" style={{ color: accGeral === null ? C.ink : accGeral >= 60 ? C.green : C.red }}>{accGeral === null ? "—" : `${accGeral}%`}</div></Card>
+    </div>
+
+    {ranking.length > 0 && <Card className="mb-4">
+      <div className="text-sm font-bold mb-3">Ranking por tópico — pior aproveitamento primeiro</div>
+      <div className="space-y-1.5">
+        {ranking.map((t, i) => {
+          const weak = t.acc < 60;
+          return <div key={i} className="flex items-center gap-3 py-1.5 border-t first:border-0" style={{ borderColor: C.line }}>
+            <div className="flex-1 min-w-0"><div className="text-sm truncate">{t.name}</div><div className="text-xs" style={{ color: C.muted }}>{t.discName} · {t.total}q</div></div>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0" style={{ background: weak ? C.redSoft : C.greenSoft, color: weak ? C.red : C.green }}>{t.acc}%{weak && " · foco"}</span>
+          </div>;
+        })}
+      </div>
+    </Card>}
+
+    <div className="flex items-center justify-between mb-2">
+      <div className="text-sm font-bold">Histórico de questões</div>
+      <select value={filtroDisc} onChange={(e) => setFiltroDisc(e.target.value)} className="px-2 py-1 rounded-lg text-xs" style={inputStyle(C)}>
+        <option value="todas">Todas as disciplinas</option>
+        {disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+      </select>
+    </div>
+    {sorted.length === 0 ? <Empty msg="Nenhuma questão registrada ainda." /> : <div className="space-y-2">{sorted.map((s) => {
+      const d = discById[s.disciplineId]; const topic = d?.topics.find((t) => t.id === s.topicId); const tot = s.right + s.wrong; const acc = tot ? Math.round((s.right / tot) * 100) : 0;
+      return <Card key={s.id} className="!p-3 flex items-center gap-3 group">
+        <span className="w-1.5 h-10 rounded-full" style={{ background: d?.color }} />
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-semibold truncate">{d?.name} {topic && <span className="font-normal" style={{ color: C.muted }}>· {topic.name}</span>}</div>
+          <div className="text-xs flex gap-3 mt-0.5" style={{ color: C.muted }}><span>{fmtDate(s.date)}</span><span style={{ color: C.green }}>✓{s.right}</span><span style={{ color: C.red }}>✕{s.wrong}</span></div>
+        </div>
+        <span className="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0" style={{ background: acc >= 60 ? C.greenSoft : C.redSoft, color: acc >= 60 ? C.green : C.red }}>{acc}%</span>
+        <button onClick={() => setEdit(s)} className="p-1"><Pencil size={15} color={C.muted} /></button>
+        <button onClick={() => remove(s.id)} className="p-1"><Trash2 size={15} color={C.red} /></button>
+      </Card>;
+    })}</div>}
+    {edit && <ManualModal disciplines={disciplines} discById={discById} initial={edit} onClose={() => setEdit(null)} onSave={(data) => save(edit.id, data)} />}
   </div>;
 }
 
