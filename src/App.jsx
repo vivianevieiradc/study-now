@@ -882,7 +882,7 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
   const filteredCards = filtro === "todas" ? cards : cards.filter((c) => c.disciplineId === filtro);
 
   const fichasCountByDisc = useMemo(() => { const m = {}; cards.forEach((c) => { m[c.disciplineId] = (m[c.disciplineId] || 0) + 1; }); return m; }, [cards]);
-  const focoList = useMemo(() => Object.entries(cardStats.reviewsByDisc).map(([discId, r]) => {
+  const focoList = useMemo(() => Object.entries(cardStats.reviewsByDisc).filter(([discId]) => fichasCountByDisc[discId] > 0).map(([discId, r]) => {
     const total = r.correct + r.wrong;
     const pct = total ? Math.round((r.correct / total) * 100) : 0;
     let cor, rotulo;
@@ -1304,7 +1304,7 @@ function StatsView({ sessions, disciplines }) {
   }, [sessions, disciplines]);
   return <div>
     <PageTitle sub="Gráficos de evolução e indicadores para orientar sua estratégia.">Estatísticas e indicadores</PageTitle>
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4"><Stat label="Tempo total" value={fmtMin(m.totalMin)} Icon={Clock} /><Stat label="Taxa de acerto" value={`${acc}%`} Icon={Target} color={acc >= 70 ? C.green : C.gold} /><Stat label="Tempo médio/sessão" value={`${avg}min`} Icon={TimerIcon} /><Stat label="Melhor constância" value={`${m.streak}d`} Icon={Flame} color={C.gold} /></div>
+    <div className="grid grid-cols-3 gap-3 mb-4"><Stat label="Taxa de acerto" value={`${acc}%`} Icon={Target} color={acc >= 70 ? C.green : C.gold} /><Stat label="Tempo médio/sessão" value={`${avg}min`} Icon={TimerIcon} /><Stat label="Melhor constância" value={`${m.streak}d`} Icon={Flame} color={C.gold} /></div>
     <Card className="mb-4"><div className="text-sm font-semibold mb-3 flex items-center gap-2"><TrendingUp size={16} color={C.gold} /> Evolução — horas por semana</div><ResponsiveContainer width="100%" height={220}><LineChart data={weekly}><CartesianGrid strokeDasharray="3 3" stroke={C.line} /><XAxis dataKey="semana" fontSize={11} stroke={C.muted} /><YAxis fontSize={11} stroke={C.muted} /><Tooltip contentStyle={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 8, color: C.ink }} /><Line type="monotone" dataKey="horas" stroke={C.gold} strokeWidth={2.5} dot={{ fill: C.gold, r: 4 }} /></LineChart></ResponsiveContainer></Card>
     <div className="grid md:grid-cols-2 gap-4 mb-4">
       <Card><div className="text-sm font-semibold mb-3">Distribuição do tempo por disciplina</div>{pie.length === 0 ? <Empty msg="Sem dados ainda." /> : <ResponsiveContainer width="100%" height={240}><PieChart><Pie data={pie} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90} paddingAngle={2}>{pie.map((e, i) => <Cell key={i} fill={e.color} />)}</Pie><Tooltip formatter={(v) => fmtMin(v)} contentStyle={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 8, color: C.ink }} /><Legend fontSize={10} /></PieChart></ResponsiveContainer>}</Card>
