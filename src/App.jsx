@@ -5,7 +5,7 @@ import {
   Trash2, Pencil, X, ChevronRight, TrendingUp, Circle, CheckCircle2,
   Timer as TimerIcon, Menu, Crosshair, Zap, Sun, Moon, RotateCcw, LogOut,
   GraduationCap, FileText, ChevronLeft, AlertCircle, Award, Filter, History,
-  Layers
+  Layers, ChevronDown
 } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis,
@@ -187,7 +187,6 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
   const [disciplines, setDisciplines] = useState([]);
   const [sessions, setSessions] = useState([]);
   const [reviews, setReviews] = useState([]);
-  const [cycle, setCycle] = useState({ mode: "auto", blocks: [] });
   const [plan, setPlan] = useState([]);
   const [goals, setGoals] = useState({ hours: 20, questions: 200 });
   const [simulados, setSimulados] = useState([]);
@@ -219,9 +218,6 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
       setCards(await store.get(CK("cards"), []));
       setErros(await store.get(CK("erros"), []));
       setCardStats(await store.get(CK("cardStats"), { reviewsByDisc: {}, studyDates: [] }));
-      let cy = await store.get(CK("cycle"), null);
-      if (!cy) { cy = { mode: "auto", blocks: autoCycle(d) }; await store.set(CK("cycle"), cy); }
-      setCycle(cy);
       setLoading(false);
     })();
   }, []);
@@ -238,7 +234,6 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
   useEffect(() => { if (!loading) store.set(CK("disc"), disciplines); }, [disciplines, loading]);
   useEffect(() => { if (!loading) store.set(CK("sess"), sessions); }, [sessions, loading]);
   useEffect(() => { if (!loading) store.set(CK("rev"), reviews); }, [reviews, loading]);
-  useEffect(() => { if (!loading) store.set(CK("cycle"), cycle); }, [cycle, loading]);
   useEffect(() => { if (!loading) store.set(CK("plan"), plan); }, [plan, loading]);
   useEffect(() => { if (!loading) store.set(CK("goals"), goals); }, [goals, loading]);
   useEffect(() => { if (!loading) store.set(CK("streakDays"), streakDays); }, [streakDays, loading]);
@@ -258,7 +253,6 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
   function registerStudy({ disciplineId, topicId, studyType, minutes, right, wrong, note, date, material, paginaInicio, paginaFim, videoTitulo }) {
     const s = { id: uid(), disciplineId, topicId: topicId || null, studyType: studyType || "teoria", minutes, right: right || 0, wrong: wrong || 0, note: note || "", material: material || "", paginaInicio: paginaInicio || "", paginaFim: paginaFim || "", videoTitulo: videoTitulo || "", date: date || todayISO() };
     setSessions((p) => [s, ...p]);
-    setCycle((prev) => ({ ...prev, blocks: prev.blocks.map((b) => b.disciplineId === disciplineId ? { ...b, doneMinutes: (b.doneMinutes || 0) + minutes } : b) }));
     const sessionDay = new Date((date || todayISO()) + "T00:00:00").getDay();
     setPlan((prev) => { const idx = prev.findIndex((p) => p.day === sessionDay && p.disciplineId === disciplineId && !p.done); if (idx === -1) return prev; const next = [...prev]; next[idx] = { ...next[idx], done: true }; return next; });
     if (topicId) setDisciplines((p) => p.map((d) => d.id === disciplineId ? { ...d, topics: d.topics.map((t) => t.id === topicId ? { ...t, studied: true } : t) } : d));
@@ -271,10 +265,10 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
   if (loading) return <Preloader exiting={false} />;
   if (showPreloader) return <Preloader exiting={preloaderExiting} />;
 
-  const shared = { concurso, disciplines, setDisciplines, sessions, setSessions, reviews, setReviews, cycle, setCycle, plan, setPlan, goals, setGoals, simulados, setSimulados, streakDays, setStreakDays, cards, setCards, erros, setErros, cardStats, setCardStats, discById, registerStudy, markReviewDone, setView };
+  const shared = { concurso, disciplines, setDisciplines, sessions, setSessions, reviews, setReviews, plan, setPlan, goals, setGoals, simulados, setSimulados, streakDays, setStreakDays, cards, setCards, erros, setErros, cardStats, setCardStats, discById, registerStudy, markReviewDone, setView };
   const NAV = [
     ["home", "Início", Home], ["raiox", "Raio-X da prova", Crosshair],
-    ["ciclo", "Ciclo de estudo", RefreshCw], ["plano", "Planejamento", CalendarDays], ["revisoes", "Revisões", ListChecks],
+    ["plano", "Planejamento", CalendarDays], ["revisoes", "Revisões", ListChecks],
     ["flashcards", "Flashcards", Layers], ["erros", "Caderno de erros", AlertCircle],
     ["edital", "Edital verticalizado", BookOpen], ["historico", "Histórico", History], ["stats", "Estatísticas", BarChart3], ["simulados", "Simulados", ClipboardList],
     ["provas", `Provas ${concurso.label}`, GraduationCap],
@@ -290,7 +284,6 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
             <div className="p-3 border-t" style={{ borderColor: C.line }}>
               <ThemeToggle theme={theme} setTheme={setTheme} />
               <button onClick={onLogout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold" style={{ background: "transparent", color: C.inkSoft }}><LogOut size={16} color={C.inkSoft} /> Sair</button>
-              <div className="px-1 pt-3 text-xs" style={{ color: C.muted }}>{concurso.label} · {concurso.subtitle}</div>
             </div>
           </aside>
 
@@ -314,7 +307,6 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
             <div className="max-w-5xl mx-auto p-4 md:p-8 pb-28 md:pb-8">
               {view === "home" && <HomeView {...shared} />}
               {view === "raiox" && <RaioXView {...shared} />}
-              {view === "ciclo" && <CicloView {...shared} />}
               {view === "plano" && <PlanoView {...shared} />}
               {view === "revisoes" && <RevisoesView {...shared} />}
               {view === "flashcards" && <FlashcardsView {...shared} />}
@@ -329,7 +321,7 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
         </div>
 
         <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 border-t flex justify-around" style={{ background: C.surface, borderColor: C.line }}>
-          {[["home", Home], ["raiox", Crosshair], ["ciclo", RefreshCw], ["edital", BookOpen], ["stats", BarChart3]].map(([id, Icon]) => (
+          {[["home", Home], ["raiox", Crosshair], ["plano", CalendarDays], ["edital", BookOpen], ["stats", BarChart3]].map(([id, Icon]) => (
             <button key={id} onClick={() => setView(id)} className="flex-1 py-2 flex justify-center" style={{ color: view === id ? C.ink : C.muted }}><Icon size={22} /></button>
           ))}
         </nav>
@@ -347,6 +339,14 @@ function ThemeToggle({ theme, setTheme }) {
 }
 function Brand({ concurso, setConcurso }) {
   const C = useC();
+  const [open, setOpen] = useState(false);
+  const boxRef = useRef(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e) => { if (boxRef.current && !boxRef.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [open]);
   return (
     <div className="px-4 pt-6 pb-4">
       <div className="flex items-center gap-3 mb-5">
@@ -355,14 +355,26 @@ function Brand({ concurso, setConcurso }) {
         </div>
         <div className="font-extrabold text-lg leading-none tracking-tight" style={{ color: C.ink }}>Studora</div>
       </div>
-      <div className="flex gap-1.5 p-1 rounded-lg" style={{ background: C.chip }}>
-        {CONCURSOS.map((c) => (
-          <button key={c.id} onClick={() => setConcurso(c.id)}
-            className="flex-1 text-[13px] font-bold px-2 py-1.5 rounded-md transition-all"
-            style={{ background: concurso?.id === c.id ? C.navActiveBg : "transparent", color: concurso?.id === c.id ? C.navActiveInk : C.muted }}>
-            {c.label}
-          </button>
-        ))}
+      <div className="relative" ref={boxRef}>
+        <button onClick={() => setOpen((o) => !o)}
+          className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-[13px] font-bold transition-all"
+          style={{ background: C.chip, color: C.ink }}>
+          <span className="truncate">{concurso?.label}{concurso?.subtitle ? ` · ${concurso.subtitle}` : ""}</span>
+          <ChevronDown size={15} color={C.muted} style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform .15s", flexShrink: 0 }} />
+        </button>
+        {open && (
+          <div className="absolute left-0 right-0 mt-1.5 rounded-lg overflow-hidden z-20"
+            style={{ background: C.surface, border: `1px solid ${C.line}`, boxShadow: "0 12px 32px -8px rgba(0,0,0,.25)" }}>
+            {CONCURSOS.map((c) => (
+              <button key={c.id} onClick={() => { setConcurso(c.id); setOpen(false); }}
+                className="w-full text-left px-3 py-2.5 text-[13px] transition-all"
+                style={{ background: concurso?.id === c.id ? C.navActiveBg : "transparent", color: concurso?.id === c.id ? C.navActiveInk : C.ink }}>
+                <div className="font-bold">{c.label}</div>
+                {c.subtitle && <div className="text-[11px] mt-0.5" style={{ color: concurso?.id === c.id ? C.navActiveInk : C.muted }}>{c.subtitle}</div>}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -400,7 +412,7 @@ function usePriority(disciplines) {
 }
 
 /* ============================ HOME ============================ */
-function HomeView({ sessions, disciplines, reviews, goals, markReviewDone, setView, discById, cycle, concurso, streakDays, setStreakDays }) {
+function HomeView({ sessions, disciplines, reviews, goals, markReviewDone, setView, discById, concurso, streakDays, setStreakDays }) {
   const C = useC();
   const m = useMetrics(sessions, disciplines, streakDays);
   const priority = usePriority(disciplines);
@@ -409,8 +421,6 @@ function HomeView({ sessions, disciplines, reviews, goals, markReviewDone, setVi
   const qPct = Math.min(100, Math.round((m.weekQ / goals.questions) * 100));
   const activeDisc = Object.entries(m.byDisc).filter(([, v]) => v.minutes > 0);
   const todayMin = sessions.filter((s) => s.date === todayISO()).reduce((a, s) => a + s.minutes, 0);
-  const curBlock = cycle?.blocks?.find((b) => (b.doneMinutes || 0) < b.targetMinutes);
-  const cicloHoje = curBlock ? discById[curBlock.disciplineId]?.name : null;
   const daysToProva = concurso?.provaDate ? Math.max(0, Math.ceil((new Date(concurso.provaDate + "T00:00:00") - new Date(todayISO() + "T00:00:00")) / 86400000)) : null;
   const pctColor = (p) => (p >= 60 ? C.green : C.gold);
   return (
@@ -458,10 +468,6 @@ function HomeView({ sessions, disciplines, reviews, goals, markReviewDone, setVi
             <div>
               <div className="text-[11px] mb-0.5" style={{ color: C.muted }}>Hoje estudado</div>
               <div className="text-[15px] font-bold">{todayMin ? fmtMin(todayMin) : "—"}</div>
-            </div>
-            <div>
-              <div className="text-[11px] mb-0.5" style={{ color: C.muted }}>Ciclo de hoje</div>
-              <div className="text-[15px] font-bold">{cicloHoje || "—"}</div>
             </div>
           </div>
         </div>
@@ -516,7 +522,7 @@ function HomeView({ sessions, disciplines, reviews, goals, markReviewDone, setVi
         </Card>
       </div>
 
-      <div className="flex gap-2"><Btn onClick={() => setView("ciclo")}><Play size={16} /> Estudar pelo ciclo</Btn></div>
+      <div className="flex gap-2"><Btn onClick={() => setView("historico")}><Play size={16} /> Registrar estudo</Btn></div>
     </div>
   );
 }
@@ -598,28 +604,6 @@ function RaioXView({ disciplines }) {
 
 
 /* ============================ CICLO ============================ */
-function CicloView({ cycle, setCycle, disciplines, discById, registerStudy }) {
-  const C = useC();
-  const [manualOpen, setManualOpen] = useState(false);
-  const total = cycle.blocks.reduce((a, b) => a + b.targetMinutes, 0);
-  function regen() { setCycle({ ...cycle, mode: "auto", blocks: autoCycle(disciplines) }); }
-  function updateBlock(id, patch) { setCycle({ ...cycle, blocks: cycle.blocks.map((b) => b.id === id ? { ...b, ...patch } : b) }); }
-  function removeBlock(id) { setCycle({ ...cycle, blocks: cycle.blocks.filter((b) => b.id !== id) }); }
-  function move(id, dir) { const idx = cycle.blocks.findIndex((b) => b.id === id); const j = idx + dir; if (j < 0 || j >= cycle.blocks.length) return; const b = [...cycle.blocks];[b[idx], b[j]] = [b[j], b[idx]]; setCycle({ ...cycle, blocks: b }); }
-  function addBlock() { const used = new Set(cycle.blocks.map((b) => b.disciplineId)); const free = disciplines.find((d) => !used.has(d.id)) || disciplines[0]; setCycle({ ...cycle, blocks: [...cycle.blocks, { id: uid(), disciplineId: free.id, targetMinutes: 60, order: cycle.blocks.length }] }); }
-  return (
-    <div>
-      <PageTitle sub="Flexível: sem fixação em dias. O tempo é distribuído proporcionalmente ao peso de cada disciplina no edital.">Ciclo de estudo</PageTitle>
-      <div className="flex flex-wrap gap-2 mb-4"><Btn variant={cycle.mode === "auto" ? "primary" : "ghost"} onClick={regen}><RefreshCw size={15} /> Gerar automático</Btn><Btn variant="ghost" onClick={addBlock}><Plus size={15} /> Adicionar etapa</Btn><Btn variant="ghost" onClick={() => setManualOpen(true)}><Pencil size={15} /> Registro manual</Btn>{cycle.blocks.length > 0 && <Btn variant="ghost" onClick={() => { if (confirm("Limpar todo o ciclo de estudo?")) setCycle({ ...cycle, blocks: [] }); }}><Trash2 size={15} color={C.red} /> <span style={{ color: C.red }}>Limpar ciclo</span></Btn>}<span className="ml-auto text-sm self-center" style={{ color: C.muted }}>Total: <b style={{ color: C.ink }}>{fmtMin(total)}</b></span></div>
-      <div className="space-y-2">
-        {cycle.blocks.map((b, i) => { const d = discById[b.disciplineId]; const pct = Math.min(100, Math.round((b.doneMinutes / b.targetMinutes) * 100));
-          return <Card key={b.id} className="!p-4"><div className="flex items-center gap-3"><span className="text-xs font-bold w-6 text-center" style={{ color: C.muted }}>{i + 1}</span><span className="w-1.5 h-10 rounded-full" style={{ background: d?.color }} /><div className="flex-1 min-w-0"><div className="font-semibold truncate">{d?.name} <span className="text-xs font-normal" style={{ color: C.muted }}>· {d?.peso} pts</span></div><div className="flex items-center gap-2 mt-1"><div className="h-1.5 rounded-full flex-1 max-w-[140px] overflow-hidden" style={{ background: C.line }}><div className="h-full" style={{ width: `${pct}%`, background: C.gold }} /></div><span className="text-xs" style={{ color: C.muted }}>{fmtMin(b.doneMinutes)} / {fmtMin(b.targetMinutes)}</span></div></div><div className="flex items-center gap-1"><input type="number" value={b.targetMinutes} min={15} step={15} onChange={(e) => updateBlock(b.id, { targetMinutes: +e.target.value })} className="w-16 px-2 py-1 rounded-lg text-sm text-center" style={inputStyle(C)} /><button onClick={() => move(b.id, -1)} className="p-1 rotate-[-90deg]" style={{ color: C.muted }}><ChevronRight size={16} /></button><button onClick={() => move(b.id, 1)} className="p-1 rotate-90" style={{ color: C.muted }}><ChevronRight size={16} /></button><button onClick={() => removeBlock(b.id)} className="p-1"><Trash2 size={16} color={C.red} /></button></div></div></Card>;
-        })}
-      </div>
-      {manualOpen && <ManualModal disciplines={disciplines} discById={discById} onClose={() => setManualOpen(false)} onSave={(data) => { registerStudy(data); setManualOpen(false); }} />}
-    </div>
-  );
-}
 function ManualModal({ disciplines, discById, onClose, onSave, initial }) {
   const C = useC();
   const [discId, setDiscId] = useState(initial?.disciplineId || disciplines[0]?.id);
@@ -652,7 +636,7 @@ function ManualModal({ disciplines, discById, onClose, onSave, initial }) {
 }
 
 /* ============================ PLANEJAMENTO ============================ */
-function PlanoView({ plan, setPlan, disciplines, discById, cycle, setView }) {
+function PlanoView({ plan, setPlan, disciplines, discById }) {
   const C = useC();
   const [open, setOpen] = useState(null);
   const [gerarOpen, setGerarOpen] = useState(false);
@@ -664,7 +648,7 @@ function PlanoView({ plan, setPlan, disciplines, discById, cycle, setView }) {
   function gerarDoCiclo(dias, horasPorDia) {
     const minPerDay = Math.round(Number(horasPorDia) * 60);
     if (!minPerDay || !dias.length) return;
-    const blocks = cycle?.blocks || [];
+    const blocks = autoCycle(disciplines);
     if (!blocks.length) return;
     const dayBlocks = dias.map(() => []);
     blocks.forEach((block, bi) => { dayBlocks[bi % dias.length].push(block); });
@@ -689,7 +673,7 @@ function PlanoView({ plan, setPlan, disciplines, discById, cycle, setView }) {
     setGerarOpen(false);
   }
   return <div>
-    <PageTitle sub="Distribua sessões ao longo da semana em grade. Gerado automaticamente a partir do ciclo ou ajustado manualmente.">Planejamento semanal</PageTitle>
+    <PageTitle sub="Distribua sessões ao longo da semana em grade. Gerado automaticamente pelo peso das disciplinas ou ajustado manualmente.">Planejamento semanal</PageTitle>
     <div className="flex flex-wrap gap-2 mb-4">
       <Btn variant="primary" onClick={() => setGerarOpen(true)}><RefreshCw size={14} /> Gerar da semana</Btn>
       {plan.length > 0 && <Btn variant="ghost" onClick={() => { if (confirm("Limpar todo o planejamento semanal?")) setPlan([]); }}><Trash2 size={14} color={C.red} /> <span style={{ color: C.red }}>Limpar tudo</span></Btn>}
@@ -702,27 +686,19 @@ function PlanoView({ plan, setPlan, disciplines, discById, cycle, setView }) {
       })}
     </div>
     {open !== null && <PlanAddModal day={open} disciplines={disciplines} onClose={() => setOpen(null)} onAdd={add} />}
-    {gerarOpen && <GerarPlanoModal cycle={cycle} discById={discById} onClose={() => setGerarOpen(false)} onGerar={gerarDoCiclo} setView={setView} />}
+    {gerarOpen && <GerarPlanoModal disciplines={disciplines} onClose={() => setGerarOpen(false)} onGerar={gerarDoCiclo} />}
   </div>;
 }
-function GerarPlanoModal({ cycle, discById, onClose, onGerar, setView }) {
+function GerarPlanoModal({ disciplines, onClose, onGerar }) {
   const C = useC();
   const [dias, setDias] = useState([1, 2, 3, 4, 5, 6]);
   const [horas, setHoras] = useState(2);
   function toggleDia(i) { setDias((d) => d.includes(i) ? d.filter((x) => x !== i) : [...d, i].sort((a, b) => a - b)); }
-  const blocks = cycle?.blocks || [];
-  const totalCiclo = blocks.reduce((a, b) => a + b.targetMinutes, 0);
+  const blocks = autoCycle(disciplines);
+  const totalSemanal = blocks.reduce((a, b) => a + b.targetMinutes, 0);
   const totalSemana = dias.length * horas * 60;
-  if (blocks.length === 0) return <Modal open title="Gerar planejamento da semana" onClose={onClose}>
-    <div className="text-center py-6">
-      <RefreshCw size={32} color={C.muted} className="mx-auto mb-3" />
-      <p className="text-sm font-semibold mb-1" style={{ color: C.ink }}>Ciclo de estudo vazio</p>
-      <p className="text-sm mb-5" style={{ color: C.muted }}>Você precisa configurar o ciclo de estudo antes de gerar o planejamento.</p>
-      <Btn onClick={() => { onClose(); setView("ciclo"); }}><RefreshCw size={14} /> Ir para o Ciclo de estudo</Btn>
-    </div>
-  </Modal>;
   return <Modal open title="Gerar planejamento da semana" onClose={onClose}>
-    <p className="text-sm mb-4" style={{ color: C.muted }}>Distribui os blocos do seu ciclo de estudo automaticamente pelos dias selecionados.</p>
+    <p className="text-sm mb-4" style={{ color: C.muted }}>Distribui o tempo de estudo pelos dias selecionados, proporcional ao peso de cada disciplina no edital.</p>
     <Field label="Dias de estudo">
       <div className="flex gap-1.5 flex-wrap">
         {DAYS.map((d, i) => <button key={i} type="button" onClick={() => toggleDia(i)} className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition" style={{ background: dias.includes(i) ? C.ink : C.surface2, color: dias.includes(i) ? C.bg : C.muted, borderColor: dias.includes(i) ? C.ink : C.line }}>{d}</button>)}
@@ -732,8 +708,8 @@ function GerarPlanoModal({ cycle, discById, onClose, onGerar, setView }) {
       <input type="number" min={0.5} max={12} step={0.5} value={horas} onChange={(e) => setHoras(+e.target.value)} className={inputCls} style={inputStyle(C)} />
     </Field>
     <div className="text-xs rounded-xl p-3 mb-2" style={{ background: C.surface2, color: C.muted }}>
-      Ciclo: <b style={{ color: C.ink }}>{fmtMin(totalCiclo)}</b> total · Semana: <b style={{ color: C.ink }}>{fmtMin(totalSemana)}</b> disponível
-      {totalSemana < totalCiclo && <span className="block mt-1 text-amber-600">⚠ Horas insuficientes para um ciclo completo por semana — só parte será alocada.</span>}
+      Distribuição: <b style={{ color: C.ink }}>{fmtMin(totalSemanal)}</b> total · Semana: <b style={{ color: C.ink }}>{fmtMin(totalSemana)}</b> disponível
+      {totalSemana < totalSemanal && <span className="block mt-1 text-amber-600">⚠ Horas insuficientes para cobrir tudo — só parte será alocada.</span>}
     </div>
     <Btn className="w-full justify-center" onClick={() => onGerar(dias, horas)} disabled={dias.length === 0}><Check size={16} /> Gerar planejamento</Btn>
   </Modal>;
@@ -1127,17 +1103,22 @@ function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, se
 }
 
 /* ============================ HISTÓRICO ============================ */
-function HistoricoView({ sessions, setSessions, discById, disciplines }) {
+function HistoricoView({ sessions, setSessions, discById, disciplines, registerStudy }) {
   const C = useC();
   const [edit, setEdit] = useState(null);
+  const [novoOpen, setNovoOpen] = useState(false);
   const sorted = [...sessions].sort((a, b) => b.date.localeCompare(a.date));
   function remove(id) { setSessions((p) => p.filter((s) => s.id !== id)); }
   function save(id, data) { setSessions((p) => p.map((s) => s.id === id ? { ...s, ...data } : s)); setEdit(null); }
   return <div>
-    <PageTitle sub="Registro completo e cronológico. Corrija ou exclua registros direto aqui.">Histórico de estudo</PageTitle>
+    <div className="flex items-start justify-between gap-3 mb-1">
+      <PageTitle sub="Registro completo e cronológico. Corrija ou exclua registros direto aqui.">Histórico de estudo</PageTitle>
+      <Btn onClick={() => setNovoOpen(true)} className="shrink-0"><Plus size={16} /> Registrar estudo</Btn>
+    </div>
     {sorted.length === 0 ? <Empty msg="Nenhuma sessão registrada ainda." /> : <div className="space-y-2">{sorted.map((s) => { const d = discById[s.disciplineId]; const topic = d?.topics.find((t) => t.id === s.topicId); const tot = s.right + s.wrong;
       return <Card key={s.id} className="!p-3 flex items-center gap-3 group"><span className="w-1.5 h-10 rounded-full" style={{ background: d?.color }} /><div className="flex-1 min-w-0"><div className="text-sm font-semibold truncate">{d?.name} {topic && <span className="font-normal" style={{ color: C.muted }}>· {topic.name}</span>}</div><div className="text-xs flex gap-3 mt-0.5" style={{ color: C.muted }}><span>{fmtDate(s.date)}</span><span><Clock size={11} className="inline" /> {fmtMin(s.minutes)}</span>{tot > 0 && <span style={{ color: C.green }}>✓{s.right}</span>}{tot > 0 && <span style={{ color: C.red }}>✕{s.wrong}</span>}</div>{s.note && <div className="text-xs mt-0.5 italic" style={{ color: C.muted }}>{s.note}</div>}</div><button onClick={() => setEdit(s)} className="p-1"><Pencil size={15} color={C.muted} /></button><button onClick={() => remove(s.id)} className="p-1"><Trash2 size={15} color={C.red} /></button></Card>; })}</div>}
     {edit && <ManualModal disciplines={disciplines} discById={discById} initial={edit} onClose={() => setEdit(null)} onSave={(data) => save(edit.id, data)} />}
+    {novoOpen && <ManualModal disciplines={disciplines} discById={discById} onClose={() => setNovoOpen(false)} onSave={(data) => { registerStudy(data); setNovoOpen(false); }} />}
   </div>;
 }
 
@@ -1590,7 +1571,7 @@ function Login() {
           </div>
           <div>
             <div style={{ fontWeight: 800, fontSize: 19, color: "#F2F4F8", letterSpacing: ".02em" }}>STUDORA</div>
-            <div style={{ fontSize: 10, color: "#F5B301", letterSpacing: ".18em", fontWeight: 600 }}>DATAPREV · ARQUITETURA</div>
+            <div style={{ fontSize: 10, color: "#F5B301", letterSpacing: ".18em", fontWeight: 600 }}>ESTUDOS · CONCURSOS</div>
           </div>
         </div>
 
