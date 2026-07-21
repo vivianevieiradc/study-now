@@ -647,7 +647,7 @@ function PlanoView({ plan, setPlan, disciplines, discById }) {
   function toggle(id) { setPlan((p) => p.map((x) => x.id === id ? { ...x, done: !x.done } : x)); }
   function add(day, disciplineId, minutes) { setPlan((p) => [...p, { id: uid(), day, disciplineId, minutes, done: false }]); setOpen(null); }
   function remove(id) { setPlan((p) => p.filter((x) => x.id !== id)); }
-  function gerarDoCiclo(dias, horasPorDia) {
+  function gerarPlanoSemanal(dias, horasPorDia) {
     const minPerDay = Math.round(Number(horasPorDia) * 60);
     if (!minPerDay || !dias.length) return;
     const blocks = autoCycle(disciplines);
@@ -688,7 +688,7 @@ function PlanoView({ plan, setPlan, disciplines, discById }) {
       })}
     </div>
     {open !== null && <PlanAddModal day={open} disciplines={disciplines} onClose={() => setOpen(null)} onAdd={add} />}
-    {gerarOpen && <GerarPlanoModal disciplines={disciplines} onClose={() => setGerarOpen(false)} onGerar={gerarDoCiclo} />}
+    {gerarOpen && <GerarPlanoModal disciplines={disciplines} onClose={() => setGerarOpen(false)} onGerar={gerarPlanoSemanal} />}
   </div>;
 }
 function GerarPlanoModal({ disciplines, onClose, onGerar }) {
@@ -1239,10 +1239,12 @@ function EditalView({ concurso, disciplines, sessions, setDisciplines }) {
   const filteredDisciplines = useMemo(() => {
     if (!searchQuery.trim()) return disciplines;
     const q = searchQuery.toLowerCase();
-    return disciplines.map((d) => ({
-      ...d,
-      topics: d.topics.filter((t) => t.name.toLowerCase().includes(q) || (t.num && t.num.toLowerCase().includes(q))),
-    })).filter((d) => d.name.toLowerCase().includes(q) || d.topics.length > 0);
+    return disciplines
+      .filter((d) => d.name.toLowerCase().includes(q) || d.topics.some((t) => t.name.toLowerCase().includes(q) || (t.num && t.num.toLowerCase().includes(q))))
+      .map((d) => d.name.toLowerCase().includes(q) ? d : ({
+        ...d,
+        topics: d.topics.filter((t) => t.name.toLowerCase().includes(q) || (t.num && t.num.toLowerCase().includes(q))),
+      }));
   }, [disciplines, searchQuery]);
   function toggleTopic(disciplineId, topicId) {
     setDisciplines((prev) => prev.map((d) => d.id !== disciplineId ? d : ({
@@ -1290,14 +1292,35 @@ function StatsView({ sessions, disciplines }) {
   const pie = Object.values(m.byDisc).filter((v) => v.minutes > 0).map((v) => ({ name: v.name, value: v.minutes, color: v.color }));
   const totalQ = Object.values(m.byDisc).reduce((a, v) => a + v.right + v.wrong, 0); const totalR = Object.values(m.byDisc).reduce((a, v) => a + v.right, 0);
   const acc = totalQ ? Math.round((totalR / totalQ) * 100) : 0; const avg = sessions.length ? Math.round(m.totalMin / sessions.length) : 0;
+  const topicPerf = useMemo(() => {
+    const map = {};
+    sessions.forEach((s) => { if (!s.topicId) return; if (!map[s.topicId]) map[s.topicId] = { r: 0, w: 0 }; map[s.topicId].r += s.right; map[s.topicId].w += s.wrong; });
+    const rows = [];
+    disciplines.forEach((d) => d.topics.forEach((t) => {
+      const p = map[t.id]; if (!p || p.r + p.w === 0) return;
+      rows.push({ discName: d.name, name: t.name, total: p.r + p.w, acc: Math.round((p.r / (p.r + p.w)) * 100) });
+    }));
+    return rows.sort((a, b) => a.acc - b.acc);
+  }, [sessions, disciplines]);
   return <div>
     <PageTitle sub="Gráficos de evolução e indicadores para orientar sua estratégia.">Estatísticas e indicadores</PageTitle>
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4"><Stat label="Tempo total" value={fmtMin(m.totalMin)} Icon={Clock} /><Stat label="Taxa de acerto" value={`${acc}%`} Icon={Target} color={acc >= 70 ? C.green : C.gold} /><Stat label="Tempo médio/sessão" value={`${avg}min`} Icon={TimerIcon} /><Stat label="Melhor constância" value={`${m.streak}d`} Icon={Flame} color={C.gold} /></div>
     <Card className="mb-4"><div className="text-sm font-semibold mb-3 flex items-center gap-2"><TrendingUp size={16} color={C.gold} /> Evolução — horas por semana</div><ResponsiveContainer width="100%" height={220}><LineChart data={weekly}><CartesianGrid strokeDasharray="3 3" stroke={C.line} /><XAxis dataKey="semana" fontSize={11} stroke={C.muted} /><YAxis fontSize={11} stroke={C.muted} /><Tooltip contentStyle={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 8, color: C.ink }} /><Line type="monotone" dataKey="horas" stroke={C.gold} strokeWidth={2.5} dot={{ fill: C.gold, r: 4 }} /></LineChart></ResponsiveContainer></Card>
-    <div className="grid md:grid-cols-2 gap-4">
+    <div className="grid md:grid-cols-2 gap-4 mb-4">
       <Card><div className="text-sm font-semibold mb-3">Distribuição do tempo por disciplina</div>{pie.length === 0 ? <Empty msg="Sem dados ainda." /> : <ResponsiveContainer width="100%" height={240}><PieChart><Pie data={pie} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90} paddingAngle={2}>{pie.map((e, i) => <Cell key={i} fill={e.color} />)}</Pie><Tooltip formatter={(v) => fmtMin(v)} contentStyle={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 8, color: C.ink }} /><Legend fontSize={10} /></PieChart></ResponsiveContainer>}</Card>
       <Card><div className="text-sm font-semibold mb-3">Acertos vs erros por disciplina</div><ResponsiveContainer width="100%" height={240}><BarChart data={Object.values(m.byDisc).filter((v) => v.right + v.wrong > 0)} layout="vertical" margin={{ left: 10 }}><XAxis type="number" fontSize={11} stroke={C.muted} /><YAxis type="category" dataKey="name" width={90} fontSize={10} stroke={C.muted} /><Tooltip contentStyle={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 8, color: C.ink }} /><Bar dataKey="right" stackId="a" fill={C.green} name="Acertos" /><Bar dataKey="wrong" stackId="a" fill={C.red} name="Erros" /></BarChart></ResponsiveContainer></Card>
     </div>
+    <Card>
+      <div className="text-sm font-semibold mb-3">Acertos por tópico — pior aproveitamento primeiro</div>
+      {topicPerf.length === 0 ? <Empty msg="Registre acertos/erros por tópico para ver o detalhamento aqui." /> : <div className="space-y-1.5">
+        {topicPerf.map((t, i) => { const weak = t.acc < 60;
+          return <div key={i} className="flex items-center gap-3 py-1.5 border-t first:border-0" style={{ borderColor: C.line }}>
+            <div className="flex-1 min-w-0"><div className="text-sm truncate">{t.name}</div><div className="text-xs" style={{ color: C.muted }}>{t.discName} · {t.total}q</div></div>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0" style={{ background: weak ? C.redSoft : C.greenSoft, color: weak ? C.red : C.green }}>{t.acc}%{weak && " · foco"}</span>
+          </div>;
+        })}
+      </div>}
+    </Card>
   </div>;
 }
 function Stat({ label, value, Icon, color }) { const C = useC(); const col = color || C.ink; return <Card className="!p-4"><Icon size={18} color={col} /><div className="text-2xl font-extrabold mt-2" style={{ color: col }}>{value}</div><div className="text-xs" style={{ color: C.muted }}>{label}</div></Card>; }
