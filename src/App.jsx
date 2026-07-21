@@ -419,10 +419,8 @@ function HomeView({ sessions, disciplines, reviews, goals, markReviewDone, setVi
   const m = useMetrics(sessions, disciplines, streakDays);
   const priority = usePriority(disciplines);
   const dueToday = reviews.filter((r) => !r.done && r.due <= todayISO());
-  const hoursPct = Math.min(100, Math.round((m.weekMin / 60 / goals.hours) * 100));
   const qPct = Math.min(100, Math.round((m.weekQ / goals.questions) * 100));
   const activeDisc = Object.entries(m.byDisc).filter(([, v]) => v.minutes > 0);
-  const todayMin = sessions.filter((s) => s.date === todayISO()).reduce((a, s) => a + s.minutes, 0);
   const daysToProva = concurso?.provaDate ? Math.max(0, Math.ceil((new Date(concurso.provaDate + "T00:00:00") - new Date(todayISO() + "T00:00:00")) / 86400000)) : null;
   const pctColor = (p) => (p >= 60 ? C.green : C.gold);
   return (
@@ -466,17 +464,10 @@ function HomeView({ sessions, disciplines, reviews, goals, markReviewDone, setVi
             <span className="text-[13px]" style={{ color: C.muted }}>{m.streak === 1 ? "dia seguido" : "dias seguidos"}</span>
           </div>
           <StreakDots dayDone={m.dayDone} onToggle={(d) => setStreakDays((prev) => ({ ...prev, [d]: !m.dayDone(d) }))} />
-          <div className="flex gap-6 pt-4" style={{ borderTop: `1px solid ${C.line}` }}>
-            <div>
-              <div className="text-[11px] mb-0.5" style={{ color: C.muted }}>Hoje estudado</div>
-              <div className="text-[15px] font-bold">{todayMin ? fmtMin(todayMin) : "—"}</div>
-            </div>
-          </div>
         </div>
         <div className="hidden md:block h-full" style={{ background: C.line }} />
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-2 text-[13px] font-semibold" style={{ color: C.muted }}><Target size={15} /> Metas da semana</div>
-          <GoalBar label="Horas de estudo" value={m.weekMin / 60} target={goals.hours} pct={hoursPct} unit="h" color={pctColor(hoursPct)} />
           <GoalBar label="Questões resolvidas" value={m.weekQ} target={goals.questions} pct={qPct} unit="" color={pctColor(qPct)} />
         </div>
       </Card>
