@@ -161,15 +161,6 @@ async function fetchProvas(concursoId) {
 }
 
 
-function autoCycle(disc) {
-  const totalPeso = disc.reduce((a, d) => a + d.peso, 0);
-  const totalMin = 900;
-  return [...disc].sort((a, b) => b.peso - a.peso).map((d, i) => ({
-    id: uid(), disciplineId: d.id, order: i,
-    targetMinutes: Math.max(30, Math.round((d.peso / totalPeso) * totalMin / 15) * 15), doneMinutes: 0,
-  }));
-}
-
 function seedSims(disc, simData) {
   const mk = () => disc.map((d) => ({ disciplineId: d.id, right: 0, total: d.q }));
   return simData.map((s) => ({ id: uid(), name: s.name, date: s.date, rows: mk() }));
@@ -565,25 +556,30 @@ function RaioXView({ disciplines }) {
             <span key={lbl} className="flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold" style={{ background: bg, color: bg === C.line ? C.muted : "#fff" }}>{lbl}</span>
           ))}
         </div>
-        <div className="space-y-4">
+        <div className="space-y-5">
           {disciplines.map((d) => (
             <div key={d.id}>
               <div className="text-xs font-semibold mb-1.5 flex items-center gap-1.5" style={{ color: C.inkSoft }}>
                 <span className="w-2 h-2 rounded-full shrink-0" style={{ background: d.color }} />{d.name}
               </div>
-              <div className="flex flex-wrap gap-1">
-                {[...d.topics].sort((a, b) => b.hits - a.hits).map((t) => {
-                  const bg = t.hits >= 8 ? C.red : t.hits >= 5 ? C.gold : t.hits >= 3 ? "#b45309" : C.line;
-                  const fg = t.hits >= 3 ? "#fff" : C.muted;
-                  const label = (t.num ? t.num + " " : "") + (t.name.length > 50 ? t.name.slice(0, 50) + "…" : t.name);
-                  return (
-                    <span key={t.id} title={`${t.num ? t.num + " " : ""}${t.name} — ${t.hits}× em provas`}
-                      className="text-[10px] px-1.5 py-0.5 rounded leading-tight cursor-default"
-                      style={{ background: bg, color: fg, maxWidth: 220 }}>
-                      {label}
-                    </span>
-                  );
-                })}
+              <div className="overflow-x-auto rounded-lg" style={{ border: `1px solid ${C.line}` }}>
+                <table className="w-full text-xs" style={{ borderCollapse: "collapse" }}>
+                  <tbody>
+                    {[...d.topics].sort((a, b) => b.hits - a.hits).map((t, i) => {
+                      const bg = t.hits >= 8 ? C.red : t.hits >= 5 ? C.gold : t.hits >= 3 ? "#b45309" : C.line;
+                      const fg = t.hits >= 3 ? "#fff" : C.muted;
+                      return (
+                        <tr key={t.id} style={{ borderTop: i ? `1px solid ${C.line}` : "none" }}>
+                          {t.num && <td className="px-2 py-1.5 font-mono text-right align-top" style={{ color: C.muted, whiteSpace: "nowrap" }}>{t.num}</td>}
+                          <td className="px-2 py-1.5 w-full" style={{ color: C.ink }}>{t.name}</td>
+                          <td className="px-2 py-1.5 align-top" style={{ whiteSpace: "nowrap" }}>
+                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: bg, color: fg }}>{t.hits}×</span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             </div>
           ))}
@@ -596,7 +592,6 @@ function RaioXView({ disciplines }) {
 
 
 
-/* ============================ CICLO ============================ */
 function ManualModal({ disciplines, discById, onClose, onSave, initial }) {
   const C = useC();
   const [discId, setDiscId] = useState(initial?.disciplineId || disciplines[0]?.id);
@@ -632,45 +627,16 @@ function ManualModal({ disciplines, discById, onClose, onSave, initial }) {
 function PlanoView({ plan, setPlan, disciplines, discById }) {
   const C = useC();
   const [open, setOpen] = useState(null);
-  const [gerarOpen, setGerarOpen] = useState(false);
   const doneCount = plan.filter((p) => p.done).length;
   const pct = plan.length ? Math.round((doneCount / plan.length) * 100) : 0;
   function toggle(id) { setPlan((p) => p.map((x) => x.id === id ? { ...x, done: !x.done } : x)); }
   function add(day, disciplineId, minutes) { setPlan((p) => [...p, { id: uid(), day, disciplineId, minutes, done: false }]); setOpen(null); }
   function remove(id) { setPlan((p) => p.filter((x) => x.id !== id)); }
-  function gerarPlanoSemanal(dias, horasPorDia) {
-    const minPerDay = Math.round(Number(horasPorDia) * 60);
-    if (!minPerDay || !dias.length) return;
-    const blocks = autoCycle(disciplines);
-    if (!blocks.length) return;
-    const dayBlocks = dias.map(() => []);
-    blocks.forEach((block, bi) => { dayBlocks[bi % dias.length].push(block); });
-    // Se blocos < dias, dias do final ficam vazios — preenche com repetição
-    if (blocks.length < dias.length) {
-      let src = 0;
-      dayBlocks.forEach((assigned, di) => {
-        if (assigned.length === 0) { dayBlocks[di].push(blocks[src % blocks.length]); src++; }
-      });
-    }
-    const newPlan = [];
-    dayBlocks.forEach((assigned, di) => {
-      if (!assigned.length) return;
-      const totalMin = assigned.reduce((s, b) => s + Number(b.targetMinutes), 0);
-      const scale = totalMin > minPerDay ? minPerDay / totalMin : 1;
-      assigned.forEach((block) => {
-        const minutes = Math.max(15, Math.round(Number(block.targetMinutes) * scale / 15) * 15);
-        newPlan.push({ id: uid(), day: dias[di], disciplineId: block.disciplineId, minutes, done: false });
-      });
-    });
-    setPlan(newPlan);
-    setGerarOpen(false);
-  }
   return <div>
-    <PageTitle sub="Distribua sessões ao longo da semana em grade. Gerado automaticamente pelo peso das disciplinas ou ajustado manualmente.">Planejamento semanal</PageTitle>
+    <PageTitle sub="Anote nos dias abaixo o que você já decidiu estudar (ex.: no ciclo do Aprovado) e marque como feito.">Planejamento semanal</PageTitle>
     <div className="flex flex-wrap gap-2 mb-4">
-      <Btn variant="primary" onClick={() => setGerarOpen(true)}><RefreshCw size={14} /> Gerar da semana</Btn>
       {plan.length > 0 && <Btn variant="ghost" onClick={() => { if (confirm("Limpar todo o planejamento semanal?")) setPlan([]); }}><Trash2 size={14} color={C.red} /> <span style={{ color: C.red }}>Limpar tudo</span></Btn>}
-      <span className="text-xs self-center ml-auto" style={{ color: C.muted }}>ou adicione sessões manualmente nos dias abaixo</span>
+      <span className="text-xs self-center ml-auto" style={{ color: C.muted }}>use o "+" em cada dia pra adicionar uma sessão</span>
     </div>
     <Card className="mb-4"><GoalBar label="Planejamento cumprido esta semana" value={doneCount} target={plan.length || 1} pct={pct} unit="" /></Card>
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -679,33 +645,7 @@ function PlanoView({ plan, setPlan, disciplines, discById }) {
       })}
     </div>
     {open !== null && <PlanAddModal day={open} disciplines={disciplines} onClose={() => setOpen(null)} onAdd={add} />}
-    {gerarOpen && <GerarPlanoModal disciplines={disciplines} onClose={() => setGerarOpen(false)} onGerar={gerarPlanoSemanal} />}
   </div>;
-}
-function GerarPlanoModal({ disciplines, onClose, onGerar }) {
-  const C = useC();
-  const [dias, setDias] = useState([1, 2, 3, 4, 5, 6]);
-  const [horas, setHoras] = useState(2);
-  function toggleDia(i) { setDias((d) => d.includes(i) ? d.filter((x) => x !== i) : [...d, i].sort((a, b) => a - b)); }
-  const blocks = autoCycle(disciplines);
-  const totalSemanal = blocks.reduce((a, b) => a + b.targetMinutes, 0);
-  const totalSemana = dias.length * horas * 60;
-  return <Modal open title="Gerar planejamento da semana" onClose={onClose}>
-    <p className="text-sm mb-4" style={{ color: C.muted }}>Distribui o tempo de estudo pelos dias selecionados, proporcional ao peso de cada disciplina no edital.</p>
-    <Field label="Dias de estudo">
-      <div className="flex gap-1.5 flex-wrap">
-        {DAYS.map((d, i) => <button key={i} type="button" onClick={() => toggleDia(i)} className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition" style={{ background: dias.includes(i) ? C.ink : C.surface2, color: dias.includes(i) ? C.bg : C.muted, borderColor: dias.includes(i) ? C.ink : C.line }}>{d}</button>)}
-      </div>
-    </Field>
-    <Field label="Horas de estudo por dia">
-      <input type="number" min={0.5} max={12} step={0.5} value={horas} onChange={(e) => setHoras(+e.target.value)} className={inputCls} style={inputStyle(C)} />
-    </Field>
-    <div className="text-xs rounded-xl p-3 mb-2" style={{ background: C.surface2, color: C.muted }}>
-      Distribuição: <b style={{ color: C.ink }}>{fmtMin(totalSemanal)}</b> total · Semana: <b style={{ color: C.ink }}>{fmtMin(totalSemana)}</b> disponível
-      {totalSemana < totalSemanal && <span className="block mt-1 text-amber-600">⚠ Horas insuficientes para cobrir tudo — só parte será alocada.</span>}
-    </div>
-    <Btn className="w-full justify-center" onClick={() => onGerar(dias, horas)} disabled={dias.length === 0}><Check size={16} /> Gerar planejamento</Btn>
-  </Modal>;
 }
 function PlanAddModal({ day, disciplines, onClose, onAdd }) { const C = useC(); const [discId, setDiscId] = useState(disciplines[0]?.id); const [min, setMin] = useState(60); return <Modal open title={`Adicionar sessão · ${DAYS[day]}`} onClose={onClose}><Field label="Disciplina"><select value={discId} onChange={(e) => setDiscId(e.target.value)} className={inputCls} style={inputStyle(C)}>{disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></Field><Field label="Duração (min)"><input type="number" value={min} step={15} onChange={(e) => setMin(+e.target.value)} className={inputCls} style={inputStyle(C)} /></Field><Btn className="w-full justify-center" onClick={() => onAdd(day, discId, min)}><Plus size={16} /> Adicionar</Btn></Modal>; }
 
