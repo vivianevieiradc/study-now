@@ -302,7 +302,6 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
   const [cardStats, setCardStats] = useState({ reviewsByDisc: {}, studyDates: [] });
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
-  const [userName, setUserName] = useState("");
 
   const C = theme === "dark" ? DARK : LIGHT;
 
@@ -325,16 +324,6 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
       setCards(await store.get(CK("cards"), []));
       setErros(await store.get(CK("erros"), []));
       setCardStats(await store.get(CK("cardStats"), { reviewsByDisc: {}, studyDates: [] }));
-      let nome = await store.get("profile_name", null);
-      if (!nome) {
-        const { data: u } = await supabase.auth.getUser();
-        const meta = u?.user?.user_metadata || {};
-        const fromMeta = meta.full_name || meta.name;
-        const fromEmail = (u?.user?.email || "").split("@")[0].replace(/[._-].*$/, "").replace(/\d+/g, "");
-        nome = (fromMeta || fromEmail || "estudante").trim();
-        nome = nome.charAt(0).toUpperCase() + nome.slice(1);
-      }
-      setUserName(nome);
       setLoading(false);
     })();
   }, []);
@@ -358,7 +347,6 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
   useEffect(() => { if (!loading) store.set(CK("cards"), cards); }, [cards, loading]);
   useEffect(() => { if (!loading) store.set(CK("erros"), erros); }, [erros, loading]);
   useEffect(() => { if (!loading) store.set(CK("cardStats"), cardStats); }, [cardStats, loading]);
-  useEffect(() => { if (!loading && userName) store.set("profile_name", userName); }, [userName, loading]);
 
   useEffect(() => {
     if (!timerRunning) return;
@@ -383,7 +371,7 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
   if (loading) return <Preloader exiting={false} />;
   if (showPreloader) return <Preloader exiting={preloaderExiting} />;
 
-  const shared = { concurso, disciplines, setDisciplines, sessions, setSessions, reviews, setReviews, plan, setPlan, goals, setGoals, simulados, setSimulados, streakDays, setStreakDays, cards, setCards, erros, setErros, cardStats, setCardStats, discById, registerStudy, markReviewDone, setView, userName, setUserName };
+  const shared = { concurso, disciplines, setDisciplines, sessions, setSessions, reviews, setReviews, plan, setPlan, goals, setGoals, simulados, setSimulados, streakDays, setStreakDays, cards, setCards, erros, setErros, cardStats, setCardStats, discById, registerStudy, markReviewDone, setView };
   const NAV = [
     ["home", "Início", Home], ["raiox", "Raio-X da prova", Crosshair],
     ["plano", "Planejamento", CalendarDays], ["revisoes", "Revisões", ListChecks],
@@ -523,17 +511,8 @@ function useMetrics(sessions, disciplines, streakDays = {}) {
     let streak = 0; let cur = todayISO();
     if (!dayDone(cur)) cur = addDays(cur, -1);
     while (dayDone(cur)) { streak++; cur = addDays(cur, -1); }
-    // Todos os dias com estudo (união das sessões + marcações manuais, respeitando overrides false)
-    const allDays = new Set(sessDays);
-    Object.entries(streakDays).forEach(([d, v]) => { if (v) allDays.add(d); else allDays.delete(d); });
-    const sortedDays = [...allDays].sort();
-    const totalDays = sortedDays.length;
-    // Recorde: maior sequência de dias consecutivos já registrada
-    let record = 0, run = 0, prev = null;
-    sortedDays.forEach((d) => { run = (prev && d === addDays(prev, 1)) ? run + 1 : 1; if (run > record) record = run; prev = d; });
-    const newRecord = streak > 0 && streak >= record;
     const wk = startOfWeek(todayISO()); const weekSess = sessions.filter((s) => s.date >= wk);
-    return { byDisc, dayDone, streak, record, totalDays, newRecord, weekMin: weekSess.reduce((a, s) => a + s.minutes, 0), weekQ: weekSess.reduce((a, s) => a + s.right + s.wrong, 0), totalMin: sessions.reduce((a, s) => a + s.minutes, 0) };
+    return { byDisc, dayDone, streak, weekMin: weekSess.reduce((a, s) => a + s.minutes, 0), weekQ: weekSess.reduce((a, s) => a + s.right + s.wrong, 0), totalMin: sessions.reduce((a, s) => a + s.minutes, 0) };
   }, [sessions, disciplines, streakDays]);
 }
 function usePriority(disciplines) {
@@ -541,11 +520,7 @@ function usePriority(disciplines) {
 }
 
 /* ============================ HOME ============================ */
-const ACCENT = "#F5900A";
-const ACCENT_SOFT = "rgba(245,144,10,.14)";
-const STREAK_MILES = [3, 7, 15, 30, 60, 100, 200, 365];
-
-function HomeView({ sessions, disciplines, reviews, goals, markReviewDone, setView, discById, concurso, streakDays, setStreakDays, userName, setUserName }) {
+function HomeView({ sessions, disciplines, reviews, goals, markReviewDone, setView, discById, concurso, streakDays, setStreakDays }) {
   const C = useC();
   const m = useMetrics(sessions, disciplines, streakDays);
   const priority = usePriority(disciplines);
@@ -553,88 +528,61 @@ function HomeView({ sessions, disciplines, reviews, goals, markReviewDone, setVi
   const qPct = Math.min(100, Math.round((m.weekQ / goals.questions) * 100));
   const activeDisc = Object.entries(m.byDisc).filter(([, v]) => v.minutes > 0);
   const daysToProva = concurso?.provaDate ? Math.max(0, Math.ceil((new Date(concurso.provaDate + "T00:00:00") - new Date(todayISO() + "T00:00:00")) / 86400000)) : null;
-  const pctColor = (p) => (p >= 60 ? C.green : ACCENT);
-
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
-  const subtitle = hour < 12 ? "Um novo dia, uma nova chance de avançar. Bora começar."
-    : hour < 18 ? "Aproveite o pique da tarde — constância vale mais que intensidade."
-    : "Noite de bons estudos. O progresso acontece agora.";
-
-  const nextMile = STREAK_MILES.find((x) => x > m.streak) || m.streak;
-  const milePct = nextMile > m.streak ? Math.round((m.streak / nextMile) * 100) : 100;
-
+  const pctColor = (p) => (p >= 60 ? C.green : C.gold);
   return (
     <div className="flex flex-col gap-5">
-      {/* Hero — saudação */}
-      <div className="relative overflow-hidden rounded-2xl p-6 md:p-7" style={{ background: "linear-gradient(135deg, #15120C 0%, #0E0E13 62%)", border: "1px solid rgba(245,144,10,.22)" }}>
-        <div className="absolute right-0 top-0 w-56 h-56 pointer-events-none" style={{ background: "radial-gradient(circle at 72% 28%, rgba(245,144,10,.20), transparent 62%)" }} />
-        <div className="relative">
-          <div className="flex items-start justify-between gap-3">
-            <h1 className="text-3xl md:text-4xl font-black uppercase leading-tight tracking-tight" style={{ color: "#fff" }}>
-              {greeting}, <EditableName name={userName} onSave={setUserName} />
-            </h1>
-            <span className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full shrink-0" style={{ background: ACCENT_SOFT, color: ACCENT, border: "1px solid rgba(245,144,10,.3)" }}><Flame size={13} /> {m.streak}d</span>
-          </div>
-          {daysToProva !== null && (
-            <div className="mt-3">
-              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[13px] font-semibold" style={{ background: "rgba(255,255,255,.06)", color: "#E7EBF2", border: "1px solid rgba(255,255,255,.1)" }}><Clock size={14} color={ACCENT} /> Prova em {daysToProva} dias</span>
-            </div>
-          )}
-          <p className="mt-3 text-sm md:text-[15px] max-w-md leading-relaxed" style={{ color: "#AEB6C7" }}>{subtitle}</p>
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-extrabold">Bom estudo</h1>
+          <p className="text-sm mt-1" style={{ color: C.muted }}>Aqui está o seu progresso atualizado.</p>
         </div>
+        {daysToProva !== null && (
+          <div className="flex items-center gap-2 px-3.5 py-2 rounded-lg" style={{ background: C.chip, border: `1px solid ${C.line}` }}>
+            <Clock size={15} color={C.gold} />
+            <span className="text-[13px] font-semibold" style={{ color: C.inkSoft }}>Prova em {daysToProva} dias</span>
+          </div>
+        )}
       </div>
 
       {/* Comece por aqui */}
-      <div className="rounded-2xl px-5 py-4" style={{ background: `linear-gradient(135deg, ${ACCENT_SOFT}, transparent)`, border: `1px solid rgba(245,144,10,.33)` }}>
+      <div className="rounded-xl px-5 py-4" style={{ background: `linear-gradient(135deg, ${C.goldSoft}, transparent)`, border: `1px solid ${C.gold}55` }}>
         <div className="flex items-center justify-between mb-1">
-          <div className="flex items-center gap-2 text-[13px] font-bold uppercase tracking-wide" style={{ color: ACCENT }}><Zap size={15} /> Comece por aqui</div>
-          <button className="text-xs font-semibold" style={{ color: ACCENT }} onClick={() => setView("raiox")}>Ver raio-x completo →</button>
+          <div className="flex items-center gap-2 text-[13px] font-bold" style={{ color: C.gold }}><Zap size={15} /> Comece por aqui</div>
+          <button className="text-xs font-semibold" style={{ color: C.gold }} onClick={() => setView("raiox")}>Ver raio-x completo →</button>
         </div>
         {priority.length === 0 ? <Empty msg="Sem tópicos prioritários pendentes — bom trabalho!" /> : priority.slice(0, 3).map(({ disc, topic }, i) => {
           const alta = i < 2;
           return (
-            <div key={topic.id} className="flex items-center gap-3 py-2" style={{ borderTop: `1px solid rgba(245,144,10,.16)` }}>
-              <span className="text-[11px] font-extrabold px-2.5 py-0.5 rounded-md shrink-0 tracking-wide" style={{ background: alta ? ACCENT : ACCENT_SOFT, color: alta ? "#1A1206" : ACCENT }}>{alta ? "PRIORIDADE ALTA" : "PRIORIDADE MÉDIA"}</span>
+            <div key={topic.id} className="flex items-center gap-3 py-2" style={{ borderTop: `1px solid ${C.gold}26` }}>
+              <span className="text-[11px] font-extrabold px-2.5 py-0.5 rounded-md shrink-0 tracking-wide" style={{ background: alta ? C.gold : C.goldSoft, color: alta ? "#12161F" : C.gold }}>{alta ? "PRIORIDADE ALTA" : "PRIORIDADE MÉDIA"}</span>
               <span className="text-[13px] min-w-0 truncate" style={{ color: C.ink }}>{disc.name}: {topic.name}</span>
             </div>
           );
         })}
       </div>
 
-      {/* Sequência (streak) */}
-      <Card className="!p-6">
-        <div className="flex items-center gap-2 text-[13px] font-bold uppercase tracking-wide mb-1" style={{ color: C.ink }}><Flame size={16} color={ACCENT} /> Sequência</div>
-        <div className="flex flex-col items-center text-center py-2">
-          <span className="text-6xl font-black leading-none" style={{ color: ACCENT }}>{m.streak}</span>
-          <span className="text-[12px] font-semibold uppercase tracking-[.15em] mt-2" style={{ color: C.muted }}>{m.streak === 1 ? "dia consecutivo" : "dias consecutivos"}</span>
-        </div>
-        <StreakRing dayDone={m.dayDone} onToggle={(d) => setStreakDays((prev) => ({ ...prev, [d]: !m.dayDone(d) }))} />
-        <div className="mt-5">
-          <div className="flex justify-between text-[13px] mb-1.5">
-            <span style={{ color: C.inkSoft }}>Próxima meta: {nextMile} dias</span>
-            <span style={{ color: C.muted, fontVariantNumeric: "tabular-nums" }}>{m.streak}/{nextMile}</span>
+      {/* Constância + Metas */}
+      <Card className="grid md:grid-cols-[1fr_1px_1.4fr] gap-7 items-start !p-6">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-2 text-[13px] font-semibold" style={{ color: C.muted }}><Flame size={15} /> Constância</div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-4xl font-extrabold">{m.streak}</span>
+            <span className="text-[13px]" style={{ color: C.muted }}>{m.streak === 1 ? "dia seguido" : "dias seguidos"}</span>
           </div>
-          <div className="h-1.5 rounded-full overflow-hidden" style={{ background: C.chip === "#FFFFFF" ? C.line : "rgba(255,255,255,.08)" }}><div className="h-full rounded-full transition-all" style={{ width: `${milePct}%`, background: ACCENT }} /></div>
+          <StreakDots dayDone={m.dayDone} onToggle={(d) => setStreakDays((prev) => ({ ...prev, [d]: !m.dayDone(d) }))} />
         </div>
-        <div className="grid grid-cols-3 gap-2 mt-5 pt-5 border-t text-center" style={{ borderColor: C.line }}>
-          <MiniStat Icon={Award} value={m.record} label="Recorde" color={ACCENT} />
-          <MiniStat Icon={CalendarDays} value={m.totalDays} label="Dias totais" color={ACCENT} />
-          <MiniStat Icon={Zap} value={m.newRecord ? "🏆" : "—"} label={m.newRecord ? "Novo recorde!" : "Siga firme"} color={C.green} />
+        <div className="hidden md:block h-full" style={{ background: C.line }} />
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-2 text-[13px] font-semibold" style={{ color: C.muted }}><Target size={15} /> Metas da semana</div>
+          <GoalBar label="Questões resolvidas" value={m.weekQ} target={goals.questions} pct={qPct} unit="" color={pctColor(qPct)} />
         </div>
-      </Card>
-
-      {/* Metas da semana */}
-      <Card className="!p-6">
-        <div className="flex items-center gap-2 text-[13px] font-bold uppercase tracking-wide mb-4" style={{ color: C.ink }}><Target size={16} color={ACCENT} /> Metas da semana</div>
-        <GoalBar label="Questões resolvidas" value={m.weekQ} target={goals.questions} pct={qPct} unit="" color={pctColor(qPct)} />
       </Card>
 
       <div className="grid md:grid-cols-[1fr_1.3fr] gap-5 items-start">
         <Card>
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2 text-[13px] font-bold uppercase tracking-wide"><ListChecks size={16} color={ACCENT} /> Revisões de hoje</div>
-            <button className="text-xs font-semibold" style={{ color: ACCENT }} onClick={() => setView("revisoes")}>Ver todas →</button>
+            <div className="flex items-center gap-2 text-sm font-bold"><ListChecks size={16} /> Revisões de hoje</div>
+            <button className="text-xs font-semibold" style={{ color: C.gold }} onClick={() => setView("revisoes")}>Ver todas →</button>
           </div>
           {dueToday.length === 0 ? (
             <div className="flex flex-col items-center text-center gap-2.5 px-2 pt-4 pb-1">
@@ -651,7 +599,7 @@ function HomeView({ sessions, disciplines, reviews, goals, markReviewDone, setVi
           ))}
         </Card>
         <Card>
-          <div className="flex items-center gap-2 mb-2 text-[13px] font-bold uppercase tracking-wide"><BarChart3 size={16} color={ACCENT} /> Desempenho por disciplina</div>
+          <div className="flex items-center gap-2 mb-2 text-sm font-bold"><BarChart3 size={16} /> Desempenho por disciplina</div>
           {activeDisc.length === 0 ? <Empty msg="Registre um estudo para ver seu desempenho aqui." /> : activeDisc.slice(0, 7).map(([id, v]) => {
             const tot = v.right + v.wrong; const acc = tot ? Math.round((v.right / tot) * 100) : null;
             return (
@@ -677,46 +625,13 @@ function HomeView({ sessions, disciplines, reviews, goals, markReviewDone, setVi
     </div>
   );
 }
-function StreakRing({ dayDone, onToggle }) {
+function StreakDots({ dayDone, onToggle }) {
   const C = useC();
   const last = Array.from({ length: 7 }, (_, i) => addDays(todayISO(), -(6 - i)));
-  return <div className="flex justify-between gap-1">{last.map((d, i) => {
+  return <div className="flex gap-2">{last.map((d, i) => {
     const done = dayDone(d); const today = i === 6;
-    const wd = DAYS[new Date(d + "T00:00:00").getDay()];
-    return (
-      <button key={d} onClick={() => onToggle(d)} title={d.split("-").reverse().join("/")} className="flex flex-col items-center gap-1.5 cursor-pointer">
-        <span className="w-9 h-9 rounded-full flex items-center justify-center text-[13px] font-bold transition-all" style={{ background: done ? ACCENT : C.chip, color: done ? "#1A1206" : C.muted, border: done ? "none" : `1px solid ${C.line}`, boxShadow: today ? `0 0 0 2px ${ACCENT}` : "none" }}>
-          {done && today ? <Flame size={15} /> : wd[0]}
-        </span>
-        <span className="text-[10px] font-medium" style={{ color: today ? ACCENT : C.muted }}>{wd.toLowerCase()}</span>
-      </button>
-    );
+    return <button key={d} onClick={() => onToggle(d)} title={d.split("-").reverse().join("/")} className="w-[34px] h-[34px] rounded-lg flex items-center justify-center text-[13px] font-bold transition-all cursor-pointer" style={{ background: done ? C.gold : C.chip, color: done ? "#12161F" : C.muted, boxShadow: today ? `0 0 0 2px ${C.gold}` : "none" }}>{DAYS[new Date(d + "T00:00:00").getDay()][0]}</button>;
   })}</div>;
-}
-function MiniStat({ Icon, value, label, color }) {
-  const C = useC();
-  return (
-    <div className="flex flex-col items-center gap-1">
-      <Icon size={17} color={color} />
-      <span className="text-lg font-extrabold leading-none">{value}</span>
-      <span className="text-[11px]" style={{ color: C.muted }}>{label}</span>
-    </div>
-  );
-}
-function EditableName({ name, onSave }) {
-  const [editing, setEditing] = useState(false);
-  const [val, setVal] = useState(name || "");
-  useEffect(() => { setVal(name || ""); }, [name]);
-  function commit() { setEditing(false); const v = val.trim(); if (v && v !== name) onSave(v); else setVal(name || ""); }
-  if (editing) {
-    return (
-      <input autoFocus value={val} onChange={(e) => setVal(e.target.value)} onBlur={commit}
-        onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); if (e.key === "Escape") { setVal(name || ""); setEditing(false); } }}
-        className="bg-transparent outline-none uppercase font-black"
-        style={{ color: ACCENT, borderBottom: `2px solid ${ACCENT}`, width: `${Math.max(4, val.length + 1)}ch` }} />
-    );
-  }
-  return <button onClick={() => setEditing(true)} title="Editar nome" style={{ color: ACCENT }}>{name}</button>;
 }
 function GoalBar({ label, value, target, pct, unit, color }) {
   const C = useC(); const barColor = color || (pct >= 100 ? C.green : C.gold);
