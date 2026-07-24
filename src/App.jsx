@@ -5,7 +5,7 @@ import {
   Trash2, Pencil, X, ChevronRight, TrendingUp, Circle, CheckCircle2,
   Timer as TimerIcon, Menu, Crosshair, Zap, Sun, Moon, RotateCcw, LogOut,
   GraduationCap, FileText, ChevronLeft, AlertCircle, Award, Filter, History,
-  Layers, ChevronDown, ClipboardCheck, Download, Copy, Upload
+  Layers, ChevronDown, ClipboardCheck, Download, Upload
 } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis,
@@ -104,17 +104,6 @@ function toCSV(headers, rows) {
   rows.forEach((r) => lines.push(r.map(csvEscape).join(";")));
   return lines.join("\n");
 }
-function mdEscape(v) {
-  return String(v ?? "").replace(/\|/g, "\\|").replace(/\n/g, " ");
-}
-function toMarkdownTable(headers, rows) {
-  const lines = [
-    `| ${headers.join(" | ")} |`,
-    `| ${headers.map(() => "---").join(" | ")} |`,
-    ...rows.map((r) => `| ${r.map(mdEscape).join(" | ")} |`),
-  ];
-  return lines.join("\n");
-}
 function downloadFile(filename, content, mime) {
   const blob = new Blob([content], { type: mime });
   const url = URL.createObjectURL(blob);
@@ -122,9 +111,6 @@ function downloadFile(filename, content, mime) {
   a.href = url; a.download = filename;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
-}
-async function copyText(text) {
-  try { await navigator.clipboard.writeText(text); return true; } catch { return false; }
 }
 function parseCSV(text) {
   const clean = text.replace(/^﻿/, "");
@@ -192,22 +178,12 @@ function ImportButton({ onImport }) {
 }
 function ExportBar({ headers, rows, filenameBase, children }) {
   const C = useC();
-  const [copied, setCopied] = useState(false);
-  async function handleCopy() {
-    const ok = await copyText(toMarkdownTable(headers, rows));
-    if (ok) { setCopied(true); setTimeout(() => setCopied(false), 1500); }
-  }
   function handleCsv() {
     downloadFile(`${filenameBase}.csv`, toCSV(headers, rows), "text/csv;charset=utf-8;");
   }
   const hasRows = rows.length > 0;
   return (
     <div className="flex gap-2 mb-3 flex-wrap">
-      {hasRows && (
-        <button onClick={handleCopy} className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg" style={{ border: `1px solid ${C.line}`, color: C.inkSoft }}>
-          <Copy size={13} /> {copied ? "Copiado!" : "Copiar Markdown"}
-        </button>
-      )}
       {hasRows && (
         <button onClick={handleCsv} className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg" style={{ border: `1px solid ${C.line}`, color: C.inkSoft }}>
           <Download size={13} /> Baixar CSV
