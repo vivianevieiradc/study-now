@@ -5,7 +5,7 @@ import {
   Trash2, Pencil, X, ChevronRight, TrendingUp, Circle, CheckCircle2,
   Timer as TimerIcon, Menu, Crosshair, Zap, Sun, Moon, RotateCcw, LogOut,
   GraduationCap, FileText, ChevronLeft, AlertCircle, Award, Filter, History,
-  Layers, ChevronDown, ClipboardCheck
+  Layers, ChevronDown, ClipboardCheck, Download, Copy, Upload
 } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis,
@@ -65,8 +65,23 @@ const DAYS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 const DAY_MS = 24 * 60 * 60 * 1000;
 const BOX_DAYS = { 1: 1, 2: 3, 3: 7 };
 const FACIL_DAYS = 10;
-const MOTIVOS_ERRO = ["Não sabia o conteúdo", "Desatenção / leitura apressada", "Interpretação do enunciado", "Chutei"];
-const makeCard = (front, back, disciplineId) => ({ id: uid(), front, back, disciplineId, box: 1, due: Date.now(), created: Date.now() });
+const MOTIVOS_ERRO = [
+  "Não sabia o conteúdo",
+  "Conhecia o conteúdo parcialmente",
+  "Confundi conceitos semelhantes",
+  "Esqueci uma regra, fórmula ou definição",
+  "Apliquei o conceito de forma incorreta",
+  "Interpretação equivocada do enunciado",
+  "Não percebi palavra-chave ou exceção",
+  "Desatenção / leitura apressada",
+  "Erro de cálculo",
+  "Falta de domínio de conteúdo pré-requisito",
+  "Gestão inadequada do tempo",
+  "Erro de marcação ou transcrição",
+  "Fiquei em dúvida entre alternativas",
+  "Chutei",
+];
+const makeCard = (front, back, disciplineId, topicId = null) => ({ id: uid(), front, back, disciplineId, topicId, box: 1, due: Date.now(), created: Date.now() });
 
 /* ============================ Helpers ============================ */
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -78,6 +93,130 @@ const startOfWeek = (iso) => { const d = new Date(iso + "T00:00:00"); d.setDate(
 const fmtTime = (s) => { const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60; return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(ss).padStart(2, "0")}`; };
 let CURRENT_USER_ID = null;
 export function setCurrentUser(id) { CURRENT_USER_ID = id; }
+
+/* ============================ Exportar (CSV / Markdown) ============================ */
+function csvEscape(v) {
+  const s = String(v ?? "");
+  return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+function toCSV(headers, rows) {
+  const lines = [headers.map(csvEscape).join(";")];
+  rows.forEach((r) => lines.push(r.map(csvEscape).join(";")));
+  return lines.join("\n");
+}
+function mdEscape(v) {
+  return String(v ?? "").replace(/\|/g, "\\|").replace(/\n/g, " ");
+}
+function toMarkdownTable(headers, rows) {
+  const lines = [
+    `| ${headers.join(" | ")} |`,
+    `| ${headers.map(() => "---").join(" | ")} |`,
+    ...rows.map((r) => `| ${r.map(mdEscape).join(" | ")} |`),
+  ];
+  return lines.join("\n");
+}
+function downloadFile(filename, content, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; } catch { return false; }
+}
+function parseCSV(text) {
+  const clean = text.replace(/^﻿/, "");
+  const firstLine = clean.split(/\r?\n/)[0] || "";
+  const delim = firstLine.split(";").length > firstLine.split(",").length ? ";" : ",";
+  const rows = [];
+  let row = [], field = "", inQuotes = false;
+  for (let i = 0; i < clean.length; i++) {
+    const ch = clean[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (clean[i + 1] === '"') { field += '"'; i++; }
+        else inQuotes = false;
+      } else field += ch;
+    } else if (ch === '"') inQuotes = true;
+    else if (ch === delim) { row.push(field); field = ""; }
+    else if (ch === "\n") { row.push(field); rows.push(row); row = []; field = ""; }
+    else if (ch === "\r") { /* ignora */ }
+    else field += ch;
+  }
+  if (field !== "" || row.length) { row.push(field); rows.push(row); }
+  return rows.filter((r) => r.some((c) => String(c).trim() !== ""));
+}
+const normName = (s) => String(s || "").trim().toLowerCase();
+function csvToObjects(text) {
+  const rows = parseCSV(text);
+  if (rows.length < 2) return [];
+  const headers = rows[0].map((h) => String(h).trim());
+  return rows.slice(1).map((r) => {
+    const o = {};
+    headers.forEach((h, i) => { o[h] = (r[i] ?? "").trim(); });
+    return o;
+  });
+}
+function ImportButton({ onImport }) {
+  const C = useC();
+  const inputRef = useRef(null);
+  const [msg, setMsg] = useState(null);
+  function handleFile(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const objs = csvToObjects(String(reader.result));
+        const res = onImport(objs) || { added: 0, skipped: 0 };
+        setMsg(`${res.added} importado(s)${res.skipped ? ` · ${res.skipped} ignorado(s)` : ""}`);
+      } catch {
+        setMsg("Não consegui ler o arquivo. Confira o formato CSV.");
+      }
+      setTimeout(() => setMsg(null), 4000);
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  }
+  return (
+    <>
+      <button onClick={() => inputRef.current?.click()} className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg" style={{ border: `1px solid ${C.line}`, color: C.inkSoft }}>
+        <Upload size={13} /> Importar CSV
+      </button>
+      <input ref={inputRef} type="file" accept=".csv,text/csv" onChange={handleFile} className="hidden" />
+      {msg && <span className="text-xs self-center" style={{ color: C.muted }}>{msg}</span>}
+    </>
+  );
+}
+function ExportBar({ headers, rows, filenameBase, children }) {
+  const C = useC();
+  const [copied, setCopied] = useState(false);
+  async function handleCopy() {
+    const ok = await copyText(toMarkdownTable(headers, rows));
+    if (ok) { setCopied(true); setTimeout(() => setCopied(false), 1500); }
+  }
+  function handleCsv() {
+    downloadFile(`${filenameBase}.csv`, toCSV(headers, rows), "text/csv;charset=utf-8;");
+  }
+  const hasRows = rows.length > 0;
+  return (
+    <div className="flex gap-2 mb-3 flex-wrap">
+      {hasRows && (
+        <button onClick={handleCopy} className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg" style={{ border: `1px solid ${C.line}`, color: C.inkSoft }}>
+          <Copy size={13} /> {copied ? "Copiado!" : "Copiar Markdown"}
+        </button>
+      )}
+      {hasRows && (
+        <button onClick={handleCsv} className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg" style={{ border: `1px solid ${C.line}`, color: C.inkSoft }}>
+          <Download size={13} /> Baixar CSV
+        </button>
+      )}
+      {children}
+    </div>
+  );
+}
 
 const store = {
   async get(k, def) {
@@ -756,8 +895,7 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
   const C = useC();
   const [sub, setSub] = useState("estudar");
   const [session, setSession] = useState(null); // { queue, index, showAnswer }
-  const [filtro, setFiltro] = useState("todas");
-  const [cardForm, setCardForm] = useState({ front: "", back: "", disciplineId: disciplines[0]?.id || "" });
+  const [cardForm, setCardForm] = useState({ front: "", back: "", disciplineId: disciplines[0]?.id || "", topicId: "" });
 
   const pendentes = useMemo(() => {
     const now = Date.now();
@@ -799,18 +937,43 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
 
   function addCard() {
     if (!cardForm.front.trim() || !cardForm.back.trim() || !cardForm.disciplineId) return;
-    setCards((p) => [makeCard(cardForm.front.trim(), cardForm.back.trim(), cardForm.disciplineId), ...p]);
-    setCardForm({ front: "", back: "", disciplineId: cardForm.disciplineId });
+    setCards((p) => [makeCard(cardForm.front.trim(), cardForm.back.trim(), cardForm.disciplineId, cardForm.topicId || null), ...p]);
+    setCardForm({ front: "", back: "", disciplineId: cardForm.disciplineId, topicId: "" });
   }
   function removeCard(id) { setCards((p) => p.filter((c) => c.id !== id)); }
+  function importCards(objs) {
+    const byName = {}; disciplines.forEach((d) => { byName[normName(d.name)] = d; });
+    const get = (o, ...keys) => { for (const k of keys) { const hit = Object.keys(o).find((h) => normName(h) === normName(k)); if (hit && o[hit]) return o[hit]; } return ""; };
+    const novos = []; let skipped = 0;
+    objs.forEach((o) => {
+      const front = get(o, "Pergunta", "front", "frente");
+      const back = get(o, "Resposta", "back", "verso");
+      const disc = byName[normName(get(o, "Matéria", "Materia", "disciplina"))] || disciplines[0];
+      if (!front.trim() || !back.trim() || !disc) { skipped++; return; }
+      const topNome = get(o, "Tópico", "Topico", "tema");
+      const topId = topNome ? (disc.topics?.find((t) => normName(t.name) === normName(topNome))?.id || null) : null;
+      novos.push(makeCard(front.trim(), back.trim(), disc.id, topId));
+    });
+    if (novos.length) setCards((p) => [...novos, ...p]);
+    return { added: novos.length, skipped };
+  }
 
-  const fmtDue = (due) => {
+  const fmtDue = (due, created, box) => {
+    if (box === 1 && created && Date.now() - created < DAY_MS) return "nova";
     const diff = due - Date.now();
     if (diff <= 0) return "hoje";
     const d = Math.ceil(diff / DAY_MS);
     return d === 1 ? "em 1 dia" : `em ${d} dias`;
   };
-  const filteredCards = filtro === "todas" ? cards : cards.filter((c) => c.disciplineId === filtro);
+  const [filtroDisc, setFiltroDisc] = useState("todas");
+  const [filtroTopic, setFiltroTopic] = useState("todas");
+  const filtroTopics = filtroDisc !== "todas" ? (discById[filtroDisc]?.topics || []) : [];
+  const filteredCards = useMemo(() => {
+    let result = cards;
+    if (filtroDisc !== "todas") result = result.filter((c) => c.disciplineId === filtroDisc);
+    if (filtroTopic !== "todas") result = result.filter((c) => c.topicId === filtroTopic);
+    return result;
+  }, [cards, filtroDisc, filtroTopic]);
 
   const fichasCountByDisc = useMemo(() => { const m = {}; cards.forEach((c) => { m[c.disciplineId] = (m[c.disciplineId] || 0) + 1; }); return m; }, [cards]);
   const focoList = useMemo(() => Object.entries(cardStats.reviewsByDisc).filter(([discId]) => fichasCountByDisc[discId] > 0).map(([discId, r]) => {
@@ -851,7 +1014,7 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
     {sub === "estudar" && (
       session && current ? (
         <div>
-          <div className="text-center text-xs font-semibold mb-2" style={{ color: C.muted }}>{session.index + 1} / {session.queue.length} · {discById[current.disciplineId]?.name || "?"}</div>
+          <div className="text-center text-xs font-semibold mb-2" style={{ color: C.muted }}>{session.index + 1} / {session.queue.length} · {discById[current.disciplineId]?.name || "?"}{current.topicId && ` · ${discById[current.disciplineId]?.topics?.find((t) => t.id === current.topicId)?.name || ""}`}</div>
           <Card className="min-h-[220px] flex items-center justify-center text-center">
             <p className="text-lg font-semibold leading-snug">{session.showAnswer ? current.back : current.front}</p>
           </Card>
@@ -875,7 +1038,7 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
             {pendentes.slice(0, 6).map((f) => (
               <div key={f.id} className="flex justify-between items-center py-3 border-t" style={{ borderColor: C.line }}>
                 <div className="min-w-0">
-                  <div className="text-xs font-semibold mb-0.5" style={{ color: C.muted }}>{discById[f.disciplineId]?.name || "?"}</div>
+                  <div className="text-xs font-semibold mb-0.5" style={{ color: C.muted }}>{discById[f.disciplineId]?.name || "?"}{f.topicId && ` · ${discById[f.disciplineId]?.topics?.find((t) => t.id === f.topicId)?.name || ""}`}</div>
                   <div className="text-sm truncate">{f.front}</div>
                 </div>
                 <span className="text-xs font-bold shrink-0 ml-2 rounded-full px-2 py-1" style={{ color: C.gold, background: C.goldSoft }}>caixa {f.box}</span>
@@ -896,23 +1059,52 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
         <Card className="mb-4">
           <div className="flex items-center gap-2 text-sm font-semibold mb-4"><Plus size={16} color={C.gold} /> Nova ficha</div>
           <Field label="Matéria">
-            <select value={cardForm.disciplineId} onChange={(e) => setCardForm({ ...cardForm, disciplineId: e.target.value })} className={inputCls} style={inputStyle(C)}>
+            <select value={cardForm.disciplineId} onChange={(e) => setCardForm({ ...cardForm, disciplineId: e.target.value, topicId: "" })} className={inputCls} style={inputStyle(C)}>
               {disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
             </select>
           </Field>
+          {(discById[cardForm.disciplineId]?.topics || []).length > 0 && (
+            <Field label="Tópico (opcional)">
+              <select value={cardForm.topicId} onChange={(e) => setCardForm({ ...cardForm, topicId: e.target.value })} className={inputCls} style={inputStyle(C)}>
+                <option value="">— geral —</option>
+                {discById[cardForm.disciplineId].topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+              </select>
+            </Field>
+          )}
           <Field label="Pergunta"><textarea rows={2} value={cardForm.front} onChange={(e) => setCardForm({ ...cardForm, front: e.target.value })} className={inputCls} style={inputStyle(C)} placeholder="Ex.: O que é subnetting?" /></Field>
           <Field label="Resposta"><textarea rows={3} value={cardForm.back} onChange={(e) => setCardForm({ ...cardForm, back: e.target.value })} className={inputCls} style={inputStyle(C)} placeholder="A resposta que você quer lembrar na prova." /></Field>
           <div className="flex justify-end"><Btn onClick={addCard}><Plus size={16} /> Registrar ficha</Btn></div>
         </Card>
-        <select value={filtro} onChange={(e) => setFiltro(e.target.value)} className={`${inputCls} mb-3`} style={inputStyle(C)}>
-          <option value="todas">Todas as matérias</option>
-          {disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
-        </select>
+        <div className="flex gap-2 mb-3">
+          <select value={filtroDisc} onChange={(e) => { setFiltroDisc(e.target.value); setFiltroTopic("todas"); }} className={inputCls} style={inputStyle(C)}>
+            <option value="todas">Todas as matérias</option>
+            {disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+          </select>
+          {filtroTopics.length > 0 && (
+            <select value={filtroTopic} onChange={(e) => setFiltroTopic(e.target.value)} className={inputCls} style={inputStyle(C)}>
+              <option value="todas">Todos os tópicos</option>
+              {filtroTopics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+            </select>
+          )}
+        </div>
+        <ExportBar
+          filenameBase="flashcards"
+          headers={["Matéria", "Tópico", "Pergunta", "Resposta", "Caixa"]}
+          rows={filteredCards.map((c) => [
+            discById[c.disciplineId]?.name || "?",
+            c.topicId ? (discById[c.disciplineId]?.topics?.find((t) => t.id === c.topicId)?.name || "") : "",
+            c.front,
+            c.back,
+            c.box,
+          ])}
+        >
+          <ImportButton onImport={importCards} />
+        </ExportBar>
         {filteredCards.length === 0 && <Empty msg="Nenhuma ficha nesta matéria." />}
         <div className="space-y-2">
           {filteredCards.map((c) => (
             <Card key={c.id} className="!p-3">
-              <div className="flex justify-between text-xs mb-1" style={{ color: C.muted }}><span>{discById[c.disciplineId]?.name || "?"}</span><span>CX {c.box} · {fmtDue(c.due)}</span></div>
+              <div className="flex justify-between text-xs mb-1" style={{ color: C.muted }}><span>{discById[c.disciplineId]?.name || "?"}{c.topicId && ` · ${discById[c.disciplineId]?.topics?.find((t) => t.id === c.topicId)?.name || ""}`}</span><span>CX {c.box} · {fmtDue(c.due, c.created, c.box)}</span></div>
               <div className="font-medium text-sm">{c.front}</div>
               <div className="text-sm mt-1" style={{ color: C.muted }}>{c.back}</div>
               <div className="flex justify-end mt-2"><button onClick={() => removeCard(c.id)}><Trash2 size={15} color={C.red} /></button></div>
@@ -963,6 +1155,20 @@ function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, se
     setErroForm({ disciplineId: erroForm.disciplineId, tema: "", motivo: MOTIVOS_ERRO[0], licao: "" });
   }
   function removeErro(id) { setErros((p) => p.filter((e) => e.id !== id)); }
+  function importErros(objs) {
+    const byName = {}; disciplines.forEach((d) => { byName[normName(d.name)] = d.id; });
+    const get = (o, ...keys) => { for (const k of keys) { const hit = Object.keys(o).find((h) => normName(h) === normName(k)); if (hit && o[hit]) return o[hit]; } return ""; };
+    const novos = []; let skipped = 0;
+    objs.forEach((o) => {
+      const tema = get(o, "Questão/tema", "Questao/tema", "tema", "questão", "questao", "pergunta");
+      const matNome = get(o, "Matéria", "Materia", "disciplina");
+      const discId = byName[normName(matNome)] || disciplines[0]?.id;
+      if (!tema.trim() || !discId) { skipped++; return; }
+      novos.push({ id: uid(), disciplineId: discId, tema: tema.trim(), motivo: get(o, "Motivo", "por que errei") || MOTIVOS_ERRO[0], licao: get(o, "O que aprendi", "licao", "lição").trim(), data: Date.now(), virouFicha: normName(get(o, "Virou ficha")) === "sim" });
+    });
+    if (novos.length) setErros((p) => [...novos, ...p]);
+    return { added: novos.length, skipped };
+  }
   function erroParaFicha(e) {
     const back = e.licao || "Revisar este conceito — complete a resposta editando a ficha.";
     setCards((p) => [makeCard(e.tema, back, e.disciplineId), ...p]);
@@ -1017,6 +1223,20 @@ function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, se
       <div className="flex justify-end"><Btn onClick={addErro}><Plus size={16} /> Registrar erro</Btn></div>
     </Card>
 
+    <ExportBar
+      filenameBase="caderno-de-erros"
+      headers={["Matéria", "Questão/tema", "Motivo", "O que aprendi", "Data", "Virou ficha"]}
+      rows={erros.map((e) => [
+        discById[e.disciplineId]?.name || "?",
+        e.tema,
+        e.motivo,
+        e.licao,
+        new Date(e.data).toISOString().slice(0, 10),
+        e.virouFicha ? "Sim" : "Não",
+      ])}
+    >
+      <ImportButton onImport={importErros} />
+    </ExportBar>
     {erros.length === 0 && <Empty msg="Caderno vazio. Errar e registrar é como se aprende — cada erro aqui é um ponto a mais na prova." />}
     <div className="space-y-2">
       {erros.map((e) => (
