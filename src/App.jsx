@@ -85,6 +85,7 @@ const makeCard = (front, back, disciplineId, topicId = null) => ({ id: uid(), fr
 
 /* ============================ Helpers ============================ */
 const uid = () => Math.random().toString(36).slice(2, 10);
+const shuffle = (arr) => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const todayISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
 const addDays = (iso, n) => { const d = new Date(iso + "T00:00:00"); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
 const fmtMin = (m) => { const h = Math.floor(m / 60), mm = m % 60; return h ? `${h}h${mm ? String(mm).padStart(2, "0") : ""}` : `${mm}min`; };
@@ -870,7 +871,8 @@ function computeCardStreak(dates) {
 function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines, discById }) {
   const C = useC();
   const [sub, setSub] = useState("estudar");
-  const [session, setSession] = useState(null); // { queue, index, showAnswer }
+  const [session, setSession] = useState(null); // { queue, index, showAnswer, mode, label }
+  const [openDeck, setOpenDeck] = useState(null);
   const [cardForm, setCardForm] = useState({ front: "", back: "", disciplineId: disciplines[0]?.id || "", topicId: "" });
 
   const pendentes = useMemo(() => {
@@ -879,12 +881,17 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
   }, [cards]);
 
   const current = session ? cards.find((c) => c.id === session.queue[session.index]) : null;
+  const livre = session?.mode === "livre";
 
-  function startStudy() {
-    const queue = pendentes.map((c) => c.id);
-    if (!queue.length) return;
-    setSession({ queue, index: 0, showAnswer: false });
+  // mode "revisao": só fichas vencidas, na ordem do vencimento, reagenda normal.
+  // mode "livre":   qualquer ficha, embaralhada, só reagenda se você marcar Novamente.
+  function startSession(pool, mode, label) {
+    const list = mode === "revisao" ? pool.filter((c) => c.due <= Date.now()) : pool;
+    if (!list.length) return;
+    const ordered = mode === "revisao" ? list.slice().sort((a, b) => a.due - b.due) : shuffle(list);
+    setSession({ queue: ordered.map((c) => c.id), index: 0, showAnswer: false, mode, label });
   }
+  function startStudy() { startSession(pendentes, "revisao", "Vencem hoje"); }
   function revealAnswer() { setSession((s) => ({ ...s, showAnswer: true })); }
 
   function recordResult(rating) {
@@ -893,6 +900,7 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
     setCards((prev) => prev.map((c) => {
       if (c.id !== current.id) return c;
       if (rating === "novamente") return { ...c, box: 1, due: Date.now() };
+      if (livre) return c; // revisão extra não infla o intervalo
       if (rating === "facil") return { ...c, box: 3, due: Date.now() + FACIL_DAYS * DAY_MS };
       const box = Math.min(3, c.box + 1);
       return { ...c, box, due: Date.now() + BOX_DAYS[box] * DAY_MS };
@@ -952,6 +960,23 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
   }, [cards, filtroDisc, filtroTopic]);
 
   const fichasCountByDisc = useMemo(() => { const m = {}; cards.forEach((c) => { m[c.disciplineId] = (m[c.disciplineId] || 0) + 1; }); return m; }, [cards]);
+  // Decks = disciplinas do edital verticalizado, subdivididas nos tópicos que já têm ficha.
+  const decks = useMemo(() => {
+    const now = Date.now();
+    const count = (list) => ({ total: list.length, due: list.filter((c) => c.due <= now).length });
+    return disciplines.map((d) => {
+      const own = cards.filter((c) => c.disciplineId === d.id);
+      const topics = (d.topics || [])
+        .map((t) => ({ id: t.id, num: t.num, name: t.name, cards: own.filter((c) => c.topicId === t.id) }))
+        .filter((t) => t.cards.length > 0)
+        .map((t) => ({ ...t, ...count(t.cards) }));
+      const geral = own.filter((c) => !c.topicId || !topics.some((t) => t.id === c.topicId));
+      if (geral.length) topics.push({ id: null, num: "", name: "Geral (sem tópico)", cards: geral, ...count(geral) });
+      return { id: d.id, name: d.name, block: d.block, cards: own, topics, ...count(own) };
+    }).filter((d) => d.total > 0);
+  }, [cards, disciplines]);
+  const deckBlocks = useMemo(() => [...new Set(decks.map((d) => d.block))], [decks]);
+
   const focoList = useMemo(() => Object.entries(cardStats.reviewsByDisc).filter(([discId]) => fichasCountByDisc[discId] > 0).map(([discId, r]) => {
     const total = r.correct + r.wrong;
     const pct = total ? Math.round((r.correct / total) * 100) : 0;
@@ -967,8 +992,23 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
 
   const SUBTABS = [["estudar", "Estudar"], ["fichas", "Fichas"], ["foco", "Foco"]];
 
+  const deckBtns = (pool, due, label) => (
+    <div className="flex gap-1.5 shrink-0">
+      <button disabled={!due} onClick={() => startSession(pool, "revisao", label)}
+        className="text-xs font-bold px-2.5 py-1.5 rounded-lg"
+        style={{ background: due ? C.goldSoft : "transparent", color: due ? C.gold : C.muted, border: `1px solid ${due ? "transparent" : C.line}`, opacity: due ? 1 : 0.5 }}>
+        Revisar{due ? ` ${due}` : ""}
+      </button>
+      <button onClick={() => startSession(pool, "livre", label)}
+        className="text-xs font-bold px-2.5 py-1.5 rounded-lg"
+        style={{ color: C.inkSoft, border: `1px solid ${C.line}` }}>
+        Livre
+      </button>
+    </div>
+  );
+
   return <div>
-    <PageTitle sub="Revisão espaçada: avalie cada ficha como Novamente, Bom ou Fácil pra ajustar o próximo intervalo.">Flashcards</PageTitle>
+    <PageTitle sub="Revisão espaçada por deck: avalie cada ficha como Novamente, Bom ou Fácil pra ajustar o próximo intervalo. Na sessão livre você revisa quando quiser, sem mexer no agendamento.">Flashcards</PageTitle>
 
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
       <Stat label="Sequência" value={`${streak} dias`} Icon={Flame} color={C.gold} />
@@ -990,6 +1030,13 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
     {sub === "estudar" && (
       session && current ? (
         <div>
+          <div className="flex items-center justify-between gap-2 mb-4">
+            <div className="min-w-0">
+              <div className="text-sm font-bold truncate">{session.label}</div>
+              <div className="text-xs" style={{ color: livre ? C.gold : C.muted }}>{livre ? "Sessão livre · não altera o agendamento" : "Revisão programada"}</div>
+            </div>
+            <button onClick={() => setSession(null)} className="text-xs font-semibold flex items-center gap-1 shrink-0" style={{ color: C.muted }}><X size={14} /> Encerrar</button>
+          </div>
           <div className="text-center text-xs font-semibold mb-2" style={{ color: C.muted }}>{session.index + 1} / {session.queue.length} · {discById[current.disciplineId]?.name || "?"}{current.topicId && ` · ${discById[current.disciplineId]?.topics?.find((t) => t.id === current.topicId)?.name || ""}`}</div>
           <Card className="min-h-[220px] flex items-center justify-center text-center">
             <p className="text-lg font-semibold leading-snug">{session.showAnswer ? current.back : current.front}</p>
@@ -999,34 +1046,80 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
           ) : (
             <div className="grid grid-cols-3 gap-2 mt-5">
               <Btn variant="ghost" onClick={() => recordResult("novamente")} style={{ flexDirection: "column", justifyContent: "center", color: C.red, borderColor: C.red }}>Novamente<span className="text-xs font-normal opacity-80">agora</span></Btn>
-              <Btn onClick={() => recordResult("bom")} style={{ flexDirection: "column", justifyContent: "center", background: C.green, borderColor: C.green, color: "#fff" }}>Bom<span className="text-xs font-normal opacity-90">{BOX_DAYS[nextBox]}d</span></Btn>
-              <Btn onClick={() => recordResult("facil")} style={{ flexDirection: "column", justifyContent: "center", background: C.gold, borderColor: C.gold, color: "#fff" }}>Fácil<span className="text-xs font-normal opacity-90">{FACIL_DAYS}d</span></Btn>
+              <Btn onClick={() => recordResult("bom")} style={{ flexDirection: "column", justifyContent: "center", background: C.green, borderColor: C.green, color: "#fff" }}>Bom<span className="text-xs font-normal opacity-90">{livre ? "mantém" : `${BOX_DAYS[nextBox]}d`}</span></Btn>
+              <Btn onClick={() => recordResult("facil")} style={{ flexDirection: "column", justifyContent: "center", background: C.gold, borderColor: C.gold, color: "#fff" }}>Fácil<span className="text-xs font-normal opacity-90">{livre ? "mantém" : `${FACIL_DAYS}d`}</span></Btn>
             </div>
           )}
         </div>
-      ) : pendentes.length > 0 ? (
-        <Card>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-bold">{pendentes.length} fichas vencem hoje</h3>
-            <Btn onClick={startStudy}><Play size={16} /> Estudar agora</Btn>
-          </div>
-          <div className="space-y-0">
-            {pendentes.slice(0, 6).map((f) => (
-              <div key={f.id} className="flex justify-between items-center py-3 border-t" style={{ borderColor: C.line }}>
-                <div className="min-w-0">
-                  <div className="text-xs font-semibold mb-0.5" style={{ color: C.muted }}>{discById[f.disciplineId]?.name || "?"}{f.topicId && ` · ${discById[f.disciplineId]?.topics?.find((t) => t.id === f.topicId)?.name || ""}`}</div>
-                  <div className="text-sm truncate">{f.front}</div>
-                </div>
-                <span className="text-xs font-bold shrink-0 ml-2 rounded-full px-2 py-1" style={{ color: C.gold, background: C.goldSoft }}>caixa {f.box}</span>
-              </div>
-            ))}
-          </div>
-        </Card>
       ) : (
-        <Card className="text-center py-10">
-          <CheckCircle2 size={28} color={C.green} className="mx-auto mb-3" />
-          <p className="text-sm" style={{ color: C.muted }}>Nenhuma ficha vence hoje.</p>
-        </Card>
+        <div>
+          {pendentes.length > 0 ? (
+            <Card className="mb-6">
+              <div className="flex items-center justify-between gap-2 mb-4">
+                <h3 className="text-base font-bold">{pendentes.length} fichas vencem hoje</h3>
+                <Btn onClick={startStudy}><Play size={16} /> Estudar agora</Btn>
+              </div>
+              <div className="space-y-0">
+                {pendentes.slice(0, 6).map((f) => (
+                  <div key={f.id} className="flex justify-between items-center py-3 border-t" style={{ borderColor: C.line }}>
+                    <div className="min-w-0">
+                      <div className="text-xs font-semibold mb-0.5" style={{ color: C.muted }}>{discById[f.disciplineId]?.name || "?"}{f.topicId && ` · ${discById[f.disciplineId]?.topics?.find((t) => t.id === f.topicId)?.name || ""}`}</div>
+                      <div className="text-sm truncate">{f.front}</div>
+                    </div>
+                    <span className="text-xs font-bold shrink-0 ml-2 rounded-full px-2 py-1" style={{ color: C.gold, background: C.goldSoft }}>caixa {f.box}</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          ) : (
+            <Card className="text-center py-8 mb-6">
+              <CheckCircle2 size={28} color={C.green} className="mx-auto mb-3" />
+              <p className="text-sm" style={{ color: C.muted }}>Nenhuma ficha vence hoje. Escolha um deck abaixo pra revisar quando quiser.</p>
+            </Card>
+          )}
+
+          <div className="flex items-baseline justify-between mb-3">
+            <h3 className="text-base font-bold">Decks do edital</h3>
+            <span className="text-xs" style={{ color: C.muted }}>Revisar = só vencidas · Livre = tudo, sem reagendar</span>
+          </div>
+
+          {decks.length === 0 ? (
+            <Empty msg="Nenhuma ficha cadastrada ainda. Crie fichas na aba Fichas pra montar seus decks." />
+          ) : deckBlocks.map((block) => (
+            <div key={block} className="mb-5">
+              <h4 className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: C.muted }}>Conhecimentos {block}</h4>
+              <div className="space-y-2">
+                {decks.filter((d) => d.block === block).map((d) => (
+                  <Card key={d.id} className="!p-4">
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => setOpenDeck(openDeck === d.id ? null : d.id)} className="flex items-center gap-2 flex-1 min-w-0 text-left">
+                        {openDeck === d.id ? <ChevronDown size={16} color={C.muted} className="shrink-0" /> : <ChevronRight size={16} color={C.muted} className="shrink-0" />}
+                        <div className="min-w-0">
+                          <div className="text-sm font-bold truncate">{d.name}</div>
+                          <div className="text-xs" style={{ color: C.muted }}>{d.total} fichas{d.due > 0 ? ` · ${d.due} vencidas` : ""} · {d.topics.length} {d.topics.length === 1 ? "tópico" : "tópicos"}</div>
+                        </div>
+                      </button>
+                      {deckBtns(d.cards, d.due, d.name)}
+                    </div>
+                    {openDeck === d.id && (
+                      <div className="mt-2">
+                        {d.topics.map((t) => (
+                          <div key={t.id || "geral"} className="flex items-center gap-2 py-2.5 border-t" style={{ borderColor: C.line }}>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm truncate">{t.num ? `${t.num} · ` : ""}{t.name}</div>
+                              <div className="text-xs" style={{ color: C.muted }}>{t.total} fichas{t.due > 0 ? ` · ${t.due} vencidas` : ""}</div>
+                            </div>
+                            {deckBtns(t.cards, t.due, `${d.name} · ${t.name}`)}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       )
     )}
 
