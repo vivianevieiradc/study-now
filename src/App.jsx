@@ -65,6 +65,9 @@ const DAYS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 const DAY_MS = 24 * 60 * 60 * 1000;
 const BOX_DAYS = { 1: 1, 2: 3, 3: 7 };
 const FACIL_DAYS = 10;
+// Vencimento cai na virada do dia, não na hora exata da revisão: uma ficha
+// agendada pra daqui 3 dias já está disponível às 00h do terceiro dia.
+const dueInDays = (n) => { const d = new Date(Date.now() + n * DAY_MS); d.setHours(0, 0, 0, 0); return d.getTime(); };
 const MOTIVOS_ERRO = [
   "Não sabia o conteúdo",
   "Conhecia o conteúdo parcialmente",
@@ -901,9 +904,9 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
       if (c.id !== current.id) return c;
       if (rating === "novamente") return { ...c, box: 1, due: Date.now() };
       if (livre) return c; // revisão extra não infla o intervalo
-      if (rating === "facil") return { ...c, box: 3, due: Date.now() + FACIL_DAYS * DAY_MS };
+      if (rating === "facil") return { ...c, box: 3, due: dueInDays(FACIL_DAYS) };
       const box = Math.min(3, c.box + 1);
-      return { ...c, box, due: Date.now() + BOX_DAYS[box] * DAY_MS };
+      return { ...c, box, due: dueInDays(BOX_DAYS[box]) };
     }));
     setCardStats((prev) => {
       const disc = prev.reviewsByDisc[current.disciplineId] || { correct: 0, wrong: 0 };
@@ -925,6 +928,18 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
     setCardForm({ front: "", back: "", disciplineId: cardForm.disciplineId, topicId: "" });
   }
   function removeCard(id) { setCards((p) => p.filter((c) => c.id !== id)); }
+
+  const [editId, setEditId] = useState(null);
+  const [editForm, setEditForm] = useState(null);
+  function startEditCard(c) { setEditId(c.id); setEditForm({ disciplineId: c.disciplineId, topicId: c.topicId || "", front: c.front, back: c.back }); }
+  function cancelEditCard() { setEditId(null); setEditForm(null); }
+  function saveEditCard() {
+    if (!editForm.front.trim() || !editForm.back.trim()) return;
+    setCards((p) => p.map((c) => c.id === editId
+      ? { ...c, disciplineId: editForm.disciplineId, topicId: editForm.topicId || null, front: editForm.front.trim(), back: editForm.back.trim() }
+      : c));
+    cancelEditCard();
+  }
   function importCards(objs) {
     const byName = {}; disciplines.forEach((d) => { byName[normName(d.name)] = d; });
     const get = (o, ...keys) => { for (const k of keys) { const hit = Object.keys(o).find((h) => normName(h) === normName(k)); if (hit && o[hit]) return o[hit]; } return ""; };
@@ -1171,12 +1186,36 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
         </ExportBar>
         {filteredCards.length === 0 && <Empty msg="Nenhuma ficha nesta matéria." />}
         <div className="space-y-2">
-          {filteredCards.map((c) => (
+          {filteredCards.map((c) => editId === c.id ? (
+            <Card key={c.id} className="!p-4">
+              <div className="flex items-center gap-2 text-sm font-semibold mb-4"><Pencil size={15} color={C.gold} /> Editar ficha</div>
+              <Field label="Matéria">
+                <select value={editForm.disciplineId} onChange={(e) => setEditForm({ ...editForm, disciplineId: e.target.value, topicId: "" })} className={inputCls} style={inputStyle(C)}>
+                  {disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                </select>
+              </Field>
+              <Field label="Tópico do edital (opcional)">
+                <select value={editForm.topicId} onChange={(e) => setEditForm({ ...editForm, topicId: e.target.value })} className={inputCls} style={inputStyle(C)}>
+                  <option value="">— geral —</option>
+                  {(discById[editForm.disciplineId]?.topics || []).map((t) => <option key={t.id} value={t.id}>{t.num ? `${t.num} · ` : ""}{t.name}</option>)}
+                </select>
+              </Field>
+              <Field label="Pergunta"><textarea rows={2} value={editForm.front} onChange={(e) => setEditForm({ ...editForm, front: e.target.value })} className={inputCls} style={inputStyle(C)} /></Field>
+              <Field label="Resposta"><textarea rows={3} value={editForm.back} onChange={(e) => setEditForm({ ...editForm, back: e.target.value })} className={inputCls} style={inputStyle(C)} /></Field>
+              <div className="flex justify-end gap-2">
+                <Btn variant="ghost" onClick={cancelEditCard}>Cancelar</Btn>
+                <Btn onClick={saveEditCard}><Check size={16} /> Salvar</Btn>
+              </div>
+            </Card>
+          ) : (
             <Card key={c.id} className="!p-3">
               <div className="flex justify-between text-xs mb-1" style={{ color: C.muted }}><span>{discById[c.disciplineId]?.name || "?"}{c.topicId && ` · ${discById[c.disciplineId]?.topics?.find((t) => t.id === c.topicId)?.name || ""}`}</span><span>CX {c.box} · {fmtDue(c.due, c.created, c.box)}</span></div>
               <div className="font-medium text-sm">{c.front}</div>
               <div className="text-sm mt-1" style={{ color: C.muted }}>{c.back}</div>
-              <div className="flex justify-end mt-2"><button onClick={() => removeCard(c.id)}><Trash2 size={15} color={C.red} /></button></div>
+              <div className="flex justify-end items-center gap-3 mt-2">
+                <button onClick={() => startEditCard(c)} title="Editar"><Pencil size={15} color={C.muted} /></button>
+                <button onClick={() => removeCard(c.id)} title="Excluir"><Trash2 size={15} color={C.red} /></button>
+              </div>
             </Card>
           ))}
         </div>
@@ -1215,32 +1254,49 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
 /* ============================ CADERNO DE ERROS ============================ */
 function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, setView }) {
   const C = useC();
-  const [erroForm, setErroForm] = useState({ disciplineId: disciplines[0]?.id || "", tema: "", motivo: MOTIVOS_ERRO[0], licao: "" });
+  const [erroForm, setErroForm] = useState({ disciplineId: disciplines[0]?.id || "", topicId: "", tema: "", motivo: MOTIVOS_ERRO[0], licao: "" });
+  const topicName = (discId, topId) => (topId ? discById[discId]?.topics?.find((t) => t.id === topId)?.name || "" : "");
 
   function addErro() {
     if (!erroForm.tema.trim() || !erroForm.disciplineId) return;
-    const e = { id: uid(), disciplineId: erroForm.disciplineId, tema: erroForm.tema.trim(), motivo: erroForm.motivo, licao: erroForm.licao.trim(), data: Date.now(), virouFicha: false };
+    const e = { id: uid(), disciplineId: erroForm.disciplineId, topicId: erroForm.topicId || null, tema: erroForm.tema.trim(), motivo: erroForm.motivo, licao: erroForm.licao.trim(), data: Date.now(), virouFicha: false };
     setErros((p) => [e, ...p]);
-    setErroForm({ disciplineId: erroForm.disciplineId, tema: "", motivo: MOTIVOS_ERRO[0], licao: "" });
+    setErroForm({ disciplineId: erroForm.disciplineId, topicId: erroForm.topicId, tema: "", motivo: MOTIVOS_ERRO[0], licao: "" });
   }
   function removeErro(id) { setErros((p) => p.filter((e) => e.id !== id)); }
+
+  const [editId, setEditId] = useState(null);
+  const [editForm, setEditForm] = useState(null);
+  function startEdit(e) { setEditId(e.id); setEditForm({ disciplineId: e.disciplineId, topicId: e.topicId || "", tema: e.tema, motivo: e.motivo, licao: e.licao }); }
+  function cancelEdit() { setEditId(null); setEditForm(null); }
+  function saveEdit() {
+    if (!editForm.tema.trim()) return;
+    setErros((p) => p.map((x) => x.id === editId
+      ? { ...x, disciplineId: editForm.disciplineId, topicId: editForm.topicId || null, tema: editForm.tema.trim(), motivo: editForm.motivo, licao: editForm.licao.trim() }
+      : x));
+    cancelEdit();
+  }
+  // motivos vindos de importação podem estar fora da lista padrão — não perder o valor atual
+  const motivoOpts = editForm && !MOTIVOS_ERRO.includes(editForm.motivo) ? [editForm.motivo, ...MOTIVOS_ERRO] : MOTIVOS_ERRO;
   function importErros(objs) {
-    const byName = {}; disciplines.forEach((d) => { byName[normName(d.name)] = d.id; });
+    const byName = {}; disciplines.forEach((d) => { byName[normName(d.name)] = d; });
     const get = (o, ...keys) => { for (const k of keys) { const hit = Object.keys(o).find((h) => normName(h) === normName(k)); if (hit && o[hit]) return o[hit]; } return ""; };
     const novos = []; let skipped = 0;
     objs.forEach((o) => {
       const tema = get(o, "Questão/tema", "Questao/tema", "tema", "questão", "questao", "pergunta");
       const matNome = get(o, "Matéria", "Materia", "disciplina");
-      const discId = byName[normName(matNome)] || disciplines[0]?.id;
-      if (!tema.trim() || !discId) { skipped++; return; }
-      novos.push({ id: uid(), disciplineId: discId, tema: tema.trim(), motivo: get(o, "Motivo", "por que errei") || MOTIVOS_ERRO[0], licao: get(o, "O que aprendi", "licao", "lição").trim(), data: Date.now(), virouFicha: normName(get(o, "Virou ficha")) === "sim" });
+      const disc = byName[normName(matNome)] || disciplines[0];
+      if (!tema.trim() || !disc) { skipped++; return; }
+      const topNome = get(o, "Tópico", "Topico", "tema do edital");
+      const topId = topNome ? (disc.topics?.find((t) => normName(t.name) === normName(topNome))?.id || null) : null;
+      novos.push({ id: uid(), disciplineId: disc.id, topicId: topId, tema: tema.trim(), motivo: get(o, "Motivo", "por que errei") || MOTIVOS_ERRO[0], licao: get(o, "O que aprendi", "licao", "lição").trim(), data: Date.now(), virouFicha: normName(get(o, "Virou ficha")) === "sim" });
     });
     if (novos.length) setErros((p) => [...novos, ...p]);
     return { added: novos.length, skipped };
   }
   function erroParaFicha(e) {
     const back = e.licao || "Revisar este conceito — complete a resposta editando a ficha.";
-    setCards((p) => [makeCard(e.tema, back, e.disciplineId), ...p]);
+    setCards((p) => [makeCard(e.tema, back, e.disciplineId, e.topicId || null), ...p]);
     setErros((p) => p.map((x) => (x.id === e.id ? { ...x, virouFicha: true } : x)));
   }
 
@@ -1278,10 +1334,18 @@ function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, se
     <Card className="mb-4">
       <div className="flex items-center gap-2 text-sm font-semibold mb-4"><Plus size={16} color={C.gold} /> Registrar erro</div>
       <Field label="Matéria">
-        <select value={erroForm.disciplineId} onChange={(e) => setErroForm({ ...erroForm, disciplineId: e.target.value })} className={inputCls} style={inputStyle(C)}>
+        <select value={erroForm.disciplineId} onChange={(e) => setErroForm({ ...erroForm, disciplineId: e.target.value, topicId: "" })} className={inputCls} style={inputStyle(C)}>
           {disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
         </select>
       </Field>
+      {(discById[erroForm.disciplineId]?.topics || []).length > 0 && (
+        <Field label="Tópico do edital (opcional — a ficha já nasce classificada)">
+          <select value={erroForm.topicId} onChange={(e) => setErroForm({ ...erroForm, topicId: e.target.value })} className={inputCls} style={inputStyle(C)}>
+            <option value="">— geral —</option>
+            {discById[erroForm.disciplineId].topics.map((t) => <option key={t.id} value={t.id}>{t.num ? `${t.num} · ` : ""}{t.name}</option>)}
+          </select>
+        </Field>
+      )}
       <Field label="Questão / tema do erro"><textarea rows={2} value={erroForm.tema} onChange={(e) => setErroForm({ ...erroForm, tema: e.target.value })} className={inputCls} style={inputStyle(C)} placeholder="Ex.: Cálculo de broadcast em sub-rede /27" /></Field>
       <Field label="Por que errei">
         <select value={erroForm.motivo} onChange={(e) => setErroForm({ ...erroForm, motivo: e.target.value })} className={inputCls} style={inputStyle(C)}>
@@ -1294,9 +1358,10 @@ function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, se
 
     <ExportBar
       filenameBase="caderno-de-erros"
-      headers={["Matéria", "Questão/tema", "Motivo", "O que aprendi", "Data", "Virou ficha"]}
+      headers={["Matéria", "Tópico", "Questão/tema", "Motivo", "O que aprendi", "Data", "Virou ficha"]}
       rows={erros.map((e) => [
         discById[e.disciplineId]?.name || "?",
+        topicName(e.disciplineId, e.topicId),
         e.tema,
         e.motivo,
         e.licao,
@@ -1308,15 +1373,47 @@ function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, se
     </ExportBar>
     {erros.length === 0 && <Empty msg="Caderno vazio. Errar e registrar é como se aprende — cada erro aqui é um ponto a mais na prova." />}
     <div className="space-y-2">
-      {erros.map((e) => (
+      {erros.map((e) => editId === e.id ? (
+        <Card key={e.id} className="!p-4">
+          <div className="flex items-center gap-2 text-sm font-semibold mb-4"><Pencil size={15} color={C.gold} /> Editar erro</div>
+          <Field label="Matéria">
+            <select value={editForm.disciplineId} onChange={(ev) => setEditForm({ ...editForm, disciplineId: ev.target.value, topicId: "" })} className={inputCls} style={inputStyle(C)}>
+              {disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+            </select>
+          </Field>
+          {(discById[editForm.disciplineId]?.topics || []).length > 0 && (
+            <Field label="Tópico do edital (opcional)">
+              <select value={editForm.topicId} onChange={(ev) => setEditForm({ ...editForm, topicId: ev.target.value })} className={inputCls} style={inputStyle(C)}>
+                <option value="">— geral —</option>
+                {discById[editForm.disciplineId].topics.map((t) => <option key={t.id} value={t.id}>{t.num ? `${t.num} · ` : ""}{t.name}</option>)}
+              </select>
+            </Field>
+          )}
+          <Field label="Questão / tema do erro"><textarea rows={2} value={editForm.tema} onChange={(ev) => setEditForm({ ...editForm, tema: ev.target.value })} className={inputCls} style={inputStyle(C)} /></Field>
+          <Field label="Por que errei">
+            <select value={editForm.motivo} onChange={(ev) => setEditForm({ ...editForm, motivo: ev.target.value })} className={inputCls} style={inputStyle(C)}>
+              {motivoOpts.map((m) => <option key={m}>{m}</option>)}
+            </select>
+          </Field>
+          <Field label="O que aprendi"><textarea rows={3} value={editForm.licao} onChange={(ev) => setEditForm({ ...editForm, licao: ev.target.value })} className={inputCls} style={inputStyle(C)} /></Field>
+          {e.virouFicha && <p className="text-xs mb-3" style={{ color: C.muted }}>Esse erro já virou ficha — editar aqui não altera o flashcard, ajuste ele na aba Flashcards.</p>}
+          <div className="flex justify-end gap-2">
+            <Btn variant="ghost" onClick={cancelEdit}>Cancelar</Btn>
+            <Btn onClick={saveEdit}><Check size={16} /> Salvar</Btn>
+          </div>
+        </Card>
+      ) : (
         <Card key={e.id} className="!p-3">
-          <div className="flex justify-between text-xs mb-1" style={{ color: C.muted }}><span>{discById[e.disciplineId]?.name || "?"}</span><span>{fmtDate(new Date(e.data).toISOString().slice(0, 10))}</span></div>
+          <div className="flex justify-between gap-2 text-xs mb-1" style={{ color: C.muted }}><span className="truncate">{discById[e.disciplineId]?.name || "?"}{e.topicId && ` · ${topicName(e.disciplineId, e.topicId)}`}</span><span className="shrink-0">{fmtDate(new Date(e.data).toISOString().slice(0, 10))}</span></div>
           <div className="font-medium text-sm">{e.tema}</div>
           <div className="text-sm mt-1" style={{ color: C.muted }}><span style={{ color: C.red }}>{e.motivo}</span>{e.licao && <> — {e.licao}</>}</div>
           <div className="flex justify-between items-center mt-2">
             {e.virouFicha ? <span className="text-xs flex items-center gap-1" style={{ color: C.green }}><CheckCircle2 size={13} /> virou ficha</span>
               : <button onClick={() => erroParaFicha(e)} className="text-xs font-semibold px-2 py-1 rounded-lg" style={{ background: C.navActiveBg, color: C.navActiveInk }}>Virar flashcard</button>}
-            <button onClick={() => removeErro(e.id)}><Trash2 size={15} color={C.red} /></button>
+            <div className="flex items-center gap-3">
+              <button onClick={() => startEdit(e)} title="Editar"><Pencil size={15} color={C.muted} /></button>
+              <button onClick={() => removeErro(e.id)} title="Excluir"><Trash2 size={15} color={C.red} /></button>
+            </div>
           </div>
         </Card>
       ))}
