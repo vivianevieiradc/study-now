@@ -871,6 +871,22 @@ function computeCardStreak(dates) {
   return streak;
 }
 
+// Progresso da ficha no Leitner: quantas revisões seguidas ela sobreviveu.
+const BOX_LABEL = { 1: "aprendendo", 2: "firmando", 3: "consolidada" };
+function BoxDots({ box }) {
+  const C = useC();
+  const b = Math.min(3, Math.max(1, box || 1));
+  const cor = b === 3 ? C.green : b === 2 ? C.gold : C.muted;
+  const dias = BOX_DAYS[b];
+  return (
+    <span className="flex items-center gap-1 shrink-0" title={`Caixa ${b} de 3 · ${BOX_LABEL[b]} · revisão a cada ${dias} ${dias === 1 ? "dia" : "dias"}`}>
+      {[1, 2, 3].map((n) => (
+        <span key={n} className="rounded-full" style={{ width: 7, height: 7, background: n <= b ? cor : "transparent", border: `1px solid ${n <= b ? cor : C.line}` }} />
+      ))}
+    </span>
+  );
+}
+
 function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines, discById }) {
   const C = useC();
   const [sub, setSub] = useState("estudar");
@@ -1081,8 +1097,13 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
                       <div className="text-xs font-semibold mb-0.5" style={{ color: C.muted }}>{discById[f.disciplineId]?.name || "?"}{f.topicId && ` · ${discById[f.disciplineId]?.topics?.find((t) => t.id === f.topicId)?.name || ""}`}</div>
                       <div className="text-sm truncate">{f.front}</div>
                     </div>
-                    <span className="text-xs font-bold shrink-0 ml-2 rounded-full px-2 py-1" style={{ color: C.gold, background: C.goldSoft }}>caixa {f.box}</span>
+                    <span className="ml-3"><BoxDots box={f.box} /></span>
                   </div>
+                ))}
+              </div>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs mt-3 pt-3 border-t" style={{ borderColor: C.line, color: C.muted }}>
+                {[1, 2, 3].map((b) => (
+                  <span key={b} className="flex items-center gap-1.5"><BoxDots box={b} />{BOX_LABEL[b]} · {BOX_DAYS[b]}d</span>
                 ))}
               </div>
             </Card>
@@ -1209,7 +1230,7 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
             </Card>
           ) : (
             <Card key={c.id} className="!p-3">
-              <div className="flex justify-between text-xs mb-1" style={{ color: C.muted }}><span>{discById[c.disciplineId]?.name || "?"}{c.topicId && ` · ${discById[c.disciplineId]?.topics?.find((t) => t.id === c.topicId)?.name || ""}`}</span><span>CX {c.box} · {fmtDue(c.due, c.created, c.box)}</span></div>
+              <div className="flex justify-between gap-2 text-xs mb-1" style={{ color: C.muted }}><span className="truncate">{discById[c.disciplineId]?.name || "?"}{c.topicId && ` · ${discById[c.disciplineId]?.topics?.find((t) => t.id === c.topicId)?.name || ""}`}</span><span className="flex items-center gap-2 shrink-0"><BoxDots box={c.box} />{fmtDue(c.due, c.created, c.box)}</span></div>
               <div className="font-medium text-sm">{c.front}</div>
               <div className="text-sm mt-1" style={{ color: C.muted }}>{c.back}</div>
               <div className="flex justify-end items-center gap-3 mt-2">
@@ -1296,8 +1317,28 @@ function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, se
   }
   function erroParaFicha(e) {
     const back = e.licao || "Revisar este conceito — complete a resposta editando a ficha.";
-    setCards((p) => [makeCard(e.tema, back, e.disciplineId, e.topicId || null), ...p]);
-    setErros((p) => p.map((x) => (x.id === e.id ? { ...x, virouFicha: true } : x)));
+    const card = makeCard(e.tema, back, e.disciplineId, e.topicId || null);
+    setCards((p) => [card, ...p]);
+    setErros((p) => p.map((x) => (x.id === e.id ? { ...x, virouFicha: true, cardId: card.id } : x)));
+  }
+
+  // Erros convertidos antes do vínculo existir não têm cardId — casa pelo conteúdo.
+  const linkedCard = (e) => {
+    if (e.cardId) return cards.find((c) => c.id === e.cardId) || null;
+    if (!e.virouFicha) return null;
+    return cards.find((c) => c.disciplineId === e.disciplineId && c.front === e.tema) || null;
+  };
+
+  const [confirmDel, setConfirmDel] = useState(null);
+  function askRemove(e) {
+    if (linkedCard(e)) setConfirmDel(e.id);
+    else removeErro(e.id);
+  }
+  function removeErroECard(e) {
+    const c = linkedCard(e);
+    if (c) setCards((p) => p.filter((x) => x.id !== c.id));
+    removeErro(e.id);
+    setConfirmDel(null);
   }
 
   const countBy = (arr) => {
@@ -1407,14 +1448,25 @@ function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, se
           <div className="flex justify-between gap-2 text-xs mb-1" style={{ color: C.muted }}><span className="truncate">{discById[e.disciplineId]?.name || "?"}{e.topicId && ` · ${topicName(e.disciplineId, e.topicId)}`}</span><span className="shrink-0">{fmtDate(new Date(e.data).toISOString().slice(0, 10))}</span></div>
           <div className="font-medium text-sm">{e.tema}</div>
           <div className="text-sm mt-1" style={{ color: C.muted }}><span style={{ color: C.red }}>{e.motivo}</span>{e.licao && <> — {e.licao}</>}</div>
-          <div className="flex justify-between items-center mt-2">
-            {e.virouFicha ? <span className="text-xs flex items-center gap-1" style={{ color: C.green }}><CheckCircle2 size={13} /> virou ficha</span>
-              : <button onClick={() => erroParaFicha(e)} className="text-xs font-semibold px-2 py-1 rounded-lg" style={{ background: C.navActiveBg, color: C.navActiveInk }}>Virar flashcard</button>}
-            <div className="flex items-center gap-3">
-              <button onClick={() => startEdit(e)} title="Editar"><Pencil size={15} color={C.muted} /></button>
-              <button onClick={() => removeErro(e.id)} title="Excluir"><Trash2 size={15} color={C.red} /></button>
+          {confirmDel === e.id ? (
+            <div className="mt-3 pt-3 border-t" style={{ borderColor: C.line }}>
+              <p className="text-xs mb-2" style={{ color: C.inkSoft }}>Esse erro tem um flashcard. Excluir a ficha também?</p>
+              <div className="flex flex-wrap gap-2">
+                <button onClick={() => removeErroECard(e)} className="text-xs font-bold px-2.5 py-1.5 rounded-lg" style={{ background: C.red, color: "#fff" }}>Excluir os dois</button>
+                <button onClick={() => { removeErro(e.id); setConfirmDel(null); }} className="text-xs font-bold px-2.5 py-1.5 rounded-lg" style={{ color: C.inkSoft, border: `1px solid ${C.line}` }}>Só o erro</button>
+                <button onClick={() => setConfirmDel(null)} className="text-xs font-bold px-2.5 py-1.5 rounded-lg" style={{ color: C.muted }}>Cancelar</button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex justify-between items-center mt-2">
+              {e.virouFicha ? <span className="text-xs flex items-center gap-1" style={{ color: C.green }}><CheckCircle2 size={13} /> virou ficha</span>
+                : <button onClick={() => erroParaFicha(e)} className="text-xs font-semibold px-2 py-1 rounded-lg" style={{ background: C.navActiveBg, color: C.navActiveInk }}>Virar flashcard</button>}
+              <div className="flex items-center gap-3">
+                <button onClick={() => startEdit(e)} title="Editar"><Pencil size={15} color={C.muted} /></button>
+                <button onClick={() => askRemove(e)} title="Excluir"><Trash2 size={15} color={C.red} /></button>
+              </div>
+            </div>
+          )}
         </Card>
       ))}
     </div>
