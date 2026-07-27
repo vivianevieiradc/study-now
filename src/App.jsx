@@ -84,6 +84,31 @@ const MOTIVOS_ERRO = [
   "Fiquei em dúvida entre alternativas",
   "Chutei",
 ];
+// O motivo decide o tratamento: memória vira flashcard; método é conduta de prova,
+// que ficha nenhuma conserta; treino pede refazer questão do tipo.
+const MOTIVO_TIPO = {
+  "Não sabia o conteúdo": "memoria",
+  "Conhecia o conteúdo parcialmente": "memoria",
+  "Confundi conceitos semelhantes": "memoria",
+  "Esqueci uma regra, fórmula ou definição": "memoria",
+  "Não percebi palavra-chave ou exceção": "memoria",
+  "Apliquei o conceito de forma incorreta": "treino",
+  "Erro de cálculo": "treino",
+  "Falta de domínio de conteúdo pré-requisito": "treino",
+  "Interpretação equivocada do enunciado": "metodo",
+  "Desatenção / leitura apressada": "metodo",
+  "Gestão inadequada do tempo": "metodo",
+  "Erro de marcação ou transcrição": "metodo",
+  "Fiquei em dúvida entre alternativas": "metodo",
+  "Chutei": "metodo",
+};
+const tipoMotivo = (m) => MOTIVO_TIPO[m] || "treino";
+const TIPO_LABEL = { memoria: "memória", treino: "treino", metodo: "método" };
+const TIPO_NOTA = {
+  memoria: "Falha de memória — é o caso clássico de flashcard.",
+  treino: "Você sabia a teoria e escorregou na aplicação. Se o buraco é uma definição, vire ficha; se é procedimento, refaça questões do tipo.",
+  metodo: "Erro de conduta na prova, não de conteúdo. Flashcard não resolve — anote a regra que você vai seguir da próxima vez.",
+};
 const makeCard = (front, back, disciplineId, topicId = null) => ({ id: uid(), front, back, disciplineId, topicId, box: 1, due: Date.now(), created: Date.now() });
 
 /* ============================ Helpers ============================ */
@@ -1376,7 +1401,8 @@ function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, se
   const filtrados = useMemo(() => erros.filter((e) => {
     if (fDisc !== "todas" && e.disciplineId !== fDisc) return false;
     if (fTopic !== "todas" && (e.topicId || "") !== (fTopic === "__geral" ? "" : fTopic)) return false;
-    if (fMotivo !== "todos" && e.motivo !== fMotivo) return false;
+    if (fMotivo.startsWith("tipo:")) { if (tipoMotivo(e.motivo) !== fMotivo.slice(5)) return false; }
+    else if (fMotivo !== "todos" && e.motivo !== fMotivo) return false;
     if (fStatus === "revisar" && e.dominado) return false;
     if (fStatus === "dominados" && !e.dominado) return false;
     return true;
@@ -1422,6 +1448,17 @@ function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, se
   const drillDaSemana = porMateria.length ? discById[porMateria[0][0]]?.name : null;
   const dominados = erros.length - aRevisar.length;
 
+  const TIPO_COR = { memoria: C.gold, treino: C.inkSoft, metodo: C.red };
+
+  // O destaque do botão segue o motivo: só erro de memória merece virar ficha.
+  const converterBtn = (e) => {
+    const tipo = tipoMotivo(e.motivo);
+    const estilo = tipo === "memoria" ? { background: C.navActiveBg, color: C.navActiveInk }
+      : tipo === "treino" ? { background: C.surface2, color: C.inkSoft, border: `1px solid ${C.line}` }
+        : { color: C.muted, border: `1px dashed ${C.line}` };
+    return <button onClick={() => erroParaFicha(e)} title={TIPO_NOTA[tipo]} className="text-xs font-semibold px-2 py-1 rounded-lg shrink-0" style={estilo}>Virar flashcard</button>;
+  };
+
   const Barra = ({ label, n, max, cor }) => (
     <div className="flex items-center gap-2">
       <span className="text-xs w-36 truncate" style={{ color: C.muted }} title={label}>{label}</span>
@@ -1441,7 +1478,7 @@ function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, se
       <button onClick={() => setSessao(null)} className="text-xs font-semibold flex items-center gap-1 shrink-0" style={{ color: C.muted }}><X size={14} /> Encerrar</button>
     </div>
     <Card className="min-h-[200px]">
-      <span className="text-xs font-bold rounded-full px-2.5 py-1" style={{ color: C.red, background: C.surface2, border: `1px solid ${C.line}` }}>{atual.motivo}</span>
+      <span className="text-xs font-bold rounded-full px-2.5 py-1" style={{ color: TIPO_COR[tipoMotivo(atual.motivo)], background: C.surface2, border: `1px solid ${C.line}` }}>{atual.motivo} · {TIPO_LABEL[tipoMotivo(atual.motivo)]}</span>
       <p className="text-lg font-semibold leading-snug mt-3">{atual.tema}</p>
       {sessao.showLicao && (
         <div className="mt-4 pt-4 border-t" style={{ borderColor: C.line }}>
@@ -1480,9 +1517,17 @@ function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, se
         </div>
         <div className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: C.muted }}>Por que você erra</div>
         <div className="space-y-2 mb-3">
-          {porMotivo.slice(0, 5).map(([motivo, n]) => <Barra key={motivo} label={motivo} n={n} max={maxMot} cor={C.gold} />)}
+          {porMotivo.slice(0, 5).map(([motivo, n]) => <Barra key={motivo} label={motivo} n={n} max={maxMot} cor={TIPO_COR[tipoMotivo(motivo)]} />)}
         </div>
-        <p className="text-xs mb-3" style={{ color: C.muted }}>Motivo de conteúdo pede voltar à teoria; motivo de atenção ou tempo pede treino de prova, não mais estudo.</p>
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs mb-3" style={{ color: C.muted }}>
+          {["memoria", "treino", "metodo"].map((t) => (
+            <span key={t} className="flex items-center gap-1.5">
+              <span className="rounded-full" style={{ width: 8, height: 8, background: TIPO_COR[t] }} />
+              {TIPO_LABEL[t]}
+            </span>
+          ))}
+        </div>
+        <p className="text-xs mb-3" style={{ color: C.muted }}>Erro de <b>memória</b> vira flashcard. De <b>treino</b>, refaça questões do tipo. De <b>método</b>, nenhum estudo resolve — mude a conduta na prova.</p>
         <button className="text-xs font-semibold" style={{ color: C.gold }} onClick={() => setView("flashcards")}>Ver flashcards →</button>
       </Card>
     )}
@@ -1505,7 +1550,12 @@ function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, se
           </select>
           <select value={fMotivo} onChange={(e) => setFMotivo(e.target.value)} className={inputCls} style={inputStyle(C)}>
             <option value="todos">Todos os motivos</option>
-            {motivosUsados.map((m) => <option key={m} value={m}>{m}</option>)}
+            <optgroup label="Por tipo de erro">
+              {["memoria", "treino", "metodo"].map((t) => <option key={t} value={`tipo:${t}`}>Só {TIPO_LABEL[t]}</option>)}
+            </optgroup>
+            <optgroup label="Por motivo">
+              {motivosUsados.map((m) => <option key={m} value={m}>{m}</option>)}
+            </optgroup>
           </select>
           <select value={fStatus} onChange={(e) => setFStatus(e.target.value)} className={inputCls} style={inputStyle(C)}>
             <option value="revisar">A revisar</option>
@@ -1611,7 +1661,14 @@ function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, se
                 <span className="shrink-0">{fmtDate(new Date(e.data).toISOString().slice(0, 10))}</span>
               </div>
               <div className="font-medium text-sm">{e.tema}</div>
-              <div className="text-sm mt-1" style={{ color: C.muted }}><span style={{ color: C.red }}>{e.motivo}</span>{e.licao && <> — {e.licao}</>}</div>
+              <div className="text-sm mt-1" style={{ color: C.muted }}>
+                <span style={{ color: TIPO_COR[tipoMotivo(e.motivo)] }}>{e.motivo}</span>
+                <span className="text-xs"> ({TIPO_LABEL[tipoMotivo(e.motivo)]})</span>
+                {e.licao && <> — {e.licao}</>}
+              </div>
+              {!e.virouFicha && tipoMotivo(e.motivo) === "metodo" && (
+                <p className="text-xs mt-1.5" style={{ color: C.muted }}>{TIPO_NOTA.metodo}</p>
+              )}
               {confirmDel === e.id ? (
                 <div className="mt-3 pt-3 border-t" style={{ borderColor: C.line }}>
                   <p className="text-xs mb-2" style={{ color: C.inkSoft }}>Esse erro tem um flashcard. Excluir a ficha também?</p>
@@ -1630,8 +1687,7 @@ function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, se
                         : { background: C.surface2, color: C.inkSoft, border: `1px solid ${C.line}` }}>
                       {e.dominado ? "✓ dominado" : "Marcar dominado"}
                     </button>
-                    {e.virouFicha ? <span className="text-xs flex items-center gap-1 truncate" style={{ color: C.green }}><CheckCircle2 size={13} /> virou ficha</span>
-                      : <button onClick={() => erroParaFicha(e)} className="text-xs font-semibold px-2 py-1 rounded-lg shrink-0" style={{ background: C.navActiveBg, color: C.navActiveInk }}>Virar flashcard</button>}
+                    {e.virouFicha ? <span className="text-xs flex items-center gap-1 truncate" style={{ color: C.green }}><CheckCircle2 size={13} /> virou ficha</span> : converterBtn(e)}
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
                     <button onClick={() => startEdit(e)} title="Editar"><Pencil size={15} color={C.muted} /></button>
