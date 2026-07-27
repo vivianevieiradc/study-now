@@ -892,6 +892,7 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
   const [sub, setSub] = useState("estudar");
   const [session, setSession] = useState(null); // { queue, index, showAnswer, mode, label }
   const [openDeck, setOpenDeck] = useState(null);
+  const [showForm, setShowForm] = useState(false);
   const [cardForm, setCardForm] = useState({ front: "", back: "", disciplineId: disciplines[0]?.id || "", topicId: "" });
 
   const pendentes = useMemo(() => {
@@ -944,6 +945,8 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
     setCardForm({ front: "", back: "", disciplineId: cardForm.disciplineId, topicId: "" });
   }
   function removeCard(id) { setCards((p) => p.filter((c) => c.id !== id)); }
+  // classificação rápida sem abrir o modo de edição
+  function setCardTopic(id, topicId) { setCards((p) => p.map((c) => (c.id === id ? { ...c, topicId: topicId || null } : c))); }
 
   const [editId, setEditId] = useState(null);
   const [editForm, setEditForm] = useState(null);
@@ -986,7 +989,8 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
   const filteredCards = useMemo(() => {
     let result = cards;
     if (filtroDisc !== "todas") result = result.filter((c) => c.disciplineId === filtroDisc);
-    if (filtroTopic !== "todas") result = result.filter((c) => c.topicId === filtroTopic);
+    if (filtroTopic === "__geral") result = result.filter((c) => !c.topicId);
+    else if (filtroTopic !== "todas") result = result.filter((c) => c.topicId === filtroTopic);
     return result;
   }, [cards, filtroDisc, filtroTopic]);
 
@@ -1161,8 +1165,12 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
 
     {sub === "fichas" && (
       <div>
-        <Card className="mb-4">
-          <div className="flex items-center gap-2 text-sm font-semibold mb-4"><Plus size={16} color={C.gold} /> Nova ficha</div>
+        {!showForm && <div className="flex justify-end mb-3"><Btn onClick={() => setShowForm(true)}><Plus size={16} /> Nova ficha</Btn></div>}
+        {showForm && <Card className="mb-4">
+          <div className="flex items-center justify-between gap-2 mb-4">
+            <div className="flex items-center gap-2 text-sm font-semibold"><Plus size={16} color={C.gold} /> Nova ficha</div>
+            <button onClick={() => setShowForm(false)} className="text-xs font-semibold flex items-center gap-1" style={{ color: C.muted }}><X size={14} /> Fechar</button>
+          </div>
           <Field label="Matéria">
             <select value={cardForm.disciplineId} onChange={(e) => setCardForm({ ...cardForm, disciplineId: e.target.value, topicId: "" })} className={inputCls} style={inputStyle(C)}>
               {disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
@@ -1179,7 +1187,7 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
           <Field label="Pergunta"><textarea rows={2} value={cardForm.front} onChange={(e) => setCardForm({ ...cardForm, front: e.target.value })} className={inputCls} style={inputStyle(C)} placeholder="Ex.: O que é subnetting?" /></Field>
           <Field label="Resposta"><textarea rows={3} value={cardForm.back} onChange={(e) => setCardForm({ ...cardForm, back: e.target.value })} className={inputCls} style={inputStyle(C)} placeholder="A resposta que você quer lembrar na prova." /></Field>
           <div className="flex justify-end"><Btn onClick={addCard}><Plus size={16} /> Registrar ficha</Btn></div>
-        </Card>
+        </Card>}
         <div className="flex gap-2 mb-3">
           <select value={filtroDisc} onChange={(e) => { setFiltroDisc(e.target.value); setFiltroTopic("todas"); }} className={inputCls} style={inputStyle(C)}>
             <option value="todas">Todas as matérias</option>
@@ -1188,7 +1196,8 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
           {filtroTopics.length > 0 && (
             <select value={filtroTopic} onChange={(e) => setFiltroTopic(e.target.value)} className={inputCls} style={inputStyle(C)}>
               <option value="todas">Todos os tópicos</option>
-              {filtroTopics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+              <option value="__geral">Sem tópico</option>
+              {filtroTopics.map((t) => <option key={t.id} value={t.id}>{t.num ? `${t.num} · ` : ""}{t.name}</option>)}
             </select>
           )}
         </div>
@@ -1233,9 +1242,19 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
               <div className="flex justify-between gap-2 text-xs mb-1" style={{ color: C.muted }}><span className="truncate">{discById[c.disciplineId]?.name || "?"}{c.topicId && ` · ${discById[c.disciplineId]?.topics?.find((t) => t.id === c.topicId)?.name || ""}`}</span><span className="flex items-center gap-2 shrink-0"><BoxDots box={c.box} />{fmtDue(c.due, c.created, c.box)}</span></div>
               <div className="font-medium text-sm">{c.front}</div>
               <div className="text-sm mt-1" style={{ color: C.muted }}>{c.back}</div>
-              <div className="flex justify-end items-center gap-3 mt-2">
-                <button onClick={() => startEditCard(c)} title="Editar"><Pencil size={15} color={C.muted} /></button>
-                <button onClick={() => removeCard(c.id)} title="Excluir"><Trash2 size={15} color={C.red} /></button>
+              <div className="flex justify-between items-center gap-2 mt-2">
+                {(discById[c.disciplineId]?.topics || []).length > 0 ? (
+                  <select value={c.topicId || ""} onChange={(e) => setCardTopic(c.id, e.target.value)} title="Tópico do edital"
+                    className="text-xs rounded-lg px-2 py-1 min-w-0 flex-1 max-w-[70%]"
+                    style={{ ...inputStyle(C), color: c.topicId ? C.inkSoft : C.muted }}>
+                    <option value="">— sem tópico —</option>
+                    {discById[c.disciplineId].topics.map((t) => <option key={t.id} value={t.id}>{t.num ? `${t.num} · ` : ""}{t.name}</option>)}
+                  </select>
+                ) : <span />}
+                <div className="flex items-center gap-3 shrink-0">
+                  <button onClick={() => startEditCard(c)} title="Editar"><Pencil size={15} color={C.muted} /></button>
+                  <button onClick={() => removeCard(c.id)} title="Excluir"><Trash2 size={15} color={C.red} /></button>
+                </div>
               </div>
             </Card>
           ))}
@@ -1276,15 +1295,19 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
 function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, setView }) {
   const C = useC();
   const [erroForm, setErroForm] = useState({ disciplineId: disciplines[0]?.id || "", topicId: "", tema: "", motivo: MOTIVOS_ERRO[0], licao: "" });
+  const [showForm, setShowForm] = useState(false);
   const topicName = (discId, topId) => (topId ? discById[discId]?.topics?.find((t) => t.id === topId)?.name || "" : "");
 
   function addErro() {
     if (!erroForm.tema.trim() || !erroForm.disciplineId) return;
-    const e = { id: uid(), disciplineId: erroForm.disciplineId, topicId: erroForm.topicId || null, tema: erroForm.tema.trim(), motivo: erroForm.motivo, licao: erroForm.licao.trim(), data: Date.now(), virouFicha: false };
+    const e = { id: uid(), disciplineId: erroForm.disciplineId, topicId: erroForm.topicId || null, tema: erroForm.tema.trim(), motivo: erroForm.motivo, licao: erroForm.licao.trim(), data: Date.now(), virouFicha: false, dominado: false };
     setErros((p) => [e, ...p]);
     setErroForm({ disciplineId: erroForm.disciplineId, topicId: erroForm.topicId, tema: "", motivo: MOTIVOS_ERRO[0], licao: "" });
   }
   function removeErro(id) { setErros((p) => p.filter((e) => e.id !== id)); }
+  function dominar(id, val) {
+    setErros((p) => p.map((x) => (x.id === id ? { ...x, dominado: val, dominadoEm: val ? Date.now() : null } : x)));
+  }
 
   const [editId, setEditId] = useState(null);
   const [editForm, setEditForm] = useState(null);
@@ -1310,7 +1333,7 @@ function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, se
       if (!tema.trim() || !disc) { skipped++; return; }
       const topNome = get(o, "Tópico", "Topico", "tema do edital");
       const topId = topNome ? (disc.topics?.find((t) => normName(t.name) === normName(topNome))?.id || null) : null;
-      novos.push({ id: uid(), disciplineId: disc.id, topicId: topId, tema: tema.trim(), motivo: get(o, "Motivo", "por que errei") || MOTIVOS_ERRO[0], licao: get(o, "O que aprendi", "licao", "lição").trim(), data: Date.now(), virouFicha: normName(get(o, "Virou ficha")) === "sim" });
+      novos.push({ id: uid(), disciplineId: disc.id, topicId: topId, tema: tema.trim(), motivo: get(o, "Motivo", "por que errei") || MOTIVOS_ERRO[0], licao: get(o, "O que aprendi", "licao", "lição").trim(), data: Date.now(), virouFicha: normName(get(o, "Virou ficha")) === "sim", dominado: normName(get(o, "Dominado")) === "sim" });
     });
     if (novos.length) setErros((p) => [...novos, ...p]);
     return { added: novos.length, skipped };
@@ -1341,66 +1364,194 @@ function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, se
     setConfirmDel(null);
   }
 
-  const countBy = (arr) => {
+  /* ---------- Recorte de estudo: matéria, tópico, motivo e status ---------- */
+  const [fDisc, setFDisc] = useState("todas");
+  const [fTopic, setFTopic] = useState("todas");
+  const [fMotivo, setFMotivo] = useState("todos");
+  const [fStatus, setFStatus] = useState("revisar");
+
+  const fTopics = fDisc !== "todas" ? (discById[fDisc]?.topics || []) : [];
+  const motivosUsados = useMemo(() => [...new Set(erros.map((e) => e.motivo))].sort(), [erros]);
+
+  const filtrados = useMemo(() => erros.filter((e) => {
+    if (fDisc !== "todas" && e.disciplineId !== fDisc) return false;
+    if (fTopic !== "todas" && (e.topicId || "") !== (fTopic === "__geral" ? "" : fTopic)) return false;
+    if (fMotivo !== "todos" && e.motivo !== fMotivo) return false;
+    if (fStatus === "revisar" && e.dominado) return false;
+    if (fStatus === "dominados" && !e.dominado) return false;
+    return true;
+  }), [erros, fDisc, fTopic, fMotivo, fStatus]);
+
+  // Sem matéria escolhida agrupa por matéria; com matéria escolhida, desce pro tópico do edital.
+  const grupos = useMemo(() => {
+    const m = new Map();
+    filtrados.forEach((e) => {
+      const porTopico = fDisc !== "todas";
+      const key = porTopico ? (e.topicId || "__geral") : e.disciplineId;
+      const label = porTopico
+        ? (e.topicId ? topicName(e.disciplineId, e.topicId) || "Geral" : "Geral (sem tópico)")
+        : (discById[e.disciplineId]?.name || "?");
+      if (!m.has(key)) m.set(key, { key, label, items: [] });
+      m.get(key).items.push(e);
+    });
+    return [...m.values()].sort((a, b) => b.items.length - a.items.length);
+  }, [filtrados, fDisc, discById]);
+
+  /* ---------- Sessão de revisão: recordar o conceito antes de ver a lição ---------- */
+  const [sessao, setSessao] = useState(null); // { queue, index, showLicao }
+  const atual = sessao ? erros.find((e) => e.id === sessao.queue[sessao.index]) : null;
+  function startRevisao() {
+    if (!filtrados.length) return;
+    setSessao({ queue: shuffle(filtrados).map((e) => e.id), index: 0, showLicao: false });
+  }
+  function avancar() {
+    setSessao((s) => (s.index + 1 < s.queue.length ? { ...s, index: s.index + 1, showLicao: false } : null));
+  }
+  function responder(val) { if (atual) dominar(atual.id, val); avancar(); }
+
+  const countBy = (arr, get) => {
     const m = {};
-    arr.forEach((x) => { m[x.disciplineId] = (m[x.disciplineId] || 0) + 1; });
+    arr.forEach((x) => { const k = get(x); m[k] = (m[k] || 0) + 1; });
     return Object.entries(m).sort((a, b) => b[1] - a[1]);
   };
-  const porMateria = countBy(erros);
+  const aRevisar = erros.filter((e) => !e.dominado);
+  const porMateria = countBy(aRevisar, (e) => e.disciplineId);
+  const porMotivo = countBy(aRevisar, (e) => e.motivo);
   const maxMat = porMateria.length ? porMateria[0][1] : 1;
+  const maxMot = porMotivo.length ? porMotivo[0][1] : 1;
   const drillDaSemana = porMateria.length ? discById[porMateria[0][0]]?.name : null;
+  const dominados = erros.length - aRevisar.length;
+
+  const Barra = ({ label, n, max, cor }) => (
+    <div className="flex items-center gap-2">
+      <span className="text-xs w-36 truncate" style={{ color: C.muted }} title={label}>{label}</span>
+      <div className="flex-1 h-2 rounded-full" style={{ background: C.surface2, border: `1px solid ${C.line}` }}>
+        <div className="h-full rounded-full" style={{ width: `${(n / max) * 100}%`, background: cor }} />
+      </div>
+      <span className="text-xs w-5 text-right">{n}</span>
+    </div>
+  );
+
+  if (sessao && atual) return <div>
+    <PageTitle sub="Leia o erro, tente reconstruir o conceito de cabeça e só então revele a lição.">Revisão de erros</PageTitle>
+    <div className="flex items-center justify-between gap-2 mb-4">
+      <div className="text-xs font-semibold" style={{ color: C.muted }}>
+        {sessao.index + 1} / {sessao.queue.length} · {discById[atual.disciplineId]?.name || "?"}{atual.topicId && ` · ${topicName(atual.disciplineId, atual.topicId)}`}
+      </div>
+      <button onClick={() => setSessao(null)} className="text-xs font-semibold flex items-center gap-1 shrink-0" style={{ color: C.muted }}><X size={14} /> Encerrar</button>
+    </div>
+    <Card className="min-h-[200px]">
+      <span className="text-xs font-bold rounded-full px-2.5 py-1" style={{ color: C.red, background: C.surface2, border: `1px solid ${C.line}` }}>{atual.motivo}</span>
+      <p className="text-lg font-semibold leading-snug mt-3">{atual.tema}</p>
+      {sessao.showLicao && (
+        <div className="mt-4 pt-4 border-t" style={{ borderColor: C.line }}>
+          <div className="text-xs font-semibold mb-1" style={{ color: C.muted }}>O que aprendi</div>
+          <p className="text-sm" style={{ color: C.inkSoft }}>{atual.licao || "Você não registrou a lição desse erro — vale voltar nele e escrever o conceito certo."}</p>
+        </div>
+      )}
+    </Card>
+    {!sessao.showLicao ? (
+      <div className="flex justify-center mt-5"><Btn onClick={() => setSessao((s) => ({ ...s, showLicao: true }))}>Mostrar o que aprendi</Btn></div>
+    ) : (
+      <div className="grid grid-cols-2 gap-2 mt-5">
+        <Btn variant="ghost" onClick={() => responder(false)} style={{ flexDirection: "column", justifyContent: "center", color: C.red, borderColor: C.red }}>Ainda erro<span className="text-xs font-normal opacity-80">continua no caderno</span></Btn>
+        <Btn onClick={() => responder(true)} style={{ flexDirection: "column", justifyContent: "center", background: C.green, borderColor: C.green, color: "#fff" }}>Dominei<span className="text-xs font-normal opacity-90">sai da revisão</span></Btn>
+      </div>
+    )}
+  </div>;
 
   return <div>
-    <PageTitle sub="Errou uma questão → registra aqui → converte em flashcard quando quiser revisar por repetição espaçada.">Caderno de erros</PageTitle>
+    <PageTitle sub="Registre por que errou, estude por recortes (matéria, tópico ou motivo) e marque o que já dominou.">Caderno de erros</PageTitle>
+
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <Stat label="Erros registrados" value={erros.length} Icon={AlertCircle} />
+      <Stat label="A revisar" value={aRevisar.length} Icon={Crosshair} color={C.red} />
+      <Stat label="Dominados" value={dominados} Icon={CheckCircle2} color={C.green} />
+      <Stat label="Matéria crítica" value={drillDaSemana || "—"} Icon={Target} color={C.gold} />
+    </div>
 
     {erros.length > 0 && (
       <Card className="mb-4">
         <div className="flex items-center gap-2 text-sm font-semibold mb-3"><AlertCircle size={16} color={C.gold} /> Raio-X dos erros</div>
-        {drillDaSemana && <p className="text-sm mb-3" style={{ color: C.inkSoft }}>Drill recomendado: <b>{drillDaSemana}</b> — sua matéria com mais erros.</p>}
-        <div className="space-y-2 mb-3">
-          {porMateria.slice(0, 5).map(([discId, n]) => (
-            <div key={discId} className="flex items-center gap-2">
-              <span className="text-xs w-32 truncate" style={{ color: C.muted }}>{discById[discId]?.name || "?"}</span>
-              <div className="flex-1 h-2 rounded-full" style={{ background: C.surface2, border: `1px solid ${C.line}` }}>
-                <div className="h-full rounded-full" style={{ width: `${(n / maxMat) * 100}%`, background: C.red }} />
-              </div>
-              <span className="text-xs w-5 text-right">{n}</span>
-            </div>
-          ))}
+        {drillDaSemana && <p className="text-sm mb-3" style={{ color: C.inkSoft }}>Drill recomendado: <b>{drillDaSemana}</b> — sua matéria com mais erros em aberto.</p>}
+        <div className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: C.muted }}>Por matéria</div>
+        <div className="space-y-2 mb-4">
+          {porMateria.slice(0, 5).map(([discId, n]) => <Barra key={discId} label={discById[discId]?.name || "?"} n={n} max={maxMat} cor={C.red} />)}
         </div>
+        <div className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: C.muted }}>Por que você erra</div>
+        <div className="space-y-2 mb-3">
+          {porMotivo.slice(0, 5).map(([motivo, n]) => <Barra key={motivo} label={motivo} n={n} max={maxMot} cor={C.gold} />)}
+        </div>
+        <p className="text-xs mb-3" style={{ color: C.muted }}>Motivo de conteúdo pede voltar à teoria; motivo de atenção ou tempo pede treino de prova, não mais estudo.</p>
         <button className="text-xs font-semibold" style={{ color: C.gold }} onClick={() => setView("flashcards")}>Ver flashcards →</button>
       </Card>
     )}
 
-    <Card className="mb-4">
-      <div className="flex items-center gap-2 text-sm font-semibold mb-4"><Plus size={16} color={C.gold} /> Registrar erro</div>
-      <Field label="Matéria">
-        <select value={erroForm.disciplineId} onChange={(e) => setErroForm({ ...erroForm, disciplineId: e.target.value, topicId: "" })} className={inputCls} style={inputStyle(C)}>
-          {disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
-        </select>
-      </Field>
-      {(discById[erroForm.disciplineId]?.topics || []).length > 0 && (
-        <Field label="Tópico do edital (opcional — a ficha já nasce classificada)">
-          <select value={erroForm.topicId} onChange={(e) => setErroForm({ ...erroForm, topicId: e.target.value })} className={inputCls} style={inputStyle(C)}>
-            <option value="">— geral —</option>
-            {discById[erroForm.disciplineId].topics.map((t) => <option key={t.id} value={t.id}>{t.num ? `${t.num} · ` : ""}{t.name}</option>)}
+    {erros.length > 0 && (
+      <Card className="mb-4">
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <div className="flex items-center gap-2 text-sm font-semibold"><Filter size={15} color={C.gold} /> Estudar pelo caderno</div>
+          <Btn onClick={startRevisao} disabled={!filtrados.length} style={!filtrados.length ? { opacity: 0.4 } : undefined}><Play size={16} /> Revisar {filtrados.length}</Btn>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <select value={fDisc} onChange={(e) => { setFDisc(e.target.value); setFTopic("todas"); }} className={inputCls} style={inputStyle(C)}>
+            <option value="todas">Todas as matérias</option>
+            {disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+          </select>
+          <select value={fTopic} onChange={(e) => setFTopic(e.target.value)} disabled={fDisc === "todas"} className={inputCls} style={{ ...inputStyle(C), opacity: fDisc === "todas" ? 0.5 : 1 }}>
+            <option value="todas">{fDisc === "todas" ? "Escolha uma matéria" : "Todos os tópicos"}</option>
+            {fDisc !== "todas" && <option value="__geral">Geral (sem tópico)</option>}
+            {fTopics.map((t) => <option key={t.id} value={t.id}>{t.num ? `${t.num} · ` : ""}{t.name}</option>)}
+          </select>
+          <select value={fMotivo} onChange={(e) => setFMotivo(e.target.value)} className={inputCls} style={inputStyle(C)}>
+            <option value="todos">Todos os motivos</option>
+            {motivosUsados.map((m) => <option key={m} value={m}>{m}</option>)}
+          </select>
+          <select value={fStatus} onChange={(e) => setFStatus(e.target.value)} className={inputCls} style={inputStyle(C)}>
+            <option value="revisar">A revisar</option>
+            <option value="dominados">Dominados</option>
+            <option value="todos">Todos</option>
+          </select>
+        </div>
+      </Card>
+    )}
+
+    {showForm ? (
+      <Card className="mb-4">
+        <div className="flex items-center justify-between gap-2 mb-4">
+          <div className="flex items-center gap-2 text-sm font-semibold"><Plus size={16} color={C.gold} /> Registrar erro</div>
+          <button onClick={() => setShowForm(false)} className="text-xs font-semibold flex items-center gap-1" style={{ color: C.muted }}><X size={14} /> Fechar</button>
+        </div>
+        <Field label="Matéria">
+          <select value={erroForm.disciplineId} onChange={(e) => setErroForm({ ...erroForm, disciplineId: e.target.value, topicId: "" })} className={inputCls} style={inputStyle(C)}>
+            {disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
           </select>
         </Field>
-      )}
-      <Field label="Questão / tema do erro"><textarea rows={2} value={erroForm.tema} onChange={(e) => setErroForm({ ...erroForm, tema: e.target.value })} className={inputCls} style={inputStyle(C)} placeholder="Ex.: Cálculo de broadcast em sub-rede /27" /></Field>
-      <Field label="Por que errei">
-        <select value={erroForm.motivo} onChange={(e) => setErroForm({ ...erroForm, motivo: e.target.value })} className={inputCls} style={inputStyle(C)}>
-          {MOTIVOS_ERRO.map((m) => <option key={m}>{m}</option>)}
-        </select>
-      </Field>
-      <Field label="O que aprendi (vira a resposta do flashcard)"><textarea rows={3} value={erroForm.licao} onChange={(e) => setErroForm({ ...erroForm, licao: e.target.value })} className={inputCls} style={inputStyle(C)} placeholder="O conceito certo, com suas palavras." /></Field>
-      <div className="flex justify-end"><Btn onClick={addErro}><Plus size={16} /> Registrar erro</Btn></div>
-    </Card>
+        {(discById[erroForm.disciplineId]?.topics || []).length > 0 && (
+          <Field label="Tópico do edital (opcional — a ficha já nasce classificada)">
+            <select value={erroForm.topicId} onChange={(e) => setErroForm({ ...erroForm, topicId: e.target.value })} className={inputCls} style={inputStyle(C)}>
+              <option value="">— geral —</option>
+              {discById[erroForm.disciplineId].topics.map((t) => <option key={t.id} value={t.id}>{t.num ? `${t.num} · ` : ""}{t.name}</option>)}
+            </select>
+          </Field>
+        )}
+        <Field label="Questão / tema do erro"><textarea rows={2} value={erroForm.tema} onChange={(e) => setErroForm({ ...erroForm, tema: e.target.value })} className={inputCls} style={inputStyle(C)} placeholder="Ex.: Cálculo de broadcast em sub-rede /27" /></Field>
+        <Field label="Por que errei">
+          <select value={erroForm.motivo} onChange={(e) => setErroForm({ ...erroForm, motivo: e.target.value })} className={inputCls} style={inputStyle(C)}>
+            {MOTIVOS_ERRO.map((m) => <option key={m}>{m}</option>)}
+          </select>
+        </Field>
+        <Field label="O que aprendi (vira a resposta do flashcard)"><textarea rows={3} value={erroForm.licao} onChange={(e) => setErroForm({ ...erroForm, licao: e.target.value })} className={inputCls} style={inputStyle(C)} placeholder="O conceito certo, com suas palavras." /></Field>
+        <div className="flex justify-end"><Btn onClick={addErro}><Plus size={16} /> Registrar erro</Btn></div>
+      </Card>
+    ) : (
+      <div className="flex justify-end mb-3"><Btn onClick={() => setShowForm(true)}><Plus size={16} /> Registrar erro</Btn></div>
+    )}
 
     <ExportBar
       filenameBase="caderno-de-erros"
-      headers={["Matéria", "Tópico", "Questão/tema", "Motivo", "O que aprendi", "Data", "Virou ficha"]}
-      rows={erros.map((e) => [
+      headers={["Matéria", "Tópico", "Questão/tema", "Motivo", "O que aprendi", "Data", "Virou ficha", "Dominado"]}
+      rows={filtrados.map((e) => [
         discById[e.disciplineId]?.name || "?",
         topicName(e.disciplineId, e.topicId),
         e.tema,
@@ -1408,68 +1559,91 @@ function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, se
         e.licao,
         new Date(e.data).toISOString().slice(0, 10),
         e.virouFicha ? "Sim" : "Não",
+        e.dominado ? "Sim" : "Não",
       ])}
     >
       <ImportButton onImport={importErros} />
     </ExportBar>
+
     {erros.length === 0 && <Empty msg="Caderno vazio. Errar e registrar é como se aprende — cada erro aqui é um ponto a mais na prova." />}
-    <div className="space-y-2">
-      {erros.map((e) => editId === e.id ? (
-        <Card key={e.id} className="!p-4">
-          <div className="flex items-center gap-2 text-sm font-semibold mb-4"><Pencil size={15} color={C.gold} /> Editar erro</div>
-          <Field label="Matéria">
-            <select value={editForm.disciplineId} onChange={(ev) => setEditForm({ ...editForm, disciplineId: ev.target.value, topicId: "" })} className={inputCls} style={inputStyle(C)}>
-              {disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
-            </select>
-          </Field>
-          {(discById[editForm.disciplineId]?.topics || []).length > 0 && (
-            <Field label="Tópico do edital (opcional)">
-              <select value={editForm.topicId} onChange={(ev) => setEditForm({ ...editForm, topicId: ev.target.value })} className={inputCls} style={inputStyle(C)}>
-                <option value="">— geral —</option>
-                {discById[editForm.disciplineId].topics.map((t) => <option key={t.id} value={t.id}>{t.num ? `${t.num} · ` : ""}{t.name}</option>)}
-              </select>
-            </Field>
-          )}
-          <Field label="Questão / tema do erro"><textarea rows={2} value={editForm.tema} onChange={(ev) => setEditForm({ ...editForm, tema: ev.target.value })} className={inputCls} style={inputStyle(C)} /></Field>
-          <Field label="Por que errei">
-            <select value={editForm.motivo} onChange={(ev) => setEditForm({ ...editForm, motivo: ev.target.value })} className={inputCls} style={inputStyle(C)}>
-              {motivoOpts.map((m) => <option key={m}>{m}</option>)}
-            </select>
-          </Field>
-          <Field label="O que aprendi"><textarea rows={3} value={editForm.licao} onChange={(ev) => setEditForm({ ...editForm, licao: ev.target.value })} className={inputCls} style={inputStyle(C)} /></Field>
-          {e.virouFicha && <p className="text-xs mb-3" style={{ color: C.muted }}>Esse erro já virou ficha — editar aqui não altera o flashcard, ajuste ele na aba Flashcards.</p>}
-          <div className="flex justify-end gap-2">
-            <Btn variant="ghost" onClick={cancelEdit}>Cancelar</Btn>
-            <Btn onClick={saveEdit}><Check size={16} /> Salvar</Btn>
-          </div>
-        </Card>
-      ) : (
-        <Card key={e.id} className="!p-3">
-          <div className="flex justify-between gap-2 text-xs mb-1" style={{ color: C.muted }}><span className="truncate">{discById[e.disciplineId]?.name || "?"}{e.topicId && ` · ${topicName(e.disciplineId, e.topicId)}`}</span><span className="shrink-0">{fmtDate(new Date(e.data).toISOString().slice(0, 10))}</span></div>
-          <div className="font-medium text-sm">{e.tema}</div>
-          <div className="text-sm mt-1" style={{ color: C.muted }}><span style={{ color: C.red }}>{e.motivo}</span>{e.licao && <> — {e.licao}</>}</div>
-          {confirmDel === e.id ? (
-            <div className="mt-3 pt-3 border-t" style={{ borderColor: C.line }}>
-              <p className="text-xs mb-2" style={{ color: C.inkSoft }}>Esse erro tem um flashcard. Excluir a ficha também?</p>
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => removeErroECard(e)} className="text-xs font-bold px-2.5 py-1.5 rounded-lg" style={{ background: C.red, color: "#fff" }}>Excluir os dois</button>
-                <button onClick={() => { removeErro(e.id); setConfirmDel(null); }} className="text-xs font-bold px-2.5 py-1.5 rounded-lg" style={{ color: C.inkSoft, border: `1px solid ${C.line}` }}>Só o erro</button>
-                <button onClick={() => setConfirmDel(null)} className="text-xs font-bold px-2.5 py-1.5 rounded-lg" style={{ color: C.muted }}>Cancelar</button>
+    {erros.length > 0 && filtrados.length === 0 && <Empty msg="Nenhum erro nesse recorte. Troque os filtros acima." />}
+
+    {grupos.map((g) => (
+      <div key={g.key} className="mb-5">
+        <div className="flex items-baseline justify-between gap-2 mb-2">
+          <h3 className="text-xs font-bold uppercase tracking-wide truncate" style={{ color: C.muted }} title={g.label}>{g.label}</h3>
+          <span className="text-xs shrink-0" style={{ color: C.muted }}>{g.items.length}</span>
+        </div>
+        <div className="space-y-2">
+          {g.items.map((e) => editId === e.id ? (
+            <Card key={e.id} className="!p-4">
+              <div className="flex items-center gap-2 text-sm font-semibold mb-4"><Pencil size={15} color={C.gold} /> Editar erro</div>
+              <Field label="Matéria">
+                <select value={editForm.disciplineId} onChange={(ev) => setEditForm({ ...editForm, disciplineId: ev.target.value, topicId: "" })} className={inputCls} style={inputStyle(C)}>
+                  {disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                </select>
+              </Field>
+              {(discById[editForm.disciplineId]?.topics || []).length > 0 && (
+                <Field label="Tópico do edital (opcional)">
+                  <select value={editForm.topicId} onChange={(ev) => setEditForm({ ...editForm, topicId: ev.target.value })} className={inputCls} style={inputStyle(C)}>
+                    <option value="">— geral —</option>
+                    {discById[editForm.disciplineId].topics.map((t) => <option key={t.id} value={t.id}>{t.num ? `${t.num} · ` : ""}{t.name}</option>)}
+                  </select>
+                </Field>
+              )}
+              <Field label="Questão / tema do erro"><textarea rows={2} value={editForm.tema} onChange={(ev) => setEditForm({ ...editForm, tema: ev.target.value })} className={inputCls} style={inputStyle(C)} /></Field>
+              <Field label="Por que errei">
+                <select value={editForm.motivo} onChange={(ev) => setEditForm({ ...editForm, motivo: ev.target.value })} className={inputCls} style={inputStyle(C)}>
+                  {motivoOpts.map((m) => <option key={m}>{m}</option>)}
+                </select>
+              </Field>
+              <Field label="O que aprendi"><textarea rows={3} value={editForm.licao} onChange={(ev) => setEditForm({ ...editForm, licao: ev.target.value })} className={inputCls} style={inputStyle(C)} /></Field>
+              {e.virouFicha && <p className="text-xs mb-3" style={{ color: C.muted }}>Esse erro já virou ficha — editar aqui não altera o flashcard, ajuste ele na aba Flashcards.</p>}
+              <div className="flex justify-end gap-2">
+                <Btn variant="ghost" onClick={cancelEdit}>Cancelar</Btn>
+                <Btn onClick={saveEdit}><Check size={16} /> Salvar</Btn>
               </div>
-            </div>
+            </Card>
           ) : (
-            <div className="flex justify-between items-center mt-2">
-              {e.virouFicha ? <span className="text-xs flex items-center gap-1" style={{ color: C.green }}><CheckCircle2 size={13} /> virou ficha</span>
-                : <button onClick={() => erroParaFicha(e)} className="text-xs font-semibold px-2 py-1 rounded-lg" style={{ background: C.navActiveBg, color: C.navActiveInk }}>Virar flashcard</button>}
-              <div className="flex items-center gap-3">
-                <button onClick={() => startEdit(e)} title="Editar"><Pencil size={15} color={C.muted} /></button>
-                <button onClick={() => askRemove(e)} title="Excluir"><Trash2 size={15} color={C.red} /></button>
+            <Card key={e.id} className="!p-3" style={e.dominado ? { opacity: 0.7 } : undefined}>
+              <div className="flex justify-between gap-2 text-xs mb-1" style={{ color: C.muted }}>
+                <span className="truncate">{discById[e.disciplineId]?.name || "?"}{e.topicId && ` · ${topicName(e.disciplineId, e.topicId)}`}</span>
+                <span className="shrink-0">{fmtDate(new Date(e.data).toISOString().slice(0, 10))}</span>
               </div>
-            </div>
-          )}
-        </Card>
-      ))}
-    </div>
+              <div className="font-medium text-sm">{e.tema}</div>
+              <div className="text-sm mt-1" style={{ color: C.muted }}><span style={{ color: C.red }}>{e.motivo}</span>{e.licao && <> — {e.licao}</>}</div>
+              {confirmDel === e.id ? (
+                <div className="mt-3 pt-3 border-t" style={{ borderColor: C.line }}>
+                  <p className="text-xs mb-2" style={{ color: C.inkSoft }}>Esse erro tem um flashcard. Excluir a ficha também?</p>
+                  <div className="flex flex-wrap gap-2">
+                    <button onClick={() => removeErroECard(e)} className="text-xs font-bold px-2.5 py-1.5 rounded-lg" style={{ background: C.red, color: "#fff" }}>Excluir os dois</button>
+                    <button onClick={() => { removeErro(e.id); setConfirmDel(null); }} className="text-xs font-bold px-2.5 py-1.5 rounded-lg" style={{ color: C.inkSoft, border: `1px solid ${C.line}` }}>Só o erro</button>
+                    <button onClick={() => setConfirmDel(null)} className="text-xs font-bold px-2.5 py-1.5 rounded-lg" style={{ color: C.muted }}>Cancelar</button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex justify-between items-center gap-2 mt-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <button onClick={() => dominar(e.id, !e.dominado)} className="text-xs font-semibold px-2 py-1 rounded-lg shrink-0"
+                      style={e.dominado
+                        ? { color: C.green, border: `1px solid ${C.green}` }
+                        : { background: C.surface2, color: C.inkSoft, border: `1px solid ${C.line}` }}>
+                      {e.dominado ? "✓ dominado" : "Marcar dominado"}
+                    </button>
+                    {e.virouFicha ? <span className="text-xs flex items-center gap-1 truncate" style={{ color: C.green }}><CheckCircle2 size={13} /> virou ficha</span>
+                      : <button onClick={() => erroParaFicha(e)} className="text-xs font-semibold px-2 py-1 rounded-lg shrink-0" style={{ background: C.navActiveBg, color: C.navActiveInk }}>Virar flashcard</button>}
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <button onClick={() => startEdit(e)} title="Editar"><Pencil size={15} color={C.muted} /></button>
+                    <button onClick={() => askRemove(e)} title="Excluir"><Trash2 size={15} color={C.red} /></button>
+                  </div>
+                </div>
+              )}
+            </Card>
+          ))}
+        </div>
+      </div>
+    ))}
   </div>;
 }
 
