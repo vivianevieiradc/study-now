@@ -242,7 +242,135 @@ export const SEED_BB = [
   ]},
 ];
 
+// ===== Perfil 3: Desenvolvimento de Software (Concurso Dataprev 2026) =====
+// Módulo I (Gerais) e nº de questões conforme quadro oficial do edital 2026.
+// Módulo II (Específicos): o edital só informa o total (30 questões, peso 2,5) para o
+// bloco "Conhecimentos Específicos", sem detalhar peso por disciplina — os valores de
+// peso/q abaixo são uma ESTIMATIVA proporcional ao nº de tópicos de cada disciplina,
+// para orientar a priorização de estudo. Ajuste conforme incidência real em provas/QC.
+// hits = 0 em todos os tópicos: ainda não há provas anteriores específicas do Perfil 3.
+export const SEED_DATAPREV3 = [
+  // ===== Módulo I — Conhecimentos Gerais =====
+  { name: "Língua Portuguesa", block: "Gerais", peso: 12, q: 12, topics: [
+    { num: "1", name: "Compreensão e interpretação de textos de gêneros variados.", hits: 0 },
+  ]},
+  { name: "Língua Inglesa", block: "Gerais", peso: 12, q: 12, topics: [
+    { num: "1", name: "Compreensão de textos em língua inglesa e itens gramaticais relevantes para o entendimento dos sentidos dos textos.", hits: 0 },
+  ]},
+  { name: "Raciocínio Lógico Matemático", block: "Gerais", peso: 5, q: 5, topics: [
+    { num: "1", name: "Estruturas lógicas, lógica de argumentação, lógica sentencial, lógica de primeira ordem e raciocínio lógico envolvendo problemas aritméticos, geométricos e matriciais.", hits: 0 },
+  ]},
+  { name: "Atualidades e Inteligência Artificial", block: "Gerais", peso: 6, q: 6, topics: [
+    { num: "1", name: "Tópicos relevantes e atuais de diversas áreas (segurança, transportes, política, economia, sociedade, educação, saúde, cultura, tecnologia, energia, relações internacionais, desenvolvimento sustentável e ecologia).", hits: 0 },
+    { num: "2", name: "Inteligência Artificial: fundamentos e aplicações; aprendizado de máquina; modelos generativos e modelos de linguagem; ética, governança e privacidade em IA.", hits: 0 },
+  ]},
+  { name: "Legislação — Segurança da Informação e Proteção de Dados", block: "Gerais", peso: 5, q: 5, topics: [
+    { num: "1", name: "Lei nº 12.527/2011 (Lei de Acesso à Informação); Lei nº 12.737/2012 (Delitos Informáticos); Lei nº 12.965/2014 (Marco Civil da Internet); Lei nº 13.709/2018 (LGPD).", hits: 0 },
+  ]},
+
+  // ===== Módulo II — Conhecimentos Específicos (Perfil 3: Desenvolvimento de Software) =====
+  { name: "Desenvolvimento de Sistemas", block: "Específicos", peso: 16, q: 16, topics: [
+    { num: "1",   name: "Desenvolvimento de sistemas em Java (6+), JavaEE (6+), JakartaEE, JPA (2+), Javascript, JUnit, Hibernate, JSF, Primefaces, Spring, SpringCloud, SpringBoot. Desenvolvimento mobile (Android e iOS). Ferramentas low-code e no-code.", hits: 0 },
+    { num: "2",   name: "Análise estática de código-fonte (clean code e ferramenta SonarQube).", hits: 0 },
+    { num: "3",   name: "Arquitetura de software; interoperabilidade de sistemas; arquitetura orientada a serviços; web services; mensageria; API, Swagger; arquitetura orientada a objetos; arquitetura de aplicações web; servidor de aplicações; servidor web.", hits: 0 },
+    { num: "4",   name: "Ambientes Internet, extranet, intranet e portal: finalidades, características físicas e lógicas, aplicações e serviços.", hits: 0 },
+    { num: "5",   name: "Padrões XML, XSLT, UDDI, REST e JSON.", hits: 0 },
+    { num: "6",   name: "DevOps.", hits: 0 },
+    { num: "7",   name: "Ferramenta de Gestão da configuração GIT.", hits: 0 },
+    { num: "T1",  name: "Testes: conceitos básicos de testes de aplicações.", hits: 0 },
+    { num: "T2",  name: "Testes unitários.", hits: 0 },
+    { num: "T3",  name: "Testes de integração.", hits: 0 },
+    { num: "T4",  name: "Testes ágeis.", hits: 0 },
+    { num: "T5",  name: "Teste de usabilidade de software.", hits: 0 },
+    { num: "T6",  name: "Testes automatizados.", hits: 0 },
+    { num: "T7",  name: "Tipos de testes.", hits: 0 },
+    { num: "T8",  name: "Test-driven development (TDD).", hits: 0 },
+    { num: "T9",  name: "Gestão do ciclo de vida de testes.", hits: 0 },
+    { num: "7.1", name: "RPA (robotic process automation).", hits: 0 },
+    { num: "8",   name: "Metodologias Ágeis de Desenvolvimento.", hits: 0 },
+    { num: "8.1", name: "Scrum.", hits: 0 },
+    { num: "8.2", name: "Kanban.", hits: 0 },
+    { num: "8.3", name: "XP.", hits: 0 },
+    { num: "9",   name: "Padrões de desenvolvimento e reuso.", hits: 0 },
+    { num: "10",  name: "Codificação de software (transacionais, analíticos, mobile e API).", hits: 0 },
+    { num: "11",  name: "Metodologia de Ponto de Função e Story Points.", hits: 0 },
+    { num: "12",  name: "Engenharia de Requisitos.", hits: 0 },
+    { num: "12.1", name: "Classificação de Requisitos.", hits: 0 },
+    { num: "12.2", name: "Processo de Engenharia de Requisitos.", hits: 0 },
+    { num: "12.3", name: "Técnicas de Elicitação de Requisitos.", hits: 0 },
+    { num: "13",  name: "Tecnologias e práticas frontend web: HTML, CSS, UX, Ajax, frameworks (VueJS, Angular e React).", hits: 0 },
+    { num: "13.1", name: "Padrões de frontend.", hits: 0 },
+    { num: "13.2", name: "SPA e PWA.", hits: 0 },
+    { num: "14",  name: "Protocolos HTTPS, SSL/TLS.", hits: 0 },
+    { num: "15",  name: "Blockchain.", hits: 0 },
+    { num: "16",  name: "Design de software.", hits: 0 },
+    { num: "17",  name: "Arquitetura hexagonal, microsserviços (orquestração de serviços e API gateway) e containers.", hits: 0 },
+    { num: "18",  name: "Transações distribuídas.", hits: 0 },
+    { num: "19",  name: "User Experience (UX).", hits: 0 },
+    { num: "19.1", name: "Sistemas de gestão de conteúdo.", hits: 0 },
+    { num: "19.1.1", name: "Conceitos básicos e aplicações.", hits: 0 },
+    { num: "19.1.2", name: "Arquitetura de informação.", hits: 0 },
+    { num: "19.1.3", name: "Portais corporativos.", hits: 0 },
+    { num: "19.1.4", name: "Conceitos básicos e aplicações (portais).", hits: 0 },
+    { num: "19.1.5", name: "Workflow.", hits: 0 },
+    { num: "19.1.6", name: "Conceitos de acessibilidade e usabilidade.", hits: 0 },
+    { num: "19.1.7", name: "Desenho e planejamento de interação em aplicações web.", hits: 0 },
+    { num: "20",  name: "Conceitos de Inteligência Artificial, Análise de Dados e Big Data.", hits: 0 },
+  ]},
+  { name: "Inteligência de Negócios (Business Intelligence)", block: "Específicos", peso: 2, q: 2, topics: [
+    { num: "1", name: "Conceitos, fundamentos, características, técnicas e métodos de business intelligence (BI).", hits: 0 },
+    { num: "2", name: "Sistemas de suporte a decisão e gestão de conteúdo.", hits: 0 },
+    { num: "3", name: "Arquitetura e aplicações de data warehouse com ETL e OLAP.", hits: 0 },
+    { num: "4", name: "Definições e conceitos de data warehouse e data mining.", hits: 0 },
+    { num: "5", name: "Visualização de dados: BD individuais e cubos.", hits: 0 },
+    { num: "6", name: "Mapeamento das fontes de dados: técnicas para coleta de dados.", hits: 0 },
+    { num: "7", name: "Arquitetura de business intelligence.", hits: 0 },
+  ]},
+  { name: "Segurança da Informação", block: "Específicos", peso: 3, q: 3, topics: [
+    { num: "1",   name: "Políticas de segurança da informação.", hits: 0 },
+    { num: "2",   name: "Procedimentos de segurança, conceitos gerais de gerenciamento.", hits: 0 },
+    { num: "3",   name: "Normas ABNT NBR ISO/IEC 27001:2022 e ABNT NBR ISO/IEC 27002:2022.", hits: 0 },
+    { num: "4",   name: "Confiabilidade, integridade e disponibilidade.", hits: 0 },
+    { num: "5",   name: "Mecanismos de segurança.", hits: 0 },
+    { num: "5.1", name: "Controle de acesso. Protocolo OAuth2. SSO (Single sign-on).", hits: 0 },
+    { num: "6",   name: "Gerência de riscos.", hits: 0 },
+    { num: "6.1", name: "Ameaça, vulnerabilidade e impacto.", hits: 0 },
+    { num: "7",   name: "Ciclo de Vida de Desenvolvimento Seguro (SDL), OWASP Top 10.", hits: 0 },
+    { num: "8",   name: "Análise estática e dinâmica de código (SAST e DAST).", hits: 0 },
+  ]},
+  { name: "Banco de Dados", block: "Específicos", peso: 6, q: 6, topics: [
+    { num: "1",  name: "Modelagem de dados (conceitual, lógica e física).", hits: 0 },
+    { num: "2",  name: "Abordagem relacional e multidimensional.", hits: 0 },
+    { num: "3",  name: "Normalização das estruturas de dados.", hits: 0 },
+    { num: "4",  name: "Integridade referencial.", hits: 0 },
+    { num: "5",  name: "Metadados.", hits: 0 },
+    { num: "6",  name: "Modelagem dimensional.", hits: 0 },
+    { num: "7",  name: "Linguagem de consulta estruturada (SQL).", hits: 0 },
+    { num: "8",  name: "Linguagem de definição de dados (DDL).", hits: 0 },
+    { num: "9",  name: "Linguagem de manipulação de dados (DML).", hits: 0 },
+    { num: "10", name: "SGBD.", hits: 0 },
+    { num: "11", name: "Propriedades de banco de dados.", hits: 0 },
+    { num: "12", name: "Banco de dados NoSQL.", hits: 0 },
+    { num: "13", name: "Banco de dados em memória.", hits: 0 },
+    { num: "14", name: "Data lakes e soluções para big data.", hits: 0 },
+    { num: "15", name: "Dados Estruturados e não Estruturados.", hits: 0 },
+    { num: "16", name: "Avaliação de modelos de dados.", hits: 0 },
+    { num: "17", name: "Técnicas de Integração e Ingestão de Dados (ETL/ELT, Transferência de Arquivos e Integração via Base de Dados).", hits: 0 },
+  ]},
+  { name: "Gestão e Governança de Tecnologia da Informação", block: "Específicos", peso: 3, q: 3, topics: [
+    { num: "1",   name: "Gerenciamento de projetos: conceitos; áreas de conhecimento, projetos, programas, portfólio; abordagens tradicional, híbrida e ágil (Scrum, Lean, Kanban); Guia Scrum de prática ágil para gerenciamento de projetos.", hits: 0 },
+    { num: "2",   name: "Processos, grupos de processos e área de conhecimento.", hits: 0 },
+    { num: "3",   name: "Gestão de riscos.", hits: 0 },
+    { num: "4",   name: "Gerenciamento de serviços (ITIL v4).", hits: 0 },
+    { num: "4.1", name: "Conceitos básicos, disciplinas, estrutura e objetivos (ITIL v4).", hits: 0 },
+    { num: "5",   name: "Governança de TI (COBIT 2019).", hits: 0 },
+    { num: "5.1", name: "Conceitos básicos, estrutura e objetivos (COBIT 2019).", hits: 0 },
+    { num: "6",   name: "Conceitos de gestão de processos e modelagem de processos de negócio usando BPMN.", hits: 0 },
+  ]},
+];
+
 export const EDITAIS = {
   "dataprev-arq": SEED_DATAPREV,
-  "bb-at": SEED_BB,
+  "dataprev-dev": SEED_DATAPREV3,
+  // "bb-at": SEED_BB, // oculto por enquanto — dados mantidos para reativar depois
 };

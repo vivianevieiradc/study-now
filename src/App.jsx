@@ -12,7 +12,7 @@ import {
   CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from "recharts";
 import { supabase } from "./supabaseClient";
-import { EDITAIS, SEED_DATAPREV, SEED_BB } from "./data/editais";
+import { EDITAIS, SEED_DATAPREV, SEED_DATAPREV3 } from "./data/editais";
 import { PROVAS } from "./data/provas";
 
 /* ============================ Temas ============================ */
@@ -44,18 +44,22 @@ const inputCls = "w-full px-3 py-2 rounded-lg text-sm outline-none";
    ============================================================ */
 
 const CONCURSOS = [
-  { id: "dataprev-arq", label: "Dataprev", subtitle: "Arquitetura de Software", seed: SEED_DATAPREV,
+  { id: "dataprev-arq", label: "Dataprev", subtitle: "Perfil 2 — Arquitetura de Software", seed: SEED_DATAPREV,
     seedSimsData: [
       { name: "Dataprev 2024 — Arquitetura", date: "2024-11-17" },
       { name: "Dataprev 2023 — Arquitetura", date: "2023-10-22" },
     ],
   },
-  { id: "bb-at", label: "BB", subtitle: "Agente de Tecnologia", seed: SEED_BB,
-    seedSimsData: [
-      { name: "BB 2023 — Agente de Tecnologia", date: "2023-10-29" },
-      { name: "BB 2022 — Agente de Tecnologia", date: "2022-07-10" },
-    ],
+  { id: "dataprev-dev", label: "Dataprev", subtitle: "Perfil 3 — Desenvolvimento de Software", seed: SEED_DATAPREV3,
+    seedSimsData: [],
   },
+  // BB oculto por enquanto (dados preservados em data/editais.js e data/provas.js):
+  // { id: "bb-at", label: "BB", subtitle: "Agente de Tecnologia", seed: SEED_BB,
+  //   seedSimsData: [
+  //     { name: "BB 2023 — Agente de Tecnologia", date: "2023-10-29" },
+  //     { name: "BB 2022 — Agente de Tecnologia", date: "2022-07-10" },
+  //   ],
+  // },
 ];
 
 const REVIEW_INTERVALS = [1, 3, 7, 15, 30];
@@ -311,7 +315,7 @@ function seedSims(disc, simData) {
 }
 
 /* ============================ App ============================ */
-function StudyApp({ onLogout, concurso, setConcurso }) {
+function StudyApp({ onLogout, concurso, setConcurso, onOpenPicker }) {
   const CK = (k) => `${concurso.id}_${k}`;
   const [loading, setLoading] = useState(true);
   const [preloaderExiting, setPreloaderExiting] = useState(false);
@@ -415,7 +419,7 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
       <div style={{ background: C.bg, minHeight: "100vh", color: C.ink, fontFamily: "'Inter',ui-sans-serif,system-ui,sans-serif" }}>
         <div className="flex">
           <aside className="hidden md:flex flex-col w-64 shrink-0 h-screen sticky top-0 border-r" style={{ background: C.sidebar, borderColor: C.line }}>
-            <Brand concurso={concurso} setConcurso={setConcurso} />
+            <Brand concurso={concurso} onOpenPicker={onOpenPicker} />
             <nav className="px-3 flex-1 space-y-1 overflow-auto">{NAV.map(([id, label, Icon]) => <NavItem key={id} active={view === id} onClick={() => setView(id)} Icon={Icon} label={label} />)}</nav>
             <div className="p-3 border-t" style={{ borderColor: C.line }}>
               <ThemeToggle theme={theme} setTheme={setTheme} />
@@ -427,7 +431,7 @@ function StudyApp({ onLogout, concurso, setConcurso }) {
             <div className="md:hidden fixed inset-0 z-40" onClick={() => setNavOpen(false)}>
               <div className="absolute inset-0 bg-black/50" />
               <aside className="absolute left-0 top-0 bottom-0 w-64 flex flex-col overflow-auto" style={{ background: C.sidebar }} onClick={(e) => e.stopPropagation()}>
-                <Brand concurso={concurso} setConcurso={setConcurso} />
+                <Brand concurso={concurso} onOpenPicker={onOpenPicker} />
                 <nav className="px-3 flex-1 space-y-1">{NAV.map(([id, label, Icon]) => <NavItem key={id} active={view === id} onClick={() => { setView(id); setNavOpen(false); }} Icon={Icon} label={label} />)}</nav>
                 <div className="p-3 border-t" style={{ borderColor: C.line }}><ThemeToggle theme={theme} setTheme={setTheme} /></div>
               </aside>
@@ -474,16 +478,8 @@ function ThemeToggle({ theme, setTheme }) {
     {dark ? <Sun size={16} color={C.inkSoft} /> : <Moon size={16} color={C.inkSoft} />} {dark ? "Tema claro" : "Tema escuro"}
   </button>;
 }
-function Brand({ concurso, setConcurso }) {
+function Brand({ concurso, onOpenPicker }) {
   const C = useC();
-  const [open, setOpen] = useState(false);
-  const boxRef = useRef(null);
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e) => { if (boxRef.current && !boxRef.current.contains(e.target)) setOpen(false); };
-    document.addEventListener("mousedown", onDown);
-    return () => document.removeEventListener("mousedown", onDown);
-  }, [open]);
   return (
     <div className="px-4 pt-6 pb-4">
       <div className="flex items-center gap-3 mb-5">
@@ -492,27 +488,12 @@ function Brand({ concurso, setConcurso }) {
         </div>
         <div className="font-extrabold text-lg leading-none tracking-tight" style={{ color: C.ink }}>Studora</div>
       </div>
-      <div className="relative" ref={boxRef}>
-        <button onClick={() => setOpen((o) => !o)}
-          className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-[13px] font-bold transition-all"
-          style={{ background: C.chip, color: C.ink }}>
-          <span className="truncate">{concurso?.label}{concurso?.subtitle ? ` · ${concurso.subtitle}` : ""}</span>
-          <ChevronDown size={15} color={C.muted} style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform .15s", flexShrink: 0 }} />
-        </button>
-        {open && (
-          <div className="absolute left-0 right-0 mt-1.5 rounded-lg overflow-hidden z-20"
-            style={{ background: C.surface, border: `1px solid ${C.line}`, boxShadow: "0 12px 32px -8px rgba(0,0,0,.25)" }}>
-            {CONCURSOS.map((c) => (
-              <button key={c.id} onClick={() => { setConcurso(c.id); setOpen(false); }}
-                className="w-full text-left px-3 py-2.5 text-[13px] transition-all"
-                style={{ background: concurso?.id === c.id ? C.navActiveBg : "transparent", color: concurso?.id === c.id ? C.navActiveInk : C.ink }}>
-                <div className="font-bold">{c.label}</div>
-                {c.subtitle && <div className="text-[11px] mt-0.5" style={{ color: concurso?.id === c.id ? C.navActiveInk : C.muted }}>{c.subtitle}</div>}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+      <button onClick={onOpenPicker}
+        className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-[13px] font-bold transition-all"
+        style={{ background: C.chip, color: C.ink }}>
+        <span className="truncate">{concurso?.label}{concurso?.subtitle ? ` · ${concurso.subtitle}` : ""}</span>
+        <ChevronDown size={15} color={C.muted} style={{ transform: "rotate(-90deg)", flexShrink: 0 }} />
+      </button>
     </div>
   );
 }
@@ -1394,6 +1375,7 @@ function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, se
   const [fTopic, setFTopic] = useState("todas");
   const [fMotivo, setFMotivo] = useState("todos");
   const [fStatus, setFStatus] = useState("revisar");
+  const [ordem, setOrdem] = useState("recentes");
 
   const fTopics = fDisc !== "todas" ? (discById[fDisc]?.topics || []) : [];
   const motivosUsados = useMemo(() => [...new Set(erros.map((e) => e.motivo))].sort(), [erros]);
@@ -1409,9 +1391,12 @@ function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, se
   }), [erros, fDisc, fTopic, fMotivo, fStatus]);
 
   // Sem matéria escolhida agrupa por matéria; com matéria escolhida, desce pro tópico do edital.
+  // Dentro do grupo e entre grupos vale a mesma direção de data — o ranking por
+  // volume fica no Raio-X, aqui a ordem é cronológica e previsível.
   const grupos = useMemo(() => {
+    const dir = ordem === "recentes" ? -1 : 1;
     const m = new Map();
-    filtrados.forEach((e) => {
+    [...filtrados].sort((a, b) => (a.data - b.data) * dir).forEach((e) => {
       const porTopico = fDisc !== "todas";
       const key = porTopico ? (e.topicId || "__geral") : e.disciplineId;
       const label = porTopico
@@ -1420,8 +1405,9 @@ function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, se
       if (!m.has(key)) m.set(key, { key, label, items: [] });
       m.get(key).items.push(e);
     });
-    return [...m.values()].sort((a, b) => b.items.length - a.items.length);
-  }, [filtrados, fDisc, discById]);
+    // items[0] já é o extremo do grupo na direção escolhida
+    return [...m.values()].sort((a, b) => (a.items[0].data - b.items[0].data) * dir);
+  }, [filtrados, fDisc, discById, ordem]);
 
   /* ---------- Sessão de revisão: recordar o conceito antes de ver a lição ---------- */
   const [sessao, setSessao] = useState(null); // { queue, index, showLicao }
@@ -1561,6 +1547,10 @@ function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, se
             <option value="revisar">A revisar</option>
             <option value="dominados">Dominados</option>
             <option value="todos">Todos</option>
+          </select>
+          <select value={ordem} onChange={(e) => setOrdem(e.target.value)} className={inputCls} style={inputStyle(C)}>
+            <option value="recentes">Mais recentes primeiro</option>
+            <option value="antigos">Mais antigos primeiro</option>
           </select>
         </div>
       </Card>
@@ -1996,7 +1986,7 @@ function ProvasView({ concurso }) {
   if (tela === "lista") {
     const ehBB = concurso?.id === "bb-at";
     const titulo = ehBB ? "Provas BB" : "Provas Dataprev";
-    const sub = ehBB ? "Banco do Brasil · Agente de Tecnologia · CESGRANRIO" : "Dataprev · Arquitetura de Software";
+    const sub = ehBB ? "Banco do Brasil · Agente de Tecnologia · CESGRANRIO" : `Dataprev · ${concurso?.subtitle || "Arquitetura de Software"}`;
 
     if (provas === null) {
       return (
@@ -2177,8 +2167,68 @@ function SimModal({ disciplines, onClose, onSave, initial }) {
 }
 
 /* ============================ Seletor de Concurso ============================ */
+const PERFIL_AVATAR_COLORS = ["#f5a623", "#5b9dfa", "#4dd08a", "#e06b9f", "#a48bfa", "#4dcbdb"];
+function PerfilPicker({ atual, onSelect, onClose }) {
+  const [busca, setBusca] = useState("");
+  const perfis = CONCURSOS.map((c, i) => ({
+    id: c.id, instituicao: c.label, cargo: c.subtitle || "",
+    iniciais: c.label.slice(0, 2).toUpperCase(),
+    cor: PERFIL_AVATAR_COLORS[i % PERFIL_AVATAR_COLORS.length],
+  }));
+  const filtrados = perfis.filter((p) => {
+    const q = busca.trim().toLowerCase();
+    if (!q) return true;
+    return p.instituicao.toLowerCase().includes(q) || p.cargo.toLowerCase().includes(q);
+  });
+  return (
+    <div style={{ minHeight: "100vh", width: "100%", background: "radial-gradient(circle at 50% -10%, #1b1e2a 0%, #12141c 55%)", display: "flex", flexDirection: "column", alignItems: "center", padding: "56px 24px 80px", fontFamily: "'Inter',ui-sans-serif,system-ui,sans-serif", boxSizing: "border-box", position: "relative" }}>
+      {onClose && (
+        <button onClick={onClose} style={{ position: "absolute", top: 20, right: 20, background: "transparent", border: "none", color: "#565b6a", cursor: "pointer", padding: 8 }} aria-label="Fechar">
+          <X size={20} />
+        </button>
+      )}
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+        <div style={{ width: 40, height: 40, border: "2px solid #f5a623", borderRadius: 10, transform: "rotate(45deg)", display: "flex", alignItems: "center", justifyContent: "center", boxSizing: "border-box" }}>
+          <BookOpen size={18} color="#f5a623" style={{ transform: "rotate(-45deg)" }} />
+        </div>
+        <div style={{ color: "#fff", fontSize: 24, fontWeight: 700, letterSpacing: "-0.3px" }}>Studora</div>
+      </div>
+
+      <h1 style={{ color: "#fff", fontSize: "clamp(24px, 4vw, 34px)", fontWeight: 700, margin: "28px 0 20px", textAlign: "center" }}>Qual perfil você quer estudar hoje?</h1>
+
+      <div style={{ width: "100%", maxWidth: 560, position: "relative", marginBottom: 24 }}>
+        <input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar perfil ou instituição..."
+          style={{ width: "100%", boxSizing: "border-box", background: "#1a1d29", border: "1px solid #262a3a", borderRadius: 12, padding: "14px 16px", color: "#fff", fontSize: 15, outline: "none" }} />
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", maxWidth: 560 }}>
+        {filtrados.map((p) => {
+          const ativo = p.id === atual;
+          return (
+            <button key={p.id} onClick={() => onSelect(p.id)}
+              style={{ all: "unset", boxSizing: "border-box", cursor: "pointer", display: "flex", alignItems: "center", gap: 16, padding: "16px 18px", borderRadius: 14, background: ativo ? "rgba(245,166,35,0.08)" : "#1a1d29", border: ativo ? "1px solid rgba(245,166,35,0.35)" : "1px solid #262a3a", transition: "background 0.15s ease", width: "100%" }}>
+              <div style={{ width: 44, height: 44, borderRadius: 10, background: p.cor, display: "flex", alignItems: "center", justifyContent: "center", color: "#12141c", fontWeight: 700, fontSize: 16, flexShrink: 0 }}>
+                {p.iniciais}
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0, textAlign: "left" }}>
+                <div style={{ color: "#fff", fontSize: 16, fontWeight: 600, lineHeight: 1.3 }}>{p.instituicao}</div>
+                <div style={{ color: "#a8adba", fontSize: 13.5, lineHeight: 1.3 }}>{p.cargo}</div>
+              </div>
+              <div style={{ marginLeft: "auto", color: "#565b6a", fontSize: 18, flexShrink: 0 }}>→</div>
+            </button>
+          );
+        })}
+        {filtrados.length === 0 && <div style={{ color: "#565b6a", fontSize: 14, textAlign: "center", padding: "24px 0" }}>Nenhum perfil encontrado.</div>}
+      </div>
+
+      <p style={{ color: "#565b6a", fontSize: 13, marginTop: 40 }}>Gerenciar perfis está disponível nas configurações da conta</p>
+    </div>
+  );
+}
+
 function StudyAppWithConcurso({ onLogout }) {
   const [concurso, setConcursoState] = React.useState(CONCURSOS[0]);
+  const [pickerOpen, setPickerOpen] = React.useState(false);
 
   React.useEffect(() => {
     store.get("active_concurso", "dataprev-arq").then((id) => {
@@ -2191,9 +2241,11 @@ function StudyAppWithConcurso({ onLogout }) {
     const c = CONCURSOS.find((x) => x.id === id) || CONCURSOS[0];
     setConcursoState(c);
     store.set("active_concurso", id);
+    setPickerOpen(false);
   }
 
-  return <StudyApp key={concurso.id} concurso={concurso} setConcurso={setConcurso} onLogout={onLogout} />;
+  if (pickerOpen) return <PerfilPicker atual={concurso.id} onSelect={setConcurso} onClose={() => setPickerOpen(false)} />;
+  return <StudyApp key={concurso.id} concurso={concurso} setConcurso={setConcurso} onOpenPicker={() => setPickerOpen(true)} onLogout={onLogout} />;
 }
 
 function Preloader({ exiting, label }) {
