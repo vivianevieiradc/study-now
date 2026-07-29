@@ -287,19 +287,20 @@ function mergeEdital(saved, globalDisc) {
   });
 }
 
-// Conteúdos Gerais (Português, Inglês etc.) são iguais entre perfis do mesmo concurso:
-// progresso (studied/hits) fica compartilhado globalmente por nome de disciplina/tópico.
-function mergeGeraisProgress(disciplines, progress) {
+// Cada perfil segue sua própria estrutura de edital/tópicos; mas onde a disciplina e o
+// tópico têm exatamente o mesmo nome entre perfis (pontos em comum), o progresso
+// (studied/hits) fica compartilhado globalmente em vez de duplicado por perfil.
+function mergeSharedProgress(disciplines, progress) {
   if (!progress) return disciplines;
   return disciplines.map((d) => {
-    if (d.block !== "Gerais" || !progress[d.name]) return d;
     const dp = progress[d.name];
+    if (!dp) return d;
     return { ...d, topics: d.topics.map((t) => (dp[t.name] ? { ...t, studied: dp[t.name].studied, hits: dp[t.name].hits ?? t.hits } : t)) };
   });
 }
-function extractGeraisProgress(disciplines) {
+function extractSharedProgress(disciplines) {
   const progress = {};
-  disciplines.filter((d) => d.block === "Gerais").forEach((d) => {
+  disciplines.forEach((d) => {
     progress[d.name] = {};
     d.topics.forEach((t) => { progress[d.name][t.name] = { studied: t.studied, hits: t.hits }; });
   });
@@ -343,6 +344,7 @@ function StudyApp({ onLogout, concurso, setConcurso, onOpenPicker }) {
   const [navOpen, setNavOpen] = useState(false);
   const [theme, setTheme] = useState("light");
   const [disciplines, setDisciplines] = useState([]);
+  const [sharedProgressBase, setSharedProgressBase] = useState({});
   const [sessions, setSessions] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [plan, setPlan] = useState([]);
@@ -366,8 +368,9 @@ function StudyApp({ onLogout, concurso, setConcurso, onOpenPicker }) {
         d = buildDiscFromEdital(concurso.id, edital);
         await store.set(CK("disc"), d);
       }
-      const geraisProgress = await store.get("geraisProgress", {});
-      d = mergeGeraisProgress(d, geraisProgress);
+      const sp = await store.get("sharedProgress", {});
+      setSharedProgressBase(sp);
+      d = mergeSharedProgress(d, sp);
       setDisciplines(d);
       setSessions(await store.get(CK("sess"), []));
       setReviews(await store.get(CK("rev"), []));
@@ -392,7 +395,7 @@ function StudyApp({ onLogout, concurso, setConcurso, onOpenPicker }) {
   useEffect(() => { document.body.style.background = C.bg; }, [C]);
   useEffect(() => { if (!loading) store.set("theme", theme); }, [theme, loading]);
   useEffect(() => { if (!loading) store.set(CK("disc"), disciplines); }, [disciplines, loading]);
-  useEffect(() => { if (!loading) store.set("geraisProgress", extractGeraisProgress(disciplines)); }, [disciplines, loading]);
+  useEffect(() => { if (!loading) store.set("sharedProgress", { ...sharedProgressBase, ...extractSharedProgress(disciplines) }); }, [disciplines, loading]);
   useEffect(() => { if (!loading) store.set(CK("sess"), sessions); }, [sessions, loading]);
   useEffect(() => { if (!loading) store.set(CK("rev"), reviews); }, [reviews, loading]);
   useEffect(() => { if (!loading) store.set(CK("plan"), plan); }, [plan, loading]);
