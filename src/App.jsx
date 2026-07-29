@@ -44,13 +44,13 @@ const inputCls = "w-full px-3 py-2 rounded-lg text-sm outline-none";
    ============================================================ */
 
 const CONCURSOS = [
-  { id: "dataprev-arq", label: "Dataprev", subtitle: "Perfil 2 — Arquitetura de Software", seed: SEED_DATAPREV,
+  { id: "dataprev-arq", label: "DATAPREV", subtitle: "Perfil 2 — Arquitetura de Software", seed: SEED_DATAPREV,
     seedSimsData: [
       { name: "Dataprev 2024 — Arquitetura", date: "2024-11-17" },
       { name: "Dataprev 2023 — Arquitetura", date: "2023-10-22" },
     ],
   },
-  { id: "dataprev-dev", label: "Dataprev", subtitle: "Perfil 3 — Desenvolvimento de Software", seed: SEED_DATAPREV3,
+  { id: "dataprev-dev", label: "DATAPREV", subtitle: "Perfil 3 — Desenvolvimento de Software", seed: SEED_DATAPREV3,
     seedSimsData: [],
   },
   // BB oculto por enquanto (dados preservados em data/editais.js e data/provas.js):
