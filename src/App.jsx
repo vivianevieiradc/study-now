@@ -353,7 +353,7 @@ function StudyApp({ onLogout, concurso, setConcurso, onOpenPicker }) {
       setPlan(await store.get(CK("plan"), []));
       let sm = await store.get(CK("sim"), null); if (!sm) { sm = seedSims(d, concurso.seedSimsData); await store.set(CK("sim"), sm); } setSimulados(sm);
       setGoals(await store.get(CK("goals"), { hours: 20, questions: 200 }));
-      setStreakDays(await store.get(CK("streakDays"), {}));
+      setStreakDays(await store.get("streakDays", {}));
       setCards(await store.get(CK("cards"), []));
       setErros(await store.get(CK("erros"), []));
       setCardStats(await store.get(CK("cardStats"), { reviewsByDisc: {}, studyDates: [] }));
@@ -375,7 +375,7 @@ function StudyApp({ onLogout, concurso, setConcurso, onOpenPicker }) {
   useEffect(() => { if (!loading) store.set(CK("rev"), reviews); }, [reviews, loading]);
   useEffect(() => { if (!loading) store.set(CK("plan"), plan); }, [plan, loading]);
   useEffect(() => { if (!loading) store.set(CK("goals"), goals); }, [goals, loading]);
-  useEffect(() => { if (!loading) store.set(CK("streakDays"), streakDays); }, [streakDays, loading]);
+  useEffect(() => { if (!loading) store.set("streakDays", streakDays); }, [streakDays, loading]);
   useEffect(() => { if (!loading) store.set(CK("sim"), simulados); }, [simulados, loading]);
   useEffect(() => { if (!loading) store.set(CK("cards"), cards); }, [cards, loading]);
   useEffect(() => { if (!loading) store.set(CK("erros"), erros); }, [erros, loading]);
@@ -2184,47 +2184,49 @@ function PerfilPicker({ atual, onSelect, onClose }) {
     return p.instituicao.toLowerCase().includes(q) || p.cargo.toLowerCase().includes(q);
   });
   return (
-    <div style={{ minHeight: "100vh", width: "100%", background: "radial-gradient(circle at 50% -10%, #1b1e2a 0%, #12141c 55%)", display: "flex", flexDirection: "column", alignItems: "center", padding: "56px 24px 80px", fontFamily: "'Inter',ui-sans-serif,system-ui,sans-serif", boxSizing: "border-box", position: "relative" }}>
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 60, minHeight: "100vh", width: "100%", background: "radial-gradient(circle at 50% -10%, #1b1e2a 0%, #12141c 55%)", display: "flex", flexDirection: "column", alignItems: "center", padding: "56px 24px 80px", fontFamily: "'Inter',ui-sans-serif,system-ui,sans-serif", boxSizing: "border-box", overflowY: "auto" }}>
       {onClose && (
         <button onClick={onClose} style={{ position: "absolute", top: 20, right: 20, background: "transparent", border: "none", color: "#565b6a", cursor: "pointer", padding: 8 }} aria-label="Fechar">
           <X size={20} />
         </button>
       )}
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
-        <div style={{ width: 40, height: 40, border: "2px solid #f5a623", borderRadius: 10, transform: "rotate(45deg)", display: "flex", alignItems: "center", justifyContent: "center", boxSizing: "border-box" }}>
-          <BookOpen size={18} color="#f5a623" style={{ transform: "rotate(-45deg)" }} />
+      <div onClick={(e) => e.stopPropagation()} style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+          <div style={{ width: 40, height: 40, border: "2px solid #f5a623", borderRadius: 10, transform: "rotate(45deg)", display: "flex", alignItems: "center", justifyContent: "center", boxSizing: "border-box" }}>
+            <BookOpen size={18} color="#f5a623" style={{ transform: "rotate(-45deg)" }} />
+          </div>
+          <div style={{ color: "#fff", fontSize: 24, fontWeight: 700, letterSpacing: "-0.3px" }}>Studora</div>
         </div>
-        <div style={{ color: "#fff", fontSize: 24, fontWeight: 700, letterSpacing: "-0.3px" }}>Studora</div>
+
+        <h1 style={{ color: "#fff", fontSize: "clamp(24px, 4vw, 34px)", fontWeight: 700, margin: "28px 0 20px", textAlign: "center" }}>Qual perfil você quer estudar hoje?</h1>
+
+        <div style={{ width: "100%", maxWidth: 560, position: "relative", marginBottom: 24 }}>
+          <input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar perfil ou instituição..."
+            style={{ width: "100%", boxSizing: "border-box", background: "#1a1d29", border: "1px solid #262a3a", borderRadius: 12, padding: "14px 16px", color: "#fff", fontSize: 15, outline: "none" }} />
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", maxWidth: 560 }}>
+          {filtrados.map((p) => {
+            const ativo = p.id === atual;
+            return (
+              <button key={p.id} onClick={() => onSelect(p.id)}
+                style={{ all: "unset", boxSizing: "border-box", cursor: "pointer", display: "flex", alignItems: "center", gap: 16, padding: "16px 18px", borderRadius: 14, background: ativo ? "rgba(245,166,35,0.08)" : "#1a1d29", border: ativo ? "1px solid rgba(245,166,35,0.35)" : "1px solid #262a3a", transition: "background 0.15s ease", width: "100%" }}>
+                <div style={{ width: 44, height: 44, borderRadius: 10, background: p.cor, display: "flex", alignItems: "center", justifyContent: "center", color: "#12141c", fontWeight: 700, fontSize: 16, flexShrink: 0 }}>
+                  {p.iniciais}
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0, textAlign: "left" }}>
+                  <div style={{ color: "#fff", fontSize: 16, fontWeight: 600, lineHeight: 1.3 }}>{p.instituicao}</div>
+                  <div style={{ color: "#a8adba", fontSize: 13.5, lineHeight: 1.3 }}>{p.cargo}</div>
+                </div>
+                <div style={{ marginLeft: "auto", color: "#565b6a", fontSize: 18, flexShrink: 0 }}>→</div>
+              </button>
+            );
+          })}
+          {filtrados.length === 0 && <div style={{ color: "#565b6a", fontSize: 14, textAlign: "center", padding: "24px 0" }}>Nenhum perfil encontrado.</div>}
+        </div>
+
+        <p style={{ color: "#565b6a", fontSize: 13, marginTop: 40 }}>Gerenciar perfis está disponível nas configurações da conta</p>
       </div>
-
-      <h1 style={{ color: "#fff", fontSize: "clamp(24px, 4vw, 34px)", fontWeight: 700, margin: "28px 0 20px", textAlign: "center" }}>Qual perfil você quer estudar hoje?</h1>
-
-      <div style={{ width: "100%", maxWidth: 560, position: "relative", marginBottom: 24 }}>
-        <input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar perfil ou instituição..."
-          style={{ width: "100%", boxSizing: "border-box", background: "#1a1d29", border: "1px solid #262a3a", borderRadius: 12, padding: "14px 16px", color: "#fff", fontSize: 15, outline: "none" }} />
-      </div>
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", maxWidth: 560 }}>
-        {filtrados.map((p) => {
-          const ativo = p.id === atual;
-          return (
-            <button key={p.id} onClick={() => onSelect(p.id)}
-              style={{ all: "unset", boxSizing: "border-box", cursor: "pointer", display: "flex", alignItems: "center", gap: 16, padding: "16px 18px", borderRadius: 14, background: ativo ? "rgba(245,166,35,0.08)" : "#1a1d29", border: ativo ? "1px solid rgba(245,166,35,0.35)" : "1px solid #262a3a", transition: "background 0.15s ease", width: "100%" }}>
-              <div style={{ width: 44, height: 44, borderRadius: 10, background: p.cor, display: "flex", alignItems: "center", justifyContent: "center", color: "#12141c", fontWeight: 700, fontSize: 16, flexShrink: 0 }}>
-                {p.iniciais}
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0, textAlign: "left" }}>
-                <div style={{ color: "#fff", fontSize: 16, fontWeight: 600, lineHeight: 1.3 }}>{p.instituicao}</div>
-                <div style={{ color: "#a8adba", fontSize: 13.5, lineHeight: 1.3 }}>{p.cargo}</div>
-              </div>
-              <div style={{ marginLeft: "auto", color: "#565b6a", fontSize: 18, flexShrink: 0 }}>→</div>
-            </button>
-          );
-        })}
-        {filtrados.length === 0 && <div style={{ color: "#565b6a", fontSize: 14, textAlign: "center", padding: "24px 0" }}>Nenhum perfil encontrado.</div>}
-      </div>
-
-      <p style={{ color: "#565b6a", fontSize: 13, marginTop: 40 }}>Gerenciar perfis está disponível nas configurações da conta</p>
     </div>
   );
 }
@@ -2247,8 +2249,12 @@ function StudyAppWithConcurso({ onLogout }) {
     setPickerOpen(false);
   }
 
-  if (pickerOpen) return <PerfilPicker atual={concurso.id} onSelect={setConcurso} onClose={() => setPickerOpen(false)} />;
-  return <StudyApp key={concurso.id} concurso={concurso} setConcurso={setConcurso} onOpenPicker={() => setPickerOpen(true)} onLogout={onLogout} />;
+  return (
+    <>
+      <StudyApp key={concurso.id} concurso={concurso} setConcurso={setConcurso} onOpenPicker={() => setPickerOpen(true)} onLogout={onLogout} />
+      {pickerOpen && <PerfilPicker atual={concurso.id} onSelect={setConcurso} onClose={() => setPickerOpen(false)} />}
+    </>
+  );
 }
 
 function Preloader({ exiting, label }) {
