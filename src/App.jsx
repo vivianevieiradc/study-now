@@ -489,9 +489,12 @@ function Brand({ concurso, onOpenPicker }) {
         <div className="font-extrabold text-lg leading-none tracking-tight" style={{ color: C.ink }}>Studora</div>
       </div>
       <button onClick={onOpenPicker}
-        className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-[13px] font-bold transition-all"
+        className="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg text-left transition-all"
         style={{ background: C.chip, color: C.ink }}>
-        <span className="truncate">{concurso?.label}{concurso?.subtitle ? ` · ${concurso.subtitle}` : ""}</span>
+        <div className="min-w-0">
+          <div className="text-[13px] font-bold leading-tight truncate">{concurso?.label}</div>
+          {concurso?.subtitle && <div className="text-[11px] leading-tight truncate" style={{ color: C.muted }}>{concurso.subtitle}</div>}
+        </div>
         <ChevronDown size={15} color={C.muted} style={{ transform: "rotate(-90deg)", flexShrink: 0 }} />
       </button>
     </div>
