@@ -124,6 +124,35 @@ const fmtMin = (m) => { const h = Math.floor(m / 60), mm = m % 60; return h ? `$
 const fmtDate = (iso) => new Date(iso + "T00:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
 const startOfWeek = (iso) => { const d = new Date(iso + "T00:00:00"); d.setDate(d.getDate() - d.getDay()); return d.toISOString().slice(0, 10); };
 const fmtTime = (s) => { const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60; return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(ss).padStart(2, "0")}`; };
+const localISO = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+const monthLabel = (date) => date.toLocaleDateString("pt-BR", { month: "long", year: "numeric" }).replace(/^./, (c) => c.toUpperCase());
+const monthCells = (date) => {
+  const first = new Date(date.getFullYear(), date.getMonth(), 1);
+  const days = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  const count = first.getDay() + days > 35 ? 42 : 35;
+  const start = new Date(date.getFullYear(), date.getMonth(), 1 - first.getDay());
+  return Array.from({ length: count }, (_, i) => new Date(start.getFullYear(), start.getMonth(), start.getDate() + i));
+};
+const disciplineShort = (name = "") => {
+  const normalized = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  if (normalized.includes("atualidades e inteligencia artificial")) return "Atualidades + IA";
+  if (normalized.includes("legislacao") && normalized.includes("protecao de dados")) return "Legislação / LGPD";
+  if (normalized.includes("raciocinio logico")) return "Raciocínio Lógico";
+  if (normalized.includes("lingua inglesa")) return "Inglês";
+  if (normalized.includes("redes de computadores")) return "Redes";
+  if (normalized.includes("arquitetura tecnologica")) return "Arq. Tecnológica";
+  if (normalized.includes("desenvolvimento de sistemas")) return "Desenvolvimento";
+  if (normalized.includes("inteligencia de negocios")) return "Business Intelligence";
+  if (normalized.includes("seguranca da informacao")) return "Segurança";
+  if (normalized.includes("gestao e governanca de tecnologia")) return "Governança de TI";
+  if (normalized.includes("arquitetura de software")) return "Arq. Software";
+  if (normalized.includes("banco de dados")) return "Banco de Dados";
+  if (normalized.includes("lingua portuguesa")) return "Português";
+  if (normalized.includes("direito constitucional")) return "Dir. Constitucional";
+  if (normalized.includes("desenvolvimento de software")) return "Desenvolvimento";
+  if (name.length <= 18) return name;
+  return `${name.slice(0, 18).trimEnd()}…`;
+};
 let CURRENT_USER_ID = null;
 export function setCurrentUser(id) { CURRENT_USER_ID = id; }
 
@@ -683,7 +712,26 @@ function GoalBar({ label, value, target, pct, unit, color }) {
 }
 
 /* ============================ RAIO-X ============================ */
-function RaioXView({ disciplines }) {
+const RAIOX_QUESTOES = {
+  "dataprev-arq": {
+    "Língua Portuguesa": { "1": [3, 4], "2": [8, 12], "4.1": [9], "5": [1, 2, 10], "5.4": [7], "5.5": [11], "5.6": [5], "6.1": [6] },
+    "Língua Inglesa": { "1": [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24] },
+    "Raciocínio Lógico": { "3.3": [28], "5": [25, 26, 27, 29, 30] },
+    "Atualidades e Inteligência Artificial": { "1": [31, 32, 33, 35], "2": [34] },
+    "Legislação — Segurança da Informação e Proteção de Dados": { "1": [36], "2": [37], "3": [38], "4": [39, 40] },
+    "Redes de Computadores": { "1": [41], "2": [44], "4": [43], "5": [42] },
+    "Banco de Dados": { "2": [46], "3": [46], "6": [45], "7": [47, 48, 49], "7.1": [45] },
+    "Arquitetura Tecnológica": { "11": [53], "15": [50], "16": [51], "19": [52] },
+    "Computação em Nuvem e Virtualização": { "1": [66], "6": [55], "8": [57], "9": [54, 56, 64] },
+    "Segurança da Informação": { "5": [59], "7": [60], "8": [58, 61] },
+    "Plataforma Básica": { "1": [62], "3": [63] },
+    "Automação": { "1": [55], "2": [65], "7": [64] },
+    "Ferramentas Analytics": { "4": [67, 68] },
+    "Aplicações": { "4": [69], "6": [70] },
+  },
+};
+
+function RaioXView({ disciplines, concurso }) {
   const C = useC();
   if (!disciplines.length) return <div><PageTitle>Raio-X da prova</PageTitle><Empty msg="Edital ainda não carregado." /></div>;
   const byPeso = [...disciplines].sort((a, b) => b.peso - a.peso);
@@ -721,10 +769,11 @@ function RaioXView({ disciplines }) {
                     {[...d.topics].sort((a, b) => b.hits - a.hits).map((t, i) => {
                       const bg = t.hits >= 8 ? C.red : t.hits >= 5 ? C.gold : t.hits >= 3 ? "#b45309" : C.line;
                       const fg = t.hits >= 3 ? "#fff" : C.muted;
+                      const refs = RAIOX_QUESTOES[concurso?.id]?.[d.name]?.[t.num] || [];
                       return (
                         <tr key={t.id} style={{ borderTop: i ? `1px solid ${C.line}` : "none" }}>
                           {t.num && <td className="px-2 py-1.5 font-mono text-right align-top" style={{ color: C.muted, whiteSpace: "nowrap" }}>{t.num}</td>}
-                          <td className="px-2 py-1.5 w-full" style={{ color: C.ink }}>{t.name}</td>
+                          <td className="px-2 py-1.5 w-full" style={{ color: C.ink }}><div>{t.name}</div>{refs.length > 0 && <div className="text-[10px] mt-1 font-semibold" style={{ color: C.gold }}>FGV 2024 · {refs.map((q) => "Q" + q).join(", ")}</div>}</td>
                           <td className="px-2 py-1.5 align-top" style={{ whiteSpace: "nowrap" }}>
                             <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: bg, color: fg }}>{t.hits}×</span>
                           </td>
@@ -777,30 +826,82 @@ function ManualModal({ disciplines, discById, onClose, onSave, initial }) {
 }
 
 /* ============================ PLANEJAMENTO ============================ */
+function PlanSessionItem({ item, discipline, compact = false, onToggle, onRemove }) {
+  const C = useC(); const name = discipline?.name || "Disciplina";
+  return <div className="group rounded-xl p-2.5 mb-2" style={{ background: C.surface2, border: `1px solid ${C.line}`, borderLeft: `3px solid ${discipline?.color || C.line}` }} title={name}><div className="flex items-start gap-1.5 min-w-0"><button onClick={onToggle} title={item.done ? "Desmarcar sessão" : "Marcar como feita"} className="shrink-0 mt-0.5">{item.done ? <CheckCircle2 size={16} color={C.green} /> : <Circle size={16} color={C.muted} />}</button><span className="w-2 h-2 rounded-full shrink-0 mt-1.5" style={{ background: discipline?.color }} /><span className="text-xs font-semibold leading-tight break-words min-w-0" style={{ color: item.done ? C.muted : C.ink, textDecoration: item.done ? "line-through" : "none" }}>{compact ? disciplineShort(name) : <><span className="xl:hidden">{disciplineShort(name)}</span><span className="hidden xl:inline">{name}</span></>}</span><button onClick={onRemove} className="ml-auto opacity-0 group-hover:opacity-100 shrink-0" title="Remover sessão"><X size={12} color={C.red} /></button></div><div className="text-[10px] mt-1 pl-6" style={{ color: C.muted }}>{fmtMin(item.minutes)}</div></div>;
+}
+
 function PlanoView({ plan, setPlan, disciplines, discById }) {
   const C = useC();
   const [open, setOpen] = useState(null);
-  const doneCount = plan.filter((p) => p.done).length;
-  const pct = plan.length ? Math.round((doneCount / plan.length) * 100) : 0;
+  const [showMonth, setShowMonth] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(() => new Date());
+  const [monthDate, setMonthDate] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); });
+  const first = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
+  const offset = (first.getDay() + 6) % 7;
+  const days = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0).getDate();
+  const cells = Array.from({ length: offset + days > 35 ? 42 : 35 }, (_, i) => new Date(monthDate.getFullYear(), monthDate.getMonth(), 1 - offset + i));
+  const selectedItems = plan.filter((p) => p.day === selectedDate.getDay());
+  const selectedDone = selectedItems.filter((p) => p.done).length;
+  const monthDates = cells.filter((d) => d.getMonth() === monthDate.getMonth());
+  const monthItems = monthDates.flatMap((d) => plan.filter((p) => p.day === d.getDay()));
+  const monthDone = monthItems.filter((p) => p.done).length;
+  const monthMinutes = monthItems.reduce((sum, p) => sum + Number(p.minutes || 0), 0);
+  const monthPct = monthItems.length ? Math.round(monthDone / monthItems.length * 100) : 0;
+  const calendarDays = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+  const displayDate = selectedDate.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" }).replace(/^./, (c) => c.toUpperCase());
+
+  function selectDate(date) {
+    setSelectedDate(date);
+    if (date.getMonth() !== monthDate.getMonth() || date.getFullYear() !== monthDate.getFullYear()) setMonthDate(new Date(date.getFullYear(), date.getMonth(), 1));
+  }
+  function shiftMonth(delta) {
+    const next = new Date(monthDate.getFullYear(), monthDate.getMonth() + delta, 1);
+    setMonthDate(next);
+    setSelectedDate(next);
+  }
+  function addSelected() {
+    setOpen({ day: selectedDate.getDay(), label: displayDate });
+  }
   function toggle(id) { setPlan((p) => p.map((x) => x.id === id ? { ...x, done: !x.done } : x)); }
   function add(day, disciplineId, minutes) { setPlan((p) => [...p, { id: uid(), day, disciplineId, minutes, done: false }]); setOpen(null); }
   function remove(id) { setPlan((p) => p.filter((x) => x.id !== id)); }
-  return <div>
-    <PageTitle sub="Anote nos dias abaixo o que você já decidiu estudar (ex.: no ciclo do Aprovado) e marque como feito.">Planejamento semanal</PageTitle>
-    <div className="flex flex-wrap gap-2 mb-4">
-      {plan.length > 0 && <Btn variant="ghost" onClick={() => { if (confirm("Limpar todo o planejamento semanal?")) setPlan([]); }}><Trash2 size={14} color={C.red} /> <span style={{ color: C.red }}>Limpar tudo</span></Btn>}
-      <span className="text-xs self-center ml-auto" style={{ color: C.muted }}>use o "+" em cada dia pra adicionar uma sessão</span>
+  const item = (it) => <PlanSessionItem key={it.id} item={it} discipline={discById[it.disciplineId]} onToggle={() => toggle(it.id)} onRemove={() => remove(it.id)} />;
+
+  return <div className="xl:-mx-5">
+    <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
+      <PageTitle sub="Escolha um dia no calendário e organize as sessões com os nomes completos.">Planejamento</PageTitle>
+      <div className="flex flex-wrap gap-2">{!showMonth && <Btn variant="gold" onClick={() => setShowMonth(true)}><CalendarDays size={16} />Ver mês completo</Btn>}<Btn onClick={addSelected}><Plus size={16} />Adicionar sessão</Btn></div>
     </div>
-    <Card className="mb-4"><GoalBar label="Planejamento cumprido esta semana" value={doneCount} target={plan.length || 1} pct={pct} unit="" /></Card>
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-      {DAYS.map((d, i) => { const items = plan.filter((p) => p.day === i);
-        return <Card key={i} className="!p-4"><div className="flex items-center justify-between mb-2"><span className="font-bold text-sm">{d}</span><button onClick={() => setOpen(i)}><Plus size={16} color={C.ink} /></button></div>{items.length === 0 ? <p className="text-xs py-3" style={{ color: C.muted }}>Sem sessões</p> : items.map((it) => { const dd = discById[it.disciplineId]; return (<div key={it.id} className="flex items-center gap-2 py-1.5 group"><button onClick={() => toggle(it.id)}>{it.done ? <CheckCircle2 size={16} color={C.green} /> : <Circle size={16} color={C.muted} />}</button><span className="w-2 h-2 rounded-full shrink-0" style={{ background: dd?.color }} /><span className="text-xs flex-1 min-w-0 leading-tight" style={{ textDecoration: it.done ? "line-through" : "none", color: it.done ? C.muted : C.ink, wordBreak: "break-word" }}>{dd?.name}</span><span className="text-[10px]" style={{ color: C.muted }}>{fmtMin(it.minutes)}</span><button onClick={() => remove(it.id)} className="opacity-0 group-hover:opacity-100"><X size={12} color={C.red} /></button></div>); })}</Card>;
-      })}
+    <div className={"grid gap-4 " + (showMonth ? "" : "xl:grid-cols-[minmax(270px,0.85fr)_minmax(0,1.7fr)]")}>
+      {!showMonth && <div className="space-y-4">
+        <Card className="!p-4">
+          <div className="flex items-center justify-between mb-4"><button onClick={() => shiftMonth(-1)} className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ border: "1px solid " + C.line }}><ChevronLeft size={17} /></button><span className="font-bold">{monthLabel(monthDate)}</span><button onClick={() => shiftMonth(1)} className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ border: "1px solid " + C.line }}><ChevronRight size={17} /></button></div>
+          <div className="grid grid-cols-7 mb-2">{calendarDays.map((day) => <span key={day} className="text-[10px] font-bold text-center" style={{ color: C.muted }}>{day}</span>)}</div>
+          <div className="grid grid-cols-7 gap-y-1">{cells.map((date) => { const current = date.getMonth() === monthDate.getMonth(); const selected = localISO(date) === localISO(selectedDate); const today = localISO(date) === todayISO(); const hasItems = current && plan.some((p) => p.day === date.getDay()); return <button key={localISO(date)} onClick={() => selectDate(date)} className="relative h-9 rounded-lg text-xs font-semibold" style={{ color: selected ? C.ink : current ? C.inkSoft : C.muted, background: selected ? C.gold : today ? C.goldSoft : "transparent", opacity: current ? 1 : .45, outline: today && !selected ? "1px solid " + C.gold : "none" }}><span>{date.getDate()}</span>{hasItems && !selected && <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full" style={{ background: C.gold }} />}</button>; })}</div>
+          <button onClick={() => selectDate(new Date())} className="w-full mt-4 py-2 rounded-lg text-sm font-semibold" style={{ border: "1px solid " + C.line, color: C.inkSoft }}><CalendarDays size={15} className="inline mr-1" />Hoje</button>
+        </Card>
+        <Card className="!p-4">
+          <h2 className="font-bold mb-3">Resumo do mês</h2>
+          <div className="space-y-2"><div className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: C.surface2 }}><span className="text-xs flex items-center gap-2" style={{ color: C.inkSoft }}><Clock size={15} />Horas planejadas</span><b className="text-sm">{fmtMin(monthMinutes)}</b></div><div className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: C.surface2 }}><span className="text-xs flex items-center gap-2" style={{ color: C.inkSoft }}><CheckCircle2 size={15} />Sessões concluídas</span><b className="text-sm">{monthDone} de {monthItems.length}</b></div><div className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: C.surface2 }}><span className="text-xs flex items-center gap-2" style={{ color: C.inkSoft }}><TrendingUp size={15} />Percentual concluído</span><b className="text-sm" style={{ color: C.gold }}>{monthPct}%</b></div></div>
+        </Card>
+      </div>}
+      <Card className={"!p-5 min-h-[620px] " + (showMonth ? "xl:col-span-full" : "")}>
+        {showMonth ? <div>
+          <div className="flex flex-wrap items-start justify-between gap-4 mb-5"><div><h2 className="text-xl font-extrabold">{monthLabel(monthDate)}</h2><p className="text-sm mt-1" style={{ color: C.muted }}>Visão mensal com sessões organizadas por dia.</p></div><button onClick={() => setShowMonth(false)} className="text-sm font-semibold px-3 py-2 rounded-lg" style={{ border: "1px solid " + C.line, color: C.inkSoft }}><ChevronLeft size={15} className="inline mr-1" />Voltar para agenda</button></div>
+          <div className="overflow-x-auto"><div className="min-w-[760px]"><div className="grid grid-cols-7 mb-2">{calendarDays.map((day) => <span key={day} className="text-[10px] font-bold text-center" style={{ color: C.muted }}>{day}</span>)}</div><div className="grid grid-cols-7">{cells.map((date) => { const current = date.getMonth() === monthDate.getMonth(); const today = localISO(date) === todayISO(); const selected = localISO(date) === localISO(selectedDate); const items = current ? plan.filter((p) => p.day === date.getDay()) : []; return <div key={localISO(date)} className="min-h-[145px] p-2" style={{ border: "1px solid " + C.line, background: selected ? C.goldSoft : C.surface2, opacity: current ? 1 : .45 }}><button onClick={() => { selectDate(date); setShowMonth(false); }} className="flex items-center justify-between w-full mb-2"><b className="text-xs" style={{ color: today ? C.gold : C.ink }}>{date.getDate()}</b>{today && <span className="text-[10px] font-bold" style={{ color: C.gold }}>Hoje</span>}</button><div className="space-y-1">{items.slice(0, 3).map((it) => { const d = discById[it.disciplineId]; return <button key={it.id} onClick={() => { selectDate(date); setShowMonth(false); }} title={d?.name} className="w-full text-left rounded-md px-2 py-1.5" style={{ background: d?.color || C.chip, color: "#fff" }}><span className="block text-[11px] font-semibold leading-tight break-words">{d?.name || "Disciplina"}</span><span className="block text-[10px] mt-0.5 opacity-80">{fmtMin(it.minutes)}</span></button>; })}{items.length > 3 && <div className="text-[10px] text-center" style={{ color: C.muted }}>+{items.length - 3} sessões</div>}</div></div>; })}</div></div></div>
+          <div className="flex items-start gap-2 mt-5 rounded-xl p-3" style={{ background: C.surface2, border: "1px solid " + C.line }}><AlertCircle size={17} color={C.gold} className="shrink-0 mt-0.5" /><p className="text-xs leading-relaxed" style={{ color: C.muted }}>Clique em uma sessão para voltar à agenda do dia com o nome completo e os controles de conclusão.</p></div>
+        </div> : <div>
+          <div className="flex flex-wrap items-start justify-between gap-4 mb-5"><div><h2 className="text-xl font-extrabold">{displayDate}</h2><p className="text-sm mt-1" style={{ color: C.muted }}>{selectedDone} de {selectedItems.length} sessões concluídas</p></div><div className="w-full sm:w-44"><div className="h-2 rounded-full overflow-hidden" style={{ background: C.chip }}><div className="h-full rounded-full" style={{ width: (selectedItems.length ? selectedDone / selectedItems.length * 100 : 0) + "%", background: C.green }} /></div></div></div>
+          <div className="space-y-3">{selectedItems.length ? selectedItems.map(item) : <div className="rounded-xl p-8 text-center" style={{ border: "1px dashed " + C.line, color: C.muted }}><CalendarDays size={24} className="mx-auto mb-2" /><p className="text-sm">Nenhuma sessão para este dia.</p><button onClick={addSelected} className="text-sm font-semibold mt-2" style={{ color: C.gold }}>Adicionar sessão</button></div>}</div>
+          <div className="flex items-start gap-2 mt-5 rounded-xl p-3" style={{ background: C.surface2, border: "1px solid " + C.line }}><AlertCircle size={17} color={C.gold} className="shrink-0 mt-0.5" /><p className="text-xs leading-relaxed" style={{ color: C.muted }}>Nomes longos de disciplinas aparecem por completo na agenda para facilitar a leitura e o seu planejamento.</p></div>
+        </div>}
+      </Card>
     </div>
-    {open !== null && <PlanAddModal day={open} disciplines={disciplines} onClose={() => setOpen(null)} onAdd={add} />}
+    {open && <PlanAddModal day={open.day} dayLabel={open.label} disciplines={disciplines} onClose={() => setOpen(null)} onAdd={add} />}
   </div>;
 }
-function PlanAddModal({ day, disciplines, onClose, onAdd }) { const C = useC(); const [discId, setDiscId] = useState(disciplines[0]?.id); const [min, setMin] = useState(60); return <Modal open title={`Adicionar sessão · ${DAYS[day]}`} onClose={onClose}><Field label="Disciplina"><select value={discId} onChange={(e) => setDiscId(e.target.value)} className={inputCls} style={inputStyle(C)}>{disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></Field><Field label="Duração (min)"><input type="number" value={min} step={15} onChange={(e) => setMin(+e.target.value)} className={inputCls} style={inputStyle(C)} /></Field><Btn className="w-full justify-center" onClick={() => onAdd(day, discId, min)}><Plus size={16} /> Adicionar</Btn></Modal>; }
+function PlanAddModal({ day, dayLabel, disciplines, onClose, onAdd }) { const C = useC(); const [discId, setDiscId] = useState(disciplines[0]?.id); const [min, setMin] = useState(60); return <Modal open title={`Adicionar sessão · ${dayLabel || DAYS[day]}`} onClose={onClose}><Field label="Disciplina"><select value={discId} onChange={(e) => setDiscId(e.target.value)} className={inputCls} style={inputStyle(C)}>{disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></Field><Field label="Duração (min)"><input type="number" value={min} step={15} onChange={(e) => setMin(+e.target.value)} className={inputCls} style={inputStyle(C)} /></Field><Btn className="w-full justify-center" onClick={() => onAdd(day, discId, min)}><Plus size={16} /> Adicionar</Btn></Modal>; }
 
 /* ============================ REVISÕES ============================ */
 function RevisoesView({ reviews, setReviews, markReviewDone, discById, disciplines, sessions }) {
