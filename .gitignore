@@ -9,3 +9,7 @@ supabase/seed.sql
 # notas de trabalho locais
 CONTEXTO.md
 modelo-preloader/
+# documentos e artefatos locais de apoio — não versionar
+.tokensave/
+download
+provas/
