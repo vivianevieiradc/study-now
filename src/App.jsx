@@ -1849,6 +1849,7 @@ function QuestoesView({ sessions, setSessions, disciplines, discById, registerSt
   const [topicId, setTopicId] = useState("");
   const [right, setRight] = useState("");
   const [wrong, setWrong] = useState("");
+  const [note, setNote] = useState("");
   const [date, setDate] = useState(todayISO());
   const [filtroDisc, setFiltroDisc] = useState("todas");
   const [edit, setEdit] = useState(null);
@@ -1877,8 +1878,8 @@ function QuestoesView({ sessions, setSessions, disciplines, discById, registerSt
   function submit() {
     const r = +right || 0, w = +wrong || 0;
     if (r + w <= 0 || !discId) return;
-    registerStudy({ disciplineId: discId, topicId: topicId || null, studyType: "questoes", minutes: 0, right: r, wrong: w, date });
-    setRight(""); setWrong("");
+    registerStudy({ disciplineId: discId, topicId: topicId || null, studyType: "questoes", minutes: 0, right: r, wrong: w, note: note.trim(), date });
+    setRight(""); setWrong(""); setNote("");
   }
   function remove(id) { setSessions((p) => p.filter((s) => s.id !== id)); }
   function save(id, data) { setSessions((p) => p.map((s) => s.id === id ? { ...s, ...data } : s)); setEdit(null); }
@@ -1892,6 +1893,7 @@ function QuestoesView({ sessions, setSessions, disciplines, discById, registerSt
         <Field label="Disciplina"><select value={discId} onChange={(e) => { setDiscId(e.target.value); setTopicId(""); }} className={inputCls} style={inputStyle(C)}>{disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></Field>
         <Field label="Tópico (opcional)"><select value={topicId} onChange={(e) => setTopicId(e.target.value)} className={inputCls} style={inputStyle(C)}><option value="">— geral —</option>{topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></Field>
       </div>
+      <Field label="Assunto / observação (opcional)"><input value={note} onChange={(e) => setNote(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="Ex.: questões sobre hífen" /></Field>
       <div className="grid grid-cols-3 gap-3">
         <Field label="Acertos"><input type="number" min={0} value={right} onChange={(e) => setRight(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="0" /></Field>
         <Field label="Erros"><input type="number" min={0} value={wrong} onChange={(e) => setWrong(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="0" /></Field>
@@ -1933,6 +1935,7 @@ function QuestoesView({ sessions, setSessions, disciplines, discById, registerSt
         <div className="flex-1 min-w-0">
           <div className="text-sm font-semibold truncate">{d?.name} {topic && <span className="font-normal" style={{ color: C.muted }}>· {topic.name}</span>}</div>
           <div className="text-xs flex gap-3 mt-0.5" style={{ color: C.muted }}><span>{fmtDate(s.date)}</span><span style={{ color: C.green }}>✓{s.right}</span><span style={{ color: C.red }}>✕{s.wrong}</span></div>
+          {s.note && <div className="text-xs mt-1" style={{ color: C.inkSoft }}>{s.note}</div>}
         </div>
         <span className="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0" style={{ background: acc >= 60 ? C.greenSoft : C.redSoft, color: acc >= 60 ? C.green : C.red }}>{acc}%</span>
         <button onClick={() => setEdit(s)} className="p-1"><Pencil size={15} color={C.muted} /></button>
