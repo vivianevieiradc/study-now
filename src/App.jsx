@@ -403,7 +403,8 @@ function StudyApp({ onLogout, concurso, setConcurso, onOpenPicker }) {
       setDisciplines(d);
       setSessions(await store.get(CK("sess"), []));
       setReviews(await store.get(CK("rev"), []));
-      setPlan(await store.get(CK("plan"), []));
+      const savedPlan = await store.get(CK("plan"), []);
+      setPlan((Array.isArray(savedPlan) ? savedPlan : []).filter((item) => item.date));
       let sm = await store.get(CK("sim"), null); if (!sm) { sm = seedSims(d, concurso.seedSimsData); await store.set(CK("sim"), sm); } setSimulados(sm);
       setGoals(await store.get(CK("goals"), { hours: 20, questions: 200 }));
       setStreakDays(await store.get("streakDays", {}));
@@ -446,8 +447,8 @@ function StudyApp({ onLogout, concurso, setConcurso, onOpenPicker }) {
   function registerStudy({ disciplineId, topicId, studyType, minutes, right, wrong, note, date, material, paginaInicio, paginaFim, videoTitulo }) {
     const s = { id: uid(), disciplineId, topicId: topicId || null, studyType: studyType || "teoria", minutes, right: right || 0, wrong: wrong || 0, note: note || "", material: material || "", paginaInicio: paginaInicio || "", paginaFim: paginaFim || "", videoTitulo: videoTitulo || "", date: date || todayISO() };
     setSessions((p) => [s, ...p]);
-    const sessionDay = new Date((date || todayISO()) + "T00:00:00").getDay();
-    setPlan((prev) => { const idx = prev.findIndex((p) => p.day === sessionDay && p.disciplineId === disciplineId && !p.done); if (idx === -1) return prev; const next = [...prev]; next[idx] = { ...next[idx], done: true }; return next; });
+    const sessionDate = date || todayISO();
+    setPlan((prev) => { const idx = prev.findIndex((p) => p.date === sessionDate && p.disciplineId === disciplineId && !p.done); if (idx === -1) return prev; const next = [...prev]; next[idx] = { ...next[idx], done: true }; return next; });
     if (topicId) setDisciplines((p) => p.map((d) => d.id === disciplineId ? { ...d, topics: d.topics.map((t) => t.id === topicId ? { ...t, studied: true } : t) } : d));
     return s;
   }
@@ -841,10 +842,12 @@ function PlanoView({ plan, setPlan, disciplines, discById }) {
   const offset = (first.getDay() + 6) % 7;
   const days = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0).getDate();
   const cells = Array.from({ length: offset + days > 35 ? 42 : 35 }, (_, i) => new Date(monthDate.getFullYear(), monthDate.getMonth(), 1 - offset + i));
-  const selectedItems = plan.filter((p) => p.day === selectedDate.getDay());
+  const selectedDateISO = localISO(selectedDate);
+  const selectedItems = plan.filter((p) => p.date === selectedDateISO);
   const selectedDone = selectedItems.filter((p) => p.done).length;
   const monthDates = cells.filter((d) => d.getMonth() === monthDate.getMonth());
-  const monthItems = monthDates.flatMap((d) => plan.filter((p) => p.day === d.getDay()));
+  const monthDateSet = new Set(monthDates.map(localISO));
+  const monthItems = plan.filter((p) => monthDateSet.has(p.date));
   const monthDone = monthItems.filter((p) => p.done).length;
   const monthMinutes = monthItems.reduce((sum, p) => sum + Number(p.minutes || 0), 0);
   const monthPct = monthItems.length ? Math.round(monthDone / monthItems.length * 100) : 0;
@@ -861,10 +864,10 @@ function PlanoView({ plan, setPlan, disciplines, discById }) {
     setSelectedDate(next);
   }
   function addSelected() {
-    setOpen({ day: selectedDate.getDay(), label: displayDate });
+    setOpen({ date: selectedDateISO, label: displayDate });
   }
   function toggle(id) { setPlan((p) => p.map((x) => x.id === id ? { ...x, done: !x.done } : x)); }
-  function add(day, disciplineId, minutes) { setPlan((p) => [...p, { id: uid(), day, disciplineId, minutes, done: false }]); setOpen(null); }
+  function add(date, disciplineId, minutes) { setPlan((p) => [...p, { id: uid(), date, disciplineId, minutes, done: false }]); setOpen(null); }
   function remove(id) { setPlan((p) => p.filter((x) => x.id !== id)); }
   const item = (it) => <PlanSessionItem key={it.id} item={it} discipline={discById[it.disciplineId]} onToggle={() => toggle(it.id)} onRemove={() => remove(it.id)} />;
 
@@ -878,7 +881,7 @@ function PlanoView({ plan, setPlan, disciplines, discById }) {
         <Card className="!p-4">
           <div className="flex items-center justify-between mb-4"><button onClick={() => shiftMonth(-1)} className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ border: "1px solid " + C.line }}><ChevronLeft size={17} /></button><span className="font-bold">{monthLabel(monthDate)}</span><button onClick={() => shiftMonth(1)} className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ border: "1px solid " + C.line }}><ChevronRight size={17} /></button></div>
           <div className="grid grid-cols-7 mb-2">{calendarDays.map((day) => <span key={day} className="text-[10px] font-bold text-center" style={{ color: C.muted }}>{day}</span>)}</div>
-          <div className="grid grid-cols-7 gap-y-1">{cells.map((date) => { const current = date.getMonth() === monthDate.getMonth(); const selected = localISO(date) === localISO(selectedDate); const today = localISO(date) === todayISO(); const hasItems = current && plan.some((p) => p.day === date.getDay()); return <button key={localISO(date)} onClick={() => selectDate(date)} className="relative h-9 rounded-lg text-xs font-semibold" style={{ color: selected ? C.ink : current ? C.inkSoft : C.muted, background: selected ? C.gold : today ? C.goldSoft : "transparent", opacity: current ? 1 : .45, outline: today && !selected ? "1px solid " + C.gold : "none" }}><span>{date.getDate()}</span>{hasItems && !selected && <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full" style={{ background: C.gold }} />}</button>; })}</div>
+          <div className="grid grid-cols-7 gap-y-1">{cells.map((date) => { const dateISO = localISO(date); const current = date.getMonth() === monthDate.getMonth(); const selected = dateISO === selectedDateISO; const today = dateISO === todayISO(); const hasItems = current && plan.some((p) => p.date === dateISO); return <button key={dateISO} onClick={() => selectDate(date)} className="relative h-9 rounded-lg text-xs font-semibold" style={{ color: selected ? C.ink : current ? C.inkSoft : C.muted, background: selected ? C.gold : today ? C.goldSoft : "transparent", opacity: current ? 1 : .45, outline: today && !selected ? "1px solid " + C.gold : "none" }}><span>{date.getDate()}</span>{hasItems && !selected && <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full" style={{ background: C.gold }} />}</button>; })}</div>
           <button onClick={() => selectDate(new Date())} className="w-full mt-4 py-2 rounded-lg text-sm font-semibold" style={{ border: "1px solid " + C.line, color: C.inkSoft }}><CalendarDays size={15} className="inline mr-1" />Hoje</button>
         </Card>
         <Card className="!p-4">
@@ -889,7 +892,7 @@ function PlanoView({ plan, setPlan, disciplines, discById }) {
       <Card className={"!p-5 min-h-[620px] " + (showMonth ? "xl:col-span-full" : "")}>
         {showMonth ? <div>
           <div className="flex flex-wrap items-start justify-between gap-4 mb-5"><div><h2 className="text-xl font-extrabold">{monthLabel(monthDate)}</h2><p className="text-sm mt-1" style={{ color: C.muted }}>Visão mensal com sessões organizadas por dia.</p></div><button onClick={() => setShowMonth(false)} className="text-sm font-semibold px-3 py-2 rounded-lg" style={{ border: "1px solid " + C.line, color: C.inkSoft }}><ChevronLeft size={15} className="inline mr-1" />Voltar para agenda</button></div>
-          <div className="overflow-x-auto"><div className="min-w-[760px]"><div className="grid grid-cols-7 mb-2">{calendarDays.map((day) => <span key={day} className="text-[10px] font-bold text-center" style={{ color: C.muted }}>{day}</span>)}</div><div className="grid grid-cols-7">{cells.map((date) => { const current = date.getMonth() === monthDate.getMonth(); const today = localISO(date) === todayISO(); const selected = localISO(date) === localISO(selectedDate); const items = current ? plan.filter((p) => p.day === date.getDay()) : []; return <div key={localISO(date)} className="min-h-[145px] p-2" style={{ border: "1px solid " + C.line, background: selected ? C.goldSoft : C.surface2, opacity: current ? 1 : .45 }}><button onClick={() => { selectDate(date); setShowMonth(false); }} className="flex items-center justify-between w-full mb-2"><b className="text-xs" style={{ color: today ? C.gold : C.ink }}>{date.getDate()}</b>{today && <span className="text-[10px] font-bold" style={{ color: C.gold }}>Hoje</span>}</button><div className="space-y-1">{items.slice(0, 3).map((it) => { const d = discById[it.disciplineId]; return <button key={it.id} onClick={() => { selectDate(date); setShowMonth(false); }} title={d?.name} className="w-full text-left rounded-md px-2 py-1.5" style={{ background: d?.color || C.chip, color: "#fff" }}><span className="block text-[11px] font-semibold leading-tight break-words">{d?.name || "Disciplina"}</span><span className="block text-[10px] mt-0.5 opacity-80">{fmtMin(it.minutes)}</span></button>; })}{items.length > 3 && <div className="text-[10px] text-center" style={{ color: C.muted }}>+{items.length - 3} sessões</div>}</div></div>; })}</div></div></div>
+          <div className="overflow-x-auto"><div className="min-w-[760px]"><div className="grid grid-cols-7 mb-2">{calendarDays.map((day) => <span key={day} className="text-[10px] font-bold text-center" style={{ color: C.muted }}>{day}</span>)}</div><div className="grid grid-cols-7">{cells.map((date) => { const dateISO = localISO(date); const current = date.getMonth() === monthDate.getMonth(); const today = dateISO === todayISO(); const selected = dateISO === selectedDateISO; const items = current ? plan.filter((p) => p.date === dateISO) : []; return <div key={dateISO} className="min-h-[145px] p-2" style={{ border: "1px solid " + C.line, background: selected ? C.goldSoft : C.surface2, opacity: current ? 1 : .45 }}><button onClick={() => { selectDate(date); setShowMonth(false); }} className="flex items-center justify-between w-full mb-2"><b className="text-xs" style={{ color: today ? C.gold : C.ink }}>{date.getDate()}</b>{today && <span className="text-[10px] font-bold" style={{ color: C.gold }}>Hoje</span>}</button><div className="space-y-1">{items.slice(0, 3).map((it) => { const d = discById[it.disciplineId]; return <button key={it.id} onClick={() => { selectDate(date); setShowMonth(false); }} title={d?.name} className="w-full text-left rounded-md px-2 py-1.5" style={{ background: d?.color || C.chip, color: "#fff" }}><span className="block text-[11px] font-semibold leading-tight break-words">{d?.name || "Disciplina"}</span><span className="block text-[10px] mt-0.5 opacity-80">{fmtMin(it.minutes)}</span></button>; })}{items.length > 3 && <div className="text-[10px] text-center" style={{ color: C.muted }}>+{items.length - 3} sessões</div>}</div></div>; })}</div></div></div>
           <div className="flex items-start gap-2 mt-5 rounded-xl p-3" style={{ background: C.surface2, border: "1px solid " + C.line }}><AlertCircle size={17} color={C.gold} className="shrink-0 mt-0.5" /><p className="text-xs leading-relaxed" style={{ color: C.muted }}>Clique em uma sessão para voltar à agenda do dia com o nome completo e os controles de conclusão.</p></div>
         </div> : <div>
           <div className="flex flex-wrap items-start justify-between gap-4 mb-5"><div><h2 className="text-xl font-extrabold">{displayDate}</h2><p className="text-sm mt-1" style={{ color: C.muted }}>{selectedDone} de {selectedItems.length} sessões concluídas</p></div><div className="w-full sm:w-44"><div className="h-2 rounded-full overflow-hidden" style={{ background: C.chip }}><div className="h-full rounded-full" style={{ width: (selectedItems.length ? selectedDone / selectedItems.length * 100 : 0) + "%", background: C.green }} /></div></div></div>
@@ -898,10 +901,10 @@ function PlanoView({ plan, setPlan, disciplines, discById }) {
         </div>}
       </Card>
     </div>
-    {open && <PlanAddModal day={open.day} dayLabel={open.label} disciplines={disciplines} onClose={() => setOpen(null)} onAdd={add} />}
+    {open && <PlanAddModal date={open.date} dateLabel={open.label} disciplines={disciplines} onClose={() => setOpen(null)} onAdd={add} />}
   </div>;
 }
-function PlanAddModal({ day, dayLabel, disciplines, onClose, onAdd }) { const C = useC(); const [discId, setDiscId] = useState(disciplines[0]?.id); const [min, setMin] = useState(60); return <Modal open title={`Adicionar sessão · ${dayLabel || DAYS[day]}`} onClose={onClose}><Field label="Disciplina"><select value={discId} onChange={(e) => setDiscId(e.target.value)} className={inputCls} style={inputStyle(C)}>{disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></Field><Field label="Duração (min)"><input type="number" value={min} step={15} onChange={(e) => setMin(+e.target.value)} className={inputCls} style={inputStyle(C)} /></Field><Btn className="w-full justify-center" onClick={() => onAdd(day, discId, min)}><Plus size={16} /> Adicionar</Btn></Modal>; }
+function PlanAddModal({ date, dateLabel, disciplines, onClose, onAdd }) { const C = useC(); const [discId, setDiscId] = useState(disciplines[0]?.id); const [min, setMin] = useState(60); return <Modal open title={`Adicionar sessão · ${dateLabel || fmtDate(date)}`} onClose={onClose}><Field label="Disciplina"><select value={discId} onChange={(e) => setDiscId(e.target.value)} className={inputCls} style={inputStyle(C)}>{disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></Field><Field label="Duração (min)"><input type="number" value={min} step={15} onChange={(e) => setMin(+e.target.value)} className={inputCls} style={inputStyle(C)} /></Field><Btn className="w-full justify-center" onClick={() => onAdd(date, discId, min)}><Plus size={16} /> Adicionar</Btn></Modal>; }
 
 /* ============================ REVISÕES ============================ */
 function RevisoesView({ reviews, setReviews, markReviewDone, discById, disciplines, sessions }) {
