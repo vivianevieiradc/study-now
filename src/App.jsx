@@ -827,9 +827,9 @@ function ManualModal({ disciplines, discById, onClose, onSave, initial }) {
 }
 
 /* ============================ PLANEJAMENTO ============================ */
-function PlanSessionItem({ item, discipline, compact = false, onToggle, onRemove }) {
+function PlanSessionItem({ item, discipline, compact = false, onToggle, onEdit, onRemove }) {
   const C = useC(); const name = discipline?.name || "Disciplina";
-  return <div className="group rounded-xl p-2.5 mb-2" style={{ background: C.surface2, border: `1px solid ${C.line}`, borderLeft: `3px solid ${discipline?.color || C.line}` }} title={name}><div className="flex items-start gap-1.5 min-w-0"><button onClick={onToggle} title={item.done ? "Desmarcar sessão" : "Marcar como feita"} className="shrink-0 mt-0.5">{item.done ? <CheckCircle2 size={16} color={C.green} /> : <Circle size={16} color={C.muted} />}</button><span className="w-2 h-2 rounded-full shrink-0 mt-1.5" style={{ background: discipline?.color }} /><span className="text-xs font-semibold leading-tight break-words min-w-0" style={{ color: item.done ? C.muted : C.ink, textDecoration: item.done ? "line-through" : "none" }}>{compact ? disciplineShort(name) : <><span className="xl:hidden">{disciplineShort(name)}</span><span className="hidden xl:inline">{name}</span></>}</span><button onClick={onRemove} className="ml-auto opacity-0 group-hover:opacity-100 shrink-0" title="Remover sessão"><X size={12} color={C.red} /></button></div><div className="text-[10px] mt-1 pl-6" style={{ color: C.muted }}>{fmtMin(item.minutes)}</div></div>;
+  return <div className="group rounded-xl p-2.5 mb-2" style={{ background: C.surface2, border: `1px solid ${C.line}`, borderLeft: `3px solid ${discipline?.color || C.line}` }} title={name}><div className="flex items-start gap-1.5 min-w-0"><button onClick={onToggle} title={item.done ? "Desmarcar sessão" : "Marcar como feita"} aria-label={item.done ? "Desmarcar sessão" : "Marcar como feita"} className="shrink-0 mt-0.5">{item.done ? <CheckCircle2 size={16} color={C.green} /> : <Circle size={16} color={C.muted} />}</button><span className="w-2 h-2 rounded-full shrink-0 mt-1.5" style={{ background: discipline?.color }} /><span className="text-xs font-semibold leading-tight break-words min-w-0" style={{ color: item.done ? C.muted : C.ink, textDecoration: item.done ? "line-through" : "none" }}>{compact ? disciplineShort(name) : <><span className="xl:hidden">{disciplineShort(name)}</span><span className="hidden xl:inline">{name}</span></>}</span><div className="ml-auto flex items-center gap-2 shrink-0"><button onClick={onEdit} className="p-0.5" title="Editar sessão" aria-label="Editar sessão"><Pencil size={13} color={C.inkSoft} /></button><button onClick={onRemove} className="p-0.5 opacity-70 hover:opacity-100" title="Remover sessão" aria-label="Remover sessão"><X size={13} color={C.red} /></button></div></div><div className="text-[10px] mt-1 pl-6" style={{ color: C.muted }}>{fmtMin(item.minutes)}</div></div>;
 }
 
 function PlanoView({ plan, setPlan, disciplines, discById }) {
@@ -864,12 +864,17 @@ function PlanoView({ plan, setPlan, disciplines, discById }) {
     setSelectedDate(next);
   }
   function addSelected() {
-    setOpen({ date: selectedDateISO, label: displayDate });
+    setOpen({ mode: "add", date: selectedDateISO });
   }
   function toggle(id) { setPlan((p) => p.map((x) => x.id === id ? { ...x, done: !x.done } : x)); }
-  function add(date, disciplineId, minutes) { setPlan((p) => [...p, { id: uid(), date, disciplineId, minutes, done: false }]); setOpen(null); }
+  function saveSession({ date, disciplineId, minutes }) {
+    if (open?.mode === "edit") setPlan((p) => p.map((x) => x.id === open.item.id ? { ...x, date, disciplineId, minutes } : x));
+    else setPlan((p) => [...p, { id: uid(), date, disciplineId, minutes, done: false }]);
+    selectDate(new Date(date + "T00:00:00"));
+    setOpen(null);
+  }
   function remove(id) { setPlan((p) => p.filter((x) => x.id !== id)); }
-  const item = (it) => <PlanSessionItem key={it.id} item={it} discipline={discById[it.disciplineId]} onToggle={() => toggle(it.id)} onRemove={() => remove(it.id)} />;
+  const item = (it) => <PlanSessionItem key={it.id} item={it} discipline={discById[it.disciplineId]} onToggle={() => toggle(it.id)} onEdit={() => setOpen({ mode: "edit", item: it })} onRemove={() => remove(it.id)} />;
 
   return <div className="xl:-mx-5">
     <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
@@ -901,10 +906,23 @@ function PlanoView({ plan, setPlan, disciplines, discById }) {
         </div>}
       </Card>
     </div>
-    {open && <PlanAddModal date={open.date} dateLabel={open.label} disciplines={disciplines} onClose={() => setOpen(null)} onAdd={add} />}
+    {open && <PlanSessionModal initial={open.mode === "edit" ? open.item : { date: open.date }} disciplines={disciplines} onClose={() => setOpen(null)} onSave={saveSession} />}
   </div>;
 }
-function PlanAddModal({ date, dateLabel, disciplines, onClose, onAdd }) { const C = useC(); const [discId, setDiscId] = useState(disciplines[0]?.id); const [min, setMin] = useState(60); return <Modal open title={`Adicionar sessão · ${dateLabel || fmtDate(date)}`} onClose={onClose}><Field label="Disciplina"><select value={discId} onChange={(e) => setDiscId(e.target.value)} className={inputCls} style={inputStyle(C)}>{disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></Field><Field label="Duração (min)"><input type="number" value={min} step={15} onChange={(e) => setMin(+e.target.value)} className={inputCls} style={inputStyle(C)} /></Field><Btn className="w-full justify-center" onClick={() => onAdd(date, discId, min)}><Plus size={16} /> Adicionar</Btn></Modal>; }
+function PlanSessionModal({ initial, disciplines, onClose, onSave }) {
+  const C = useC();
+  const editing = Boolean(initial?.id);
+  const [date, setDate] = useState(initial?.date || todayISO());
+  const [discId, setDiscId] = useState(initial?.disciplineId || disciplines[0]?.id || "");
+  const [min, setMin] = useState(initial?.minutes || 60);
+  const valid = date && discId && Number(min) > 0;
+  return <Modal open title={editing ? "Editar sessão" : "Adicionar sessão"} onClose={onClose}>
+    <Field label="Data"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputCls} style={inputStyle(C)} /></Field>
+    <Field label="Disciplina"><select value={discId} onChange={(e) => setDiscId(e.target.value)} className={inputCls} style={inputStyle(C)}>{disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></Field>
+    <Field label="Duração (min)"><input type="number" min="1" value={min} step={15} onChange={(e) => setMin(+e.target.value)} className={inputCls} style={inputStyle(C)} /></Field>
+    <Btn className="w-full justify-center disabled:opacity-50 disabled:cursor-not-allowed" disabled={!valid} onClick={() => onSave({ date, disciplineId: discId, minutes: Number(min) })}>{editing ? <Check size={16} /> : <Plus size={16} />} {editing ? "Salvar alterações" : "Adicionar"}</Btn>
+  </Modal>;
+}
 
 /* ============================ REVISÕES ============================ */
 function RevisoesView({ reviews, setReviews, markReviewDone, discById, disciplines, sessions }) {
