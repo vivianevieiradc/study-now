@@ -5,7 +5,7 @@ import {
   Trash2, Pencil, X, ChevronRight, TrendingUp, Circle, CheckCircle2,
   Timer as TimerIcon, Menu, Crosshair, Zap, Sun, Moon, RotateCcw, LogOut,
   GraduationCap, FileText, ChevronLeft, AlertCircle, Award, Filter, History,
-  Layers, ChevronDown, ClipboardCheck, Download, Upload
+  Layers, ChevronDown, ClipboardCheck, Download, Upload, ExternalLink
 } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis,
@@ -285,7 +285,10 @@ function buildDiscFromEdital(concursoId, edital) {
     id: `${concursoId}-d${i}`,
     name: s.name, block: s.block, peso: s.peso, q: s.q,
     color: DISC_COLORS[i % DISC_COLORS.length],
-    topics: (s.topics || []).map((t, j) => ({ id: `${concursoId}-d${i}-t${j}`, num: t.num, name: t.name, hits: t.hits, studied: false })),
+    topics: (s.topics || []).map((t, j) => ({
+      id: `${concursoId}-d${i}-t${j}`, num: t.num, name: t.name, hits: t.hits,
+      tecQuestions: t.tecQuestions, tecFilterUrl: t.tecFilterUrl, studied: false,
+    })),
   }));
 }
 
@@ -310,7 +313,13 @@ function mergeEdital(saved, globalDisc) {
       color: old?.color || g.color,
       topics: g.topics.map((gt) => {
         const ot = old?.topics?.find((o) => o.name === gt.name);
-        return { ...gt, id: ot?.id || gt.id, studied: ot?.studied || false };
+        return {
+          ...gt,
+          id: ot?.id || gt.id,
+          studied: ot?.studied || false,
+          tecQuestions: ot?.tecQuestions ?? gt.tecQuestions,
+          tecFilterUrl: ot?.tecFilterUrl ?? gt.tecFilterUrl,
+        };
       }),
     };
   });
@@ -324,14 +333,25 @@ function mergeSharedProgress(disciplines, progress) {
   return disciplines.map((d) => {
     const dp = progress[d.name];
     if (!dp) return d;
-    return { ...d, topics: d.topics.map((t) => (dp[t.name] ? { ...t, studied: dp[t.name].studied, hits: dp[t.name].hits ?? t.hits } : t)) };
+    return { ...d, topics: d.topics.map((t) => (dp[t.name] ? {
+      ...t,
+      studied: dp[t.name].studied,
+      hits: dp[t.name].hits ?? t.hits,
+      tecQuestions: dp[t.name].tecQuestions ?? t.tecQuestions,
+      tecFilterUrl: dp[t.name].tecFilterUrl ?? t.tecFilterUrl,
+    } : t)) };
   });
 }
 function extractSharedProgress(disciplines) {
   const progress = {};
   disciplines.forEach((d) => {
     progress[d.name] = {};
-    d.topics.forEach((t) => { progress[d.name][t.name] = { studied: t.studied, hits: t.hits }; });
+    d.topics.forEach((t) => { progress[d.name][t.name] = {
+      studied: t.studied,
+      hits: t.hits,
+      tecQuestions: t.tecQuestions,
+      tecFilterUrl: t.tecFilterUrl,
+    }; });
   });
   return progress;
 }
@@ -1864,8 +1884,9 @@ function HistoricoView({ sessions, setSessions, discById, disciplines, registerS
 }
 
 /* ============================ QUESTÕES ============================ */
-function QuestoesView({ sessions, setSessions, disciplines, discById, registerStudy }) {
+function QuestoesView({ sessions, setSessions, disciplines, setDisciplines, discById, registerStudy }) {
   const C = useC();
+  const [section, setSection] = useState("registro");
   const [discId, setDiscId] = useState(disciplines[0]?.id || "");
   const [topicId, setTopicId] = useState("");
   const [right, setRight] = useState("");
@@ -1905,8 +1926,19 @@ function QuestoesView({ sessions, setSessions, disciplines, discById, registerSt
   function remove(id) { setSessions((p) => p.filter((s) => s.id !== id)); }
   function save(id, data) { setSessions((p) => p.map((s) => s.id === id ? { ...s, ...data } : s)); setEdit(null); }
 
+  const tabs = <div className="flex gap-1 p-1 rounded-xl mb-4 w-fit max-w-full" style={{ background: C.surface2, border: `1px solid ${C.line}` }}>
+    {[['registro', 'Registro e desempenho'], ['tec', 'Prioridade TEC']].map(([id, label]) => <button key={id} onClick={() => setSection(id)} className="px-3 py-2 rounded-lg text-xs font-semibold transition whitespace-nowrap" style={{ background: section === id ? C.navActiveBg : "transparent", color: section === id ? C.navActiveInk : C.muted }}>{label}</button>)}
+  </div>;
+
+  if (section === "tec") return <div>
+    <PageTitle sub="Centralize os filtros do TecConcursos e transforme volume de questões em ordem de estudo.">Questões</PageTitle>
+    {tabs}
+    <TecPriorityPanel disciplines={disciplines} setDisciplines={setDisciplines} />
+  </div>;
+
   return <div>
     <PageTitle sub="Registre quantas questões fez, acertou e errou por tópico do edital.">Questões</PageTitle>
+    {tabs}
 
     <Card className="mb-4">
       <div className="text-sm font-bold mb-3">Registrar questões</div>
@@ -1967,6 +1999,85 @@ function QuestoesView({ sessions, setSessions, disciplines, discById, registerSt
   </div>;
 }
 
+function TecPriorityPanel({ disciplines, setDisciplines }) {
+  const C = useC();
+  const [disciplineId, setDisciplineId] = useState(disciplines[0]?.id || "");
+  const firstTopic = disciplines[0]?.topics?.[0];
+  const [topicId, setTopicId] = useState(firstTopic?.id || "");
+  const [questions, setQuestions] = useState("");
+  const [url, setUrl] = useState("");
+  const selectedDiscipline = disciplines.find((d) => d.id === disciplineId);
+  const topics = selectedDiscipline?.topics || [];
+  const selectedTopic = topics.find((t) => t.id === topicId);
+
+  useEffect(() => {
+    setQuestions(selectedTopic?.tecQuestions ?? "");
+    setUrl(selectedTopic?.tecFilterUrl || "");
+  }, [selectedTopic?.id, selectedTopic?.tecQuestions, selectedTopic?.tecFilterUrl]);
+
+  const rows = useMemo(() => {
+    const configured = disciplines.flatMap((d) => d.topics.map((t) => {
+      const hasTec = t.tecQuestions !== undefined && t.tecQuestions !== null && t.tecQuestions !== "";
+      const count = hasTec ? Math.max(0, Number(t.tecQuestions) || 0) : 0;
+      return { discipline: d, topic: t, count, hasTec, score: count * (d.q > 0 ? d.peso / d.q : d.peso) };
+    })).filter((row) => row.hasTec);
+    return configured.sort((a, b) => (a.topic.studied === b.topic.studied ? b.score - a.score : a.topic.studied ? 1 : -1));
+  }, [disciplines]);
+  const maxScore = rows.reduce((max, row) => Math.max(max, row.score), 0);
+  const labelFor = (score) => !maxScore ? "Baixa" : score >= maxScore * 0.67 ? "Alta" : score >= maxScore * 0.34 ? "Média" : "Baixa";
+
+  function changeDiscipline(nextId) {
+    const d = disciplines.find((item) => item.id === nextId);
+    setDisciplineId(nextId);
+    setTopicId(d?.topics?.[0]?.id || "");
+  }
+  function saveFilter() {
+    if (!disciplineId || !topicId || questions === "") return;
+    const rawUrl = url.trim();
+    let safeUrl = "";
+    if (rawUrl) {
+      try {
+        const parsed = new URL(/^https?:\/\//i.test(rawUrl) ? rawUrl : `https://${rawUrl}`);
+        if (parsed.protocol === "http:" || parsed.protocol === "https:") safeUrl = parsed.href;
+      } catch { safeUrl = ""; }
+    }
+    setDisciplines((prev) => prev.map((d) => d.id !== disciplineId ? d : ({
+      ...d,
+      topics: d.topics.map((t) => t.id !== topicId ? t : ({ ...t, tecQuestions: Math.max(0, Math.round(Number(questions) || 0)), tecFilterUrl: safeUrl || undefined })),
+    })));
+  }
+  function clearFilter() {
+    if (!disciplineId || !topicId) return;
+    setDisciplines((prev) => prev.map((d) => d.id !== disciplineId ? d : ({
+      ...d,
+      topics: d.topics.map((t) => {
+        if (t.id !== topicId) return t;
+        const next = { ...t }; delete next.tecQuestions; delete next.tecFilterUrl; return next;
+      }),
+    })));
+    setQuestions(""); setUrl("");
+  }
+  function editRow(row) { setDisciplineId(row.discipline.id); setTopicId(row.topic.id); }
+
+  return <div>
+    <Card className="mb-4">
+      <div className="flex items-start gap-3 mb-4"><Target size={18} color={C.gold} className="shrink-0 mt-0.5" /><div><div className="text-sm font-bold">Configurar filtro TEC</div><p className="text-xs mt-1" style={{ color: C.muted }}>Informe o total encontrado para um tópico. A prioridade considera esse volume e o valor de cada questão da matéria.</p></div></div>
+      <div className="grid md:grid-cols-2 gap-3">
+        <Field label="Matéria"><select value={disciplineId} onChange={(e) => changeDiscipline(e.target.value)} className={inputCls} style={inputStyle(C)}>{disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></Field>
+        <Field label="Tópico"><select value={topicId} onChange={(e) => setTopicId(e.target.value)} className={inputCls} style={inputStyle(C)}>{topics.map((t) => <option key={t.id} value={t.id}>{t.num ? `${t.num} · ` : ""}{t.name}</option>)}</select></Field>
+        <Field label="Quantidade de questões no filtro"><input type="number" min="0" step="1" value={questions} onChange={(e) => setQuestions(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="Ex.: 248" /></Field>
+        <Field label="Link do filtro (opcional)"><input type="url" value={url} onChange={(e) => setUrl(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="https://www.tecconcursos.com.br/questoes/..." /></Field>
+      </div>
+      <div className="flex justify-end gap-2 flex-wrap"><Btn variant="ghost" onClick={clearFilter} disabled={!selectedTopic || selectedTopic.tecQuestions === undefined}><Trash2 size={14} /> Limpar</Btn><Btn onClick={saveFilter} disabled={!topicId || questions === ""}><Check size={15} /> Salvar filtro</Btn></div>
+    </Card>
+
+    <Card>
+      <div className="flex items-center justify-between gap-3 mb-3"><div><div className="text-sm font-bold">Ordem sugerida de estudo</div><p className="text-xs mt-1" style={{ color: C.muted }}>Tópicos não estudados aparecem primeiro.</p></div><span className="text-xs shrink-0" style={{ color: C.muted }}>{rows.filter((row) => !row.topic.studied).length} pendente(s)</span></div>
+      {rows.length === 0 ? <Empty msg="Nenhum filtro configurado. Escolha uma matéria e um tópico acima para começar." /> : <div className="space-y-1">{rows.map((row, index) => { const label = labelFor(row.score); const high = label === "Alta"; return <div key={row.topic.id} className="flex items-center gap-3 py-2.5 border-t first:border-0" style={{ borderColor: C.line, opacity: row.topic.studied ? 0.65 : 1 }}><span className="w-6 text-xs font-bold text-center" style={{ color: C.muted }}>{index + 1}</span><button onClick={() => editRow(row)} className="flex-1 min-w-0 text-left"><div className="text-sm font-semibold truncate">{row.topic.name}</div><div className="text-[11px] truncate" style={{ color: C.muted }}>{row.discipline.name} · {row.count} questões TEC{row.topic.studied ? " · já estudado" : ""}</div></button><span className="text-[10px] font-bold px-2 py-1 rounded-full" style={{ background: row.topic.studied ? C.greenSoft : high ? C.redSoft : C.goldSoft, color: row.topic.studied ? C.green : high ? C.red : C.ink }}>{row.topic.studied ? "Estudado" : label}</span>{row.topic.tecFilterUrl && <a href={row.topic.tecFilterUrl} target="_blank" rel="noreferrer" className="p-1.5" title="Abrir filtro no TecConcursos"><ExternalLink size={15} color={C.muted} /></a>}</div>; })}</div>}
+    </Card>
+  </div>;
+}
+
 /* ============================ EDITAL ============================ */
 function EditalView({ concurso, disciplines, sessions, setDisciplines }) {
   const C = useC();
@@ -1977,6 +2088,7 @@ function EditalView({ concurso, disciplines, sessions, setDisciplines }) {
   const studied = allTopics.filter((t) => t.studied).length;
   const pct = allTopics.length ? Math.round((studied / allTopics.length) * 100) : 0;
   const blocks = [...new Set(disciplines.map((d) => d.block))];
+  const untouchedDisciplines = disciplines.filter((d) => d.topics.length > 0 && !d.topics.some((t) => t.studied));
 
   const filteredDisciplines = useMemo(() => {
     if (!searchQuery.trim()) return disciplines;
@@ -1994,6 +2106,24 @@ function EditalView({ concurso, disciplines, sessions, setDisciplines }) {
       topics: d.topics.map((t) => t.id === topicId ? { ...t, studied: !t.studied } : t),
     })));
   }
+  function downloadEdital() {
+    const rows = [];
+    disciplines.forEach((d) => d.topics.forEach((t) => {
+      const p = perf[t.id];
+      const total = p ? p.r + p.w : 0;
+      const hasTec = t.tecQuestions !== undefined && t.tecQuestions !== null && t.tecQuestions !== "";
+      rows.push([
+        d.name, d.block, t.num || "", t.name, t.studied ? "Estudado" : "Pendente", hasTec ? t.tecQuestions : "",
+        t.tecFilterUrl || "", p?.min || 0, total,
+        total ? `${Math.round((p.r / total) * 100)}%` : "",
+      ]);
+    }));
+    downloadFile(
+      `edital-${concurso.id}.csv`,
+      `\uFEFF${toCSV(["Matéria", "Bloco", "Item", "Tópico", "Status", "Questões TEC", "Filtro TEC", "Minutos estudados", "Questões respondidas", "Aproveitamento"], rows)}`,
+      "text/csv;charset=utf-8;",
+    );
+  }
   async function atualizarEdital() {
     if (sincronizando) return;
     setSincronizando(true);
@@ -2005,16 +2135,20 @@ function EditalView({ concurso, disciplines, sessions, setDisciplines }) {
     } finally { setSincronizando(false); }
   }
   return <div>
-    <div className="flex items-start justify-between gap-3 mb-6">
+    <div className="flex items-start justify-between gap-3 mb-6 flex-wrap">
       <div><h1 className="text-2xl font-extrabold">Edital verticalizado</h1><p className="text-sm mt-1" style={{ color: C.muted }}>{concurso.label} · {concurso.subtitle}. Peso, nº de questões e incidência por tópico. Marque o que já estudou.</p></div>
-      <Btn variant="ghost" onClick={atualizarEdital} disabled={sincronizando} className="shrink-0"><RefreshCw size={14} className={sincronizando ? "animate-spin" : ""} /> {sincronizando ? "Atualizando…" : "Atualizar edital"}</Btn>
+      <div className="flex gap-2 flex-wrap">
+        <Btn variant="ghost" onClick={downloadEdital} title="Baixar todos os tópicos com o status atual"><Download size={14} /> Baixar edital</Btn>
+        <Btn variant="ghost" onClick={atualizarEdital} disabled={sincronizando} className="shrink-0"><RefreshCw size={14} className={sincronizando ? "animate-spin" : ""} /> {sincronizando ? "Atualizando…" : "Atualizar edital"}</Btn>
+      </div>
     </div>
     <Card className="mb-4"><input type="text" placeholder="Pesquisar disciplina ou tópico…" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className={inputCls} style={inputStyle(C)} /></Card>
     <Card className="mb-4"><div className="flex items-center justify-between text-sm mb-2"><span className="font-semibold">Cobertura do edital</span><span style={{ color: C.muted }}>{studied}/{allTopics.length} tópicos</span></div><div className="h-3 rounded-full overflow-hidden" style={{ background: C.line }}><div className="h-full" style={{ width: `${pct}%`, background: C.ink }} /></div></Card>
+    {untouchedDisciplines.length > 0 && <Card className="mb-4" style={{ background: C.goldSoft, borderColor: `${C.gold}77` }}><div className="flex gap-3"><AlertCircle size={19} color={C.gold} className="shrink-0 mt-0.5" /><div><div className="text-sm font-bold">Atenção: {untouchedDisciplines.length} {untouchedDisciplines.length === 1 ? "matéria ainda não foi iniciada" : "matérias ainda não foram iniciadas"}</div><p className="text-xs mt-1 mb-2" style={{ color: C.inkSoft }}>Você ainda não marcou nenhum tópico nestas matérias:</p><div className="flex flex-wrap gap-1.5">{untouchedDisciplines.map((d) => <span key={d.id} className="text-[11px] font-semibold px-2 py-1 rounded-full" style={{ background: C.surface, color: C.ink, border: `1px solid ${C.gold}55` }}>{d.name}</span>)}</div></div></div></Card>}
     {blocks.map((block) => (
       <div key={block} className="mb-5"><h3 className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: C.muted }}>Conhecimentos {block}</h3><div className="space-y-3">
-        {filteredDisciplines.filter((d) => d.block === block).map((d) => { const done = d.topics.filter((t) => t.studied).length;
-          return <Card key={d.id} className="!p-4"><div className="flex items-center gap-2 mb-3"><span className="w-1.5 h-6 rounded-full" style={{ background: d.color }} /><span className="font-bold flex-1">{d.name}</span><span className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: C.goldSoft, color: C.ink }}>{d.peso} pts · {d.q}q</span><span className="text-xs" style={{ color: C.muted }}>{done}/{d.topics.length}</span></div><div className="space-y-1.5">
+        {filteredDisciplines.filter((d) => d.block === block).map((d) => { const fullD = disciplines.find((item) => item.id === d.id) || d; const done = fullD.topics.filter((t) => t.studied).length; const untouched = done === 0;
+          return <Card key={d.id} className="!p-4" style={untouched ? { borderColor: `${C.gold}77` } : undefined}><div className="flex items-center gap-2 mb-3 flex-wrap"><span className="w-1.5 h-6 rounded-full" style={{ background: d.color }} /><span className="font-bold flex-1 min-w-[180px]">{d.name}</span>{untouched && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: C.goldSoft, color: C.gold }}>NENHUM TÓPICO MARCADO</span>}<span className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: C.goldSoft, color: C.ink }}>{d.peso} pts · {d.q}q</span><span className="text-xs" style={{ color: C.muted }}>{done}/{fullD.topics.length}</span></div><div className="space-y-1.5">
             {d.topics.map((t) => { const isSub = t.num && t.num.includes("."); const p = perf[t.id]; const tot = p ? p.r + p.w : 0; const acc = tot ? Math.round((p.r / tot) * 100) : null; const weak = acc !== null && acc < 60;
               return <button key={t.id} type="button" onClick={() => toggleTopic(d.id, t.id)} className={`w-full flex items-center gap-2 text-sm p-2.5 rounded-xl border text-left transition hover:-translate-y-[1px]${isSub ? " ml-5" : ""}`} style={{ background: t.studied ? C.greenSoft : C.surface2, borderColor: t.studied ? C.green : C.line, boxShadow: t.studied ? `0 0 0 1px ${C.green} inset` : "none", width: isSub ? "calc(100% - 1.25rem)" : undefined }}><span className="pointer-events-none shrink-0 mt-0.5">{t.studied ? <CheckCircle2 size={15} color={C.green} /> : <Circle size={15} color={C.line} />}</span>{t.num && <span className="pointer-events-none text-xs font-mono shrink-0 min-w-[2rem] text-right" style={{ color: C.muted }}>{t.num}</span>}<span className="pointer-events-none flex-1 min-w-0" style={{ color: t.studied ? C.ink : C.inkSoft }}>{t.name}</span><span className="pointer-events-none flex items-center gap-1 shrink-0">{t.hits >= 8 && <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: C.redSoft, color: C.red }}>cai muito</span>}{t.hits >= 4 && t.hits < 8 && <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: C.goldSoft, color: C.ink }}>cai bastante</span>}{p && <span className="text-xs" style={{ color: C.muted }}>{fmtMin(p.min)}</span>}{acc !== null && <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: weak ? C.redSoft : C.greenSoft, color: weak ? C.red : C.green }}>{acc}%{weak && " · foco"}</span>}</span></button>;
             })}
