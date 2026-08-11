@@ -287,7 +287,8 @@ function buildDiscFromEdital(concursoId, edital) {
     color: DISC_COLORS[i % DISC_COLORS.length],
     topics: (s.topics || []).map((t, j) => ({
       id: `${concursoId}-d${i}-t${j}`, num: t.num, name: t.name, hits: t.hits,
-      tecQuestions: t.tecQuestions, tecFilterUrl: t.tecFilterUrl, studied: false,
+      tecQuestions: t.tecQuestions, tecFilterUrl: t.tecFilterUrl,
+      tecYearStart: t.tecYearStart, tecYearEnd: t.tecYearEnd, studied: false,
     })),
   }));
 }
@@ -319,6 +320,8 @@ function mergeEdital(saved, globalDisc) {
           studied: ot?.studied || false,
           tecQuestions: ot?.tecQuestions ?? gt.tecQuestions,
           tecFilterUrl: ot?.tecFilterUrl ?? gt.tecFilterUrl,
+          tecYearStart: ot?.tecYearStart ?? gt.tecYearStart,
+          tecYearEnd: ot?.tecYearEnd ?? gt.tecYearEnd,
         };
       }),
     };
@@ -339,6 +342,8 @@ function mergeSharedProgress(disciplines, progress) {
       hits: dp[t.name].hits ?? t.hits,
       tecQuestions: dp[t.name].tecQuestions ?? t.tecQuestions,
       tecFilterUrl: dp[t.name].tecFilterUrl ?? t.tecFilterUrl,
+      tecYearStart: dp[t.name].tecYearStart ?? t.tecYearStart,
+      tecYearEnd: dp[t.name].tecYearEnd ?? t.tecYearEnd,
     } : t)) };
   });
 }
@@ -351,6 +356,8 @@ function extractSharedProgress(disciplines) {
       hits: t.hits,
       tecQuestions: t.tecQuestions,
       tecFilterUrl: t.tecFilterUrl,
+      tecYearStart: t.tecYearStart,
+      tecYearEnd: t.tecYearEnd,
     }; });
   });
   return progress;
@@ -2002,18 +2009,25 @@ function QuestoesView({ sessions, setSessions, disciplines, setDisciplines, disc
 function TecPriorityPanel({ disciplines, setDisciplines }) {
   const C = useC();
   const [disciplineId, setDisciplineId] = useState(disciplines[0]?.id || "");
+  const currentYear = new Date().getFullYear();
   const firstTopic = disciplines[0]?.topics?.[0];
   const [topicId, setTopicId] = useState(firstTopic?.id || "");
   const [questions, setQuestions] = useState("");
+  const [yearStart, setYearStart] = useState("");
+  const [yearEnd, setYearEnd] = useState("");
   const [url, setUrl] = useState("");
+  const [yearError, setYearError] = useState("");
   const selectedDiscipline = disciplines.find((d) => d.id === disciplineId);
   const topics = selectedDiscipline?.topics || [];
   const selectedTopic = topics.find((t) => t.id === topicId);
 
   useEffect(() => {
     setQuestions(selectedTopic?.tecQuestions ?? "");
+    setYearStart(selectedTopic?.tecYearStart ?? "");
+    setYearEnd(selectedTopic?.tecYearEnd ?? "");
     setUrl(selectedTopic?.tecFilterUrl || "");
-  }, [selectedTopic?.id, selectedTopic?.tecQuestions, selectedTopic?.tecFilterUrl]);
+    setYearError("");
+  }, [selectedTopic?.id, selectedTopic?.tecQuestions, selectedTopic?.tecYearStart, selectedTopic?.tecYearEnd, selectedTopic?.tecFilterUrl]);
 
   const rows = useMemo(() => {
     const configured = disciplines.flatMap((d) => d.topics.map((t) => {
@@ -2025,6 +2039,7 @@ function TecPriorityPanel({ disciplines, setDisciplines }) {
   }, [disciplines]);
   const maxScore = rows.reduce((max, row) => Math.max(max, row.score), 0);
   const labelFor = (score) => !maxScore ? "Baixa" : score >= maxScore * 0.67 ? "Alta" : score >= maxScore * 0.34 ? "Média" : "Baixa";
+  const tecPeriod = (topic) => topic.tecYearStart && topic.tecYearEnd ? ` · ${topic.tecYearStart}–${topic.tecYearEnd}` : topic.tecYearStart ? ` · desde ${topic.tecYearStart}` : topic.tecYearEnd ? ` · até ${topic.tecYearEnd}` : "";
 
   function changeDiscipline(nextId) {
     const d = disciplines.find((item) => item.id === nextId);
@@ -2033,6 +2048,17 @@ function TecPriorityPanel({ disciplines, setDisciplines }) {
   }
   function saveFilter() {
     if (!disciplineId || !topicId || questions === "") return;
+    const start = yearStart === "" ? undefined : Math.round(Number(yearStart));
+    const end = yearEnd === "" ? undefined : Math.round(Number(yearEnd));
+    if ((start !== undefined && (start < 1900 || start > currentYear)) || (end !== undefined && (end < 1900 || end > currentYear))) {
+      setYearError(`Use anos entre 1900 e ${currentYear}.`);
+      return;
+    }
+    if (start !== undefined && end !== undefined && start > end) {
+      setYearError("O ano inicial não pode ser maior que o ano final.");
+      return;
+    }
+    setYearError("");
     const rawUrl = url.trim();
     let safeUrl = "";
     if (rawUrl) {
@@ -2043,7 +2069,13 @@ function TecPriorityPanel({ disciplines, setDisciplines }) {
     }
     setDisciplines((prev) => prev.map((d) => d.id !== disciplineId ? d : ({
       ...d,
-      topics: d.topics.map((t) => t.id !== topicId ? t : ({ ...t, tecQuestions: Math.max(0, Math.round(Number(questions) || 0)), tecFilterUrl: safeUrl || undefined })),
+      topics: d.topics.map((t) => t.id !== topicId ? t : ({
+        ...t,
+        tecQuestions: Math.max(0, Math.round(Number(questions) || 0)),
+        tecYearStart: start,
+        tecYearEnd: end,
+        tecFilterUrl: safeUrl || undefined,
+      })),
     })));
   }
   function clearFilter() {
@@ -2052,28 +2084,35 @@ function TecPriorityPanel({ disciplines, setDisciplines }) {
       ...d,
       topics: d.topics.map((t) => {
         if (t.id !== topicId) return t;
-        const next = { ...t }; delete next.tecQuestions; delete next.tecFilterUrl; return next;
+        const next = { ...t };
+        delete next.tecQuestions; delete next.tecYearStart; delete next.tecYearEnd; delete next.tecFilterUrl;
+        return next;
       }),
     })));
-    setQuestions(""); setUrl("");
+    setQuestions(""); setYearStart(""); setYearEnd(""); setUrl(""); setYearError("");
   }
   function editRow(row) { setDisciplineId(row.discipline.id); setTopicId(row.topic.id); }
 
   return <div>
     <Card className="mb-4">
-      <div className="flex items-start gap-3 mb-4"><Target size={18} color={C.gold} className="shrink-0 mt-0.5" /><div><div className="text-sm font-bold">Configurar filtro TEC</div><p className="text-xs mt-1" style={{ color: C.muted }}>Informe o total encontrado para um tópico. A prioridade considera esse volume e o valor de cada questão da matéria.</p></div></div>
+      <div className="flex items-start gap-3 mb-4"><Target size={18} color={C.gold} className="shrink-0 mt-0.5" /><div><div className="text-sm font-bold">Configurar filtro TEC</div><p className="text-xs mt-1" style={{ color: C.muted }}>Informe o período e o total encontrado para um tópico. A prioridade considera esse volume e o valor de cada questão da matéria.</p></div></div>
       <div className="grid md:grid-cols-2 gap-3">
         <Field label="Matéria"><select value={disciplineId} onChange={(e) => changeDiscipline(e.target.value)} className={inputCls} style={inputStyle(C)}>{disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></Field>
         <Field label="Tópico"><select value={topicId} onChange={(e) => setTopicId(e.target.value)} className={inputCls} style={inputStyle(C)}>{topics.map((t) => <option key={t.id} value={t.id}>{t.num ? `${t.num} · ` : ""}{t.name}</option>)}</select></Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Ano inicial"><input type="number" min="1900" max={currentYear} step="1" value={yearStart} onChange={(e) => { setYearStart(e.target.value); setYearError(""); }} className={inputCls} style={inputStyle(C)} placeholder="Ex.: 2020" /></Field>
+          <Field label="Ano final"><input type="number" min="1900" max={currentYear} step="1" value={yearEnd} onChange={(e) => { setYearEnd(e.target.value); setYearError(""); }} className={inputCls} style={inputStyle(C)} placeholder={`Ex.: ${currentYear}`} /></Field>
+        </div>
         <Field label="Quantidade de questões no filtro"><input type="number" min="0" step="1" value={questions} onChange={(e) => setQuestions(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="Ex.: 248" /></Field>
-        <Field label="Link do filtro (opcional)"><input type="url" value={url} onChange={(e) => setUrl(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="https://www.tecconcursos.com.br/questoes/..." /></Field>
+        <div className="md:col-span-2"><Field label="Link do filtro (opcional)"><input type="url" value={url} onChange={(e) => setUrl(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="https://www.tecconcursos.com.br/questoes/..." /></Field></div>
       </div>
+      {yearError && <p className="text-xs mb-3" style={{ color: C.red }}>{yearError}</p>}
       <div className="flex justify-end gap-2 flex-wrap"><Btn variant="ghost" onClick={clearFilter} disabled={!selectedTopic || selectedTopic.tecQuestions === undefined}><Trash2 size={14} /> Limpar</Btn><Btn onClick={saveFilter} disabled={!topicId || questions === ""}><Check size={15} /> Salvar filtro</Btn></div>
     </Card>
 
     <Card>
       <div className="flex items-center justify-between gap-3 mb-3"><div><div className="text-sm font-bold">Ordem sugerida de estudo</div><p className="text-xs mt-1" style={{ color: C.muted }}>Tópicos não estudados aparecem primeiro.</p></div><span className="text-xs shrink-0" style={{ color: C.muted }}>{rows.filter((row) => !row.topic.studied).length} pendente(s)</span></div>
-      {rows.length === 0 ? <Empty msg="Nenhum filtro configurado. Escolha uma matéria e um tópico acima para começar." /> : <div className="space-y-1">{rows.map((row, index) => { const label = labelFor(row.score); const high = label === "Alta"; return <div key={row.topic.id} className="flex items-center gap-3 py-2.5 border-t first:border-0" style={{ borderColor: C.line, opacity: row.topic.studied ? 0.65 : 1 }}><span className="w-6 text-xs font-bold text-center" style={{ color: C.muted }}>{index + 1}</span><button onClick={() => editRow(row)} className="flex-1 min-w-0 text-left"><div className="text-sm font-semibold truncate">{row.topic.name}</div><div className="text-[11px] truncate" style={{ color: C.muted }}>{row.discipline.name} · {row.count} questões TEC{row.topic.studied ? " · já estudado" : ""}</div></button><span className="text-[10px] font-bold px-2 py-1 rounded-full" style={{ background: row.topic.studied ? C.greenSoft : high ? C.redSoft : C.goldSoft, color: row.topic.studied ? C.green : high ? C.red : C.ink }}>{row.topic.studied ? "Estudado" : label}</span>{row.topic.tecFilterUrl && <a href={row.topic.tecFilterUrl} target="_blank" rel="noreferrer" className="p-1.5" title="Abrir filtro no TecConcursos"><ExternalLink size={15} color={C.muted} /></a>}</div>; })}</div>}
+      {rows.length === 0 ? <Empty msg="Nenhum filtro configurado. Escolha uma matéria e um tópico acima para começar." /> : <div className="space-y-1">{rows.map((row, index) => { const label = labelFor(row.score); const high = label === "Alta"; return <div key={row.topic.id} className="flex items-center gap-3 py-2.5 border-t first:border-0" style={{ borderColor: C.line, opacity: row.topic.studied ? 0.65 : 1 }}><span className="w-6 text-xs font-bold text-center" style={{ color: C.muted }}>{index + 1}</span><button onClick={() => editRow(row)} className="flex-1 min-w-0 text-left"><div className="text-sm font-semibold truncate">{row.topic.name}</div><div className="text-[11px] truncate" style={{ color: C.muted }}>{row.discipline.name} · {row.count} questões TEC{tecPeriod(row.topic)}{row.topic.studied ? " · já estudado" : ""}</div></button><span className="text-[10px] font-bold px-2 py-1 rounded-full" style={{ background: row.topic.studied ? C.greenSoft : high ? C.redSoft : C.goldSoft, color: row.topic.studied ? C.green : high ? C.red : C.ink }}>{row.topic.studied ? "Estudado" : label}</span>{row.topic.tecFilterUrl && <a href={row.topic.tecFilterUrl} target="_blank" rel="noreferrer" className="p-1.5" title="Abrir filtro no TecConcursos"><ExternalLink size={15} color={C.muted} /></a>}</div>; })}</div>}
     </Card>
   </div>;
 }
@@ -2114,13 +2153,13 @@ function EditalView({ concurso, disciplines, sessions, setDisciplines }) {
       const hasTec = t.tecQuestions !== undefined && t.tecQuestions !== null && t.tecQuestions !== "";
       rows.push([
         d.name, d.block, t.num || "", t.name, t.studied ? "Estudado" : "Pendente", hasTec ? t.tecQuestions : "",
-        t.tecFilterUrl || "", p?.min || 0, total,
+        t.tecYearStart || "", t.tecYearEnd || "", t.tecFilterUrl || "", p?.min || 0, total,
         total ? `${Math.round((p.r / total) * 100)}%` : "",
       ]);
     }));
     downloadFile(
       `edital-${concurso.id}.csv`,
-      `\uFEFF${toCSV(["Matéria", "Bloco", "Item", "Tópico", "Status", "Questões TEC", "Filtro TEC", "Minutos estudados", "Questões respondidas", "Aproveitamento"], rows)}`,
+      `\uFEFF${toCSV(["Matéria", "Bloco", "Item", "Tópico", "Status", "Questões TEC", "Ano inicial TEC", "Ano final TEC", "Filtro TEC", "Minutos estudados", "Questões respondidas", "Aproveitamento"], rows)}`,
       "text/csv;charset=utf-8;",
     );
   }
