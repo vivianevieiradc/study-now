@@ -1912,18 +1912,6 @@ function QuestoesView({ sessions, setSessions, disciplines, setDisciplines, disc
   const totalR = qSessions.reduce((a, s) => a + s.right, 0);
   const accGeral = totalQ ? Math.round((totalR / totalQ) * 100) : null;
 
-  const ranking = useMemo(() => {
-    const map = {};
-    qSessions.forEach((s) => {
-      const d = discById[s.disciplineId];
-      const topic = s.topicId ? d?.topics.find((t) => t.id === s.topicId) : null;
-      const key = s.topicId || `disc-${s.disciplineId}`;
-      if (!map[key]) map[key] = { name: topic ? topic.name : (d?.name || "?"), discName: d?.name || "?", r: 0, w: 0 };
-      map[key].r += s.right; map[key].w += s.wrong;
-    });
-    return Object.values(map).map((t) => ({ ...t, total: t.r + t.w, acc: Math.round((t.r / (t.r + t.w)) * 100) })).sort((a, b) => a.acc - b.acc);
-  }, [qSessions, discById]);
-
   function submit() {
     const r = +right || 0, w = +wrong || 0;
     if (r + w <= 0 || !discId) return;
@@ -1967,19 +1955,6 @@ function QuestoesView({ sessions, setSessions, disciplines, setDisciplines, disc
       <Card className="!p-4"><div className="text-[11px] mb-1" style={{ color: C.muted }}>Acertos</div><div className="text-2xl font-extrabold" style={{ color: C.green }}>{totalR}</div></Card>
       <Card className="!p-4"><div className="text-[11px] mb-1" style={{ color: C.muted }}>Aproveitamento geral</div><div className="text-2xl font-extrabold" style={{ color: accGeral === null ? C.ink : accGeral >= 60 ? C.green : C.red }}>{accGeral === null ? "—" : `${accGeral}%`}</div></Card>
     </div>
-
-    {ranking.length > 0 && <Card className="mb-4">
-      <div className="text-sm font-bold mb-3">Ranking por tópico — pior aproveitamento primeiro</div>
-      <div className="space-y-1.5">
-        {ranking.map((t, i) => {
-          const weak = t.acc < 60;
-          return <div key={i} className="flex items-center gap-3 py-1.5 border-t first:border-0" style={{ borderColor: C.line }}>
-            <div className="flex-1 min-w-0"><div className="text-sm truncate">{t.name}</div><div className="text-xs" style={{ color: C.muted }}>{t.discName} · {t.total}q</div></div>
-            <span className="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0" style={{ background: weak ? C.redSoft : C.greenSoft, color: weak ? C.red : C.green }}>{t.acc}%{weak && " · foco"}</span>
-          </div>;
-        })}
-      </div>
-    </Card>}
 
     <div className="flex items-center justify-between mb-2">
       <div className="text-sm font-bold">Histórico de questões</div>
@@ -2226,7 +2201,7 @@ function StatsView({ sessions, disciplines }) {
       <Card><div className="text-sm font-semibold mb-3">Acertos vs erros por disciplina</div><ResponsiveContainer width="100%" height={240}><BarChart data={Object.values(m.byDisc).filter((v) => v.right + v.wrong > 0)} layout="vertical" margin={{ left: 10 }}><XAxis type="number" fontSize={11} stroke={C.muted} /><YAxis type="category" dataKey="name" width={90} fontSize={10} stroke={C.muted} /><Tooltip contentStyle={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 8, color: C.ink }} /><Bar dataKey="right" stackId="a" fill={C.green} name="Acertos" /><Bar dataKey="wrong" stackId="a" fill={C.red} name="Erros" /></BarChart></ResponsiveContainer></Card>
     </div>
     <Card>
-      <div className="text-sm font-semibold mb-3">Acertos por tópico — pior aproveitamento primeiro</div>
+      <div className="text-sm font-semibold mb-3">Ranking por tópico — pior aproveitamento primeiro</div>
       {topicPerf.length === 0 ? <Empty msg="Registre acertos/erros por tópico para ver o detalhamento aqui." /> : <div className="space-y-1.5">
         {topicPerf.map((t, i) => { const weak = t.acc < 60;
           return <div key={i} className="flex items-center gap-3 py-1.5 border-t first:border-0" style={{ borderColor: C.line }}>
