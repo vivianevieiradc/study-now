@@ -5,7 +5,7 @@ import {
   Trash2, Pencil, X, ChevronRight, TrendingUp, Circle, CheckCircle2,
   Timer as TimerIcon, Menu, Crosshair, Zap, Sun, Moon, RotateCcw, LogOut,
   GraduationCap, FileText, ChevronLeft, AlertCircle, Award, Filter, History,
-  Layers, ChevronDown, ClipboardCheck, Download, Upload, ExternalLink
+  Layers, ChevronDown, ClipboardCheck, Download, Upload, ExternalLink, Copy
 } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis,
@@ -2097,6 +2097,7 @@ function EditalView({ concurso, disciplines, sessions, setDisciplines }) {
   const C = useC();
   const [sincronizando, setSincronizando] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [copiedTopicId, setCopiedTopicId] = useState(null);
   const perf = useMemo(() => { const map = {}; sessions.forEach((s) => { if (!s.topicId) return; const k = s.topicId; map[k] = map[k] || { min: 0, r: 0, w: 0 }; map[k].min += s.minutes; map[k].r += s.right; map[k].w += s.wrong; }); return map; }, [sessions]);
   const allTopics = disciplines.flatMap((d) => d.topics);
   const studied = allTopics.filter((t) => t.studied).length;
@@ -2119,6 +2120,29 @@ function EditalView({ concurso, disciplines, sessions, setDisciplines }) {
       ...d,
       topics: d.topics.map((t) => t.id === topicId ? { ...t, studied: !t.studied } : t),
     })));
+  }
+
+  async function copyTopic(t) {
+    const text = `${t.num ? `${t.num} ` : ""}${t.name}`;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      }
+      setCopiedTopicId(t.id);
+      window.setTimeout(() => setCopiedTopicId((current) => current === t.id ? null : current), 1500);
+    } catch (e) {
+      console.error("Não foi possível copiar o tópico —", e);
+    }
   }
   function downloadEdital() {
     const rows = [];
@@ -2164,7 +2188,7 @@ function EditalView({ concurso, disciplines, sessions, setDisciplines }) {
         {filteredDisciplines.filter((d) => d.block === block).map((d) => { const fullD = disciplines.find((item) => item.id === d.id) || d; const done = fullD.topics.filter((t) => t.studied).length; const untouched = done === 0;
           return <Card key={d.id} className="!p-4" style={untouched ? { borderColor: `${C.gold}77` } : undefined}><div className="flex items-center gap-2 mb-3 flex-wrap"><span className="w-1.5 h-6 rounded-full" style={{ background: d.color }} /><span className="font-bold flex-1 min-w-[180px]">{d.name}</span>{untouched && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: C.goldSoft, color: C.gold }}>NENHUM TÓPICO MARCADO</span>}<span className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: C.goldSoft, color: C.ink }}>{d.peso} pts · {d.q}q</span><span className="text-xs" style={{ color: C.muted }}>{done}/{fullD.topics.length}</span></div><div className="space-y-1.5">
             {d.topics.map((t) => { const isSub = t.num && t.num.includes("."); const p = perf[t.id]; const tot = p ? p.r + p.w : 0; const acc = tot ? Math.round((p.r / tot) * 100) : null; const weak = acc !== null && acc < 60;
-              return <button key={t.id} type="button" onClick={() => toggleTopic(d.id, t.id)} className={`w-full flex items-center gap-2 text-sm p-2.5 rounded-xl border text-left transition hover:-translate-y-[1px]${isSub ? " ml-5" : ""}`} style={{ background: t.studied ? C.greenSoft : C.surface2, borderColor: t.studied ? C.green : C.line, boxShadow: t.studied ? `0 0 0 1px ${C.green} inset` : "none", width: isSub ? "calc(100% - 1.25rem)" : undefined }}><span className="pointer-events-none shrink-0 mt-0.5">{t.studied ? <CheckCircle2 size={15} color={C.green} /> : <Circle size={15} color={C.line} />}</span>{t.num && <span className="pointer-events-none text-xs font-mono shrink-0 min-w-[2rem] text-right" style={{ color: C.muted }}>{t.num}</span>}<span className="pointer-events-none flex-1 min-w-0" style={{ color: t.studied ? C.ink : C.inkSoft }}>{t.name}</span><span className="pointer-events-none flex items-center gap-1 shrink-0">{t.hits >= 8 && <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: C.redSoft, color: C.red }}>cai muito</span>}{t.hits >= 4 && t.hits < 8 && <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: C.goldSoft, color: C.ink }}>cai bastante</span>}{p && <span className="text-xs" style={{ color: C.muted }}>{fmtMin(p.min)}</span>}{acc !== null && <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: weak ? C.redSoft : C.greenSoft, color: weak ? C.red : C.green }}>{acc}%{weak && " · foco"}</span>}</span></button>;
+              return <div key={t.id} className={`w-full flex items-center gap-2 text-sm p-2.5 rounded-xl border transition hover:-translate-y-[1px]${isSub ? " ml-5" : ""}`} style={{ background: t.studied ? C.greenSoft : C.surface2, borderColor: t.studied ? C.green : C.line, boxShadow: t.studied ? `0 0 0 1px ${C.green} inset` : "none", width: isSub ? "calc(100% - 1.25rem)" : undefined }}><button type="button" onClick={() => toggleTopic(d.id, t.id)} className="shrink-0 mt-0.5 rounded focus:outline-none focus-visible:ring-2" title={t.studied ? "Desmarcar como estudado" : "Marcar como estudado"} aria-label={t.studied ? `Desmarcar ${t.name}` : `Marcar ${t.name} como estudado`}>{t.studied ? <CheckCircle2 size={15} color={C.green} /> : <Circle size={15} color={C.line} />}</button>{t.num && <span className="select-text text-xs font-mono shrink-0 min-w-[2rem] text-right" style={{ color: C.muted }}>{t.num}</span>}<span className="select-text flex-1 min-w-0" style={{ color: t.studied ? C.ink : C.inkSoft }}>{t.name}</span><span className="flex items-center gap-1 shrink-0">{t.hits >= 8 && <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: C.redSoft, color: C.red }}>cai muito</span>}{t.hits >= 4 && t.hits < 8 && <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: C.goldSoft, color: C.ink }}>cai bastante</span>}{p && <span className="text-xs" style={{ color: C.muted }}>{fmtMin(p.min)}</span>}{acc !== null && <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: weak ? C.redSoft : C.greenSoft, color: weak ? C.red : C.green }}>{acc}%{weak && " · foco"}</span>}</span><button type="button" onClick={() => copyTopic(t)} className="shrink-0 p-1 rounded hover:bg-black/5 focus:outline-none focus-visible:ring-2" title={copiedTopicId === t.id ? "Tópico copiado" : "Copiar tópico"} aria-label={copiedTopicId === t.id ? "Tópico copiado" : `Copiar tópico ${t.name}`}>{copiedTopicId === t.id ? <Check size={15} color={C.green} /> : <Copy size={15} color={C.muted} />}</button></div>;
             })}
           </div></Card>;
         })}
