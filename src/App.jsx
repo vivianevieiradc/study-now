@@ -1205,7 +1205,7 @@ function FlashcardsView({ cards, setCards, cardStats, setCardStats, disciplines,
   }, [cards, disciplines]);
   const deckBlocks = useMemo(() => [...new Set(decks.map((d) => d.block))], [decks]);
 
-  const focoList = useMemo(() => Object.entries(cardStats.reviewsByDisc).filter(([discId]) => fichasCountByDisc[discId] > 0).map(([discId, r]) => {
+  const focoList = useMemo(() => Object.entries(cardStats.reviewsByDisc).filter(([discId]) => fichasCountByDisc[discId] > 0 && discById[discId]?.name !== "Arquitetura Tecnológica").map(([discId, r]) => {
     const total = r.correct + r.wrong;
     const pct = total ? Math.round((r.correct / total) * 100) : 0;
     let cor, rotulo;
