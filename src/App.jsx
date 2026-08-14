@@ -2002,6 +2002,7 @@ function TecPriorityPanel({ disciplines, setDisciplines }) {
   const [yearEnd, setYearEnd] = useState("");
   const [url, setUrl] = useState("");
   const [yearError, setYearError] = useState("");
+  const [recurrenceFilter, setRecurrenceFilter] = useState("todas");
   const selectedDiscipline = disciplines.find((d) => d.id === disciplineId);
   const topics = selectedDiscipline?.topics || [];
   const selectedTopic = topics.find((t) => t.id === topicId);
@@ -2020,10 +2021,12 @@ function TecPriorityPanel({ disciplines, setDisciplines }) {
       const count = hasTec ? Math.max(0, Number(t.tecQuestions) || 0) : 0;
       return { discipline: d, topic: t, count, hasTec, score: count * (d.q > 0 ? d.peso / d.q : d.peso) };
     })).filter((row) => row.hasTec);
-    return configured.sort((a, b) => (a.topic.studied === b.topic.studied ? b.score - a.score : a.topic.studied ? 1 : -1));
+    return configured.sort((a, b) => b.count - a.count || b.score - a.score || a.topic.name.localeCompare(b.topic.name));
   }, [disciplines]);
-  const maxScore = rows.reduce((max, row) => Math.max(max, row.score), 0);
-  const labelFor = (score) => !maxScore ? "Baixa" : score >= maxScore * 0.67 ? "Alta" : score >= maxScore * 0.34 ? "Média" : "Baixa";
+  const maxCount = rows.reduce((max, row) => Math.max(max, row.count), 0);
+  const recurrenceLevel = (count) => !maxCount ? "baixa" : count >= maxCount * 0.67 ? "alta" : count >= maxCount * 0.34 ? "media" : "baixa";
+  const recurrenceLabel = { alta: "Alta recorrência", media: "Média recorrência", baixa: "Baixa recorrência" };
+  const visibleRows = recurrenceFilter === "todas" ? rows : rows.filter((row) => recurrenceLevel(row.count) === recurrenceFilter);
   const tecPeriod = (topic) => topic.tecYearStart && topic.tecYearEnd ? ` · ${topic.tecYearStart}–${topic.tecYearEnd}` : topic.tecYearStart ? ` · desde ${topic.tecYearStart}` : topic.tecYearEnd ? ` · até ${topic.tecYearEnd}` : "";
 
   function changeDiscipline(nextId) {
@@ -2080,7 +2083,7 @@ function TecPriorityPanel({ disciplines, setDisciplines }) {
 
   return <div>
     <Card className="mb-4">
-      <div className="flex items-start gap-3 mb-4"><Target size={18} color={C.gold} className="shrink-0 mt-0.5" /><div><div className="text-sm font-bold">Configurar filtro TEC</div><p className="text-xs mt-1" style={{ color: C.muted }}>Informe o período e o total encontrado para um tópico. A prioridade considera esse volume e o valor de cada questão da matéria.</p></div></div>
+      <div className="flex items-start gap-3 mb-4"><Target size={18} color={C.gold} className="shrink-0 mt-0.5" /><div><div className="text-sm font-bold">Configurar filtro TEC</div><p className="text-xs mt-1" style={{ color: C.muted }}>Informe o período e o total encontrado para um tópico. A ordem será definida pela quantidade de questões no filtro.</p></div></div>
       <div className="grid md:grid-cols-2 gap-3">
         <Field label="Matéria"><select value={disciplineId} onChange={(e) => changeDiscipline(e.target.value)} className={inputCls} style={inputStyle(C)}>{disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></Field>
         <Field label="Tópico"><select value={topicId} onChange={(e) => setTopicId(e.target.value)} className={inputCls} style={inputStyle(C)}>{topics.map((t) => <option key={t.id} value={t.id}>{t.num ? `${t.num} · ` : ""}{t.name}</option>)}</select></Field>
@@ -2096,8 +2099,11 @@ function TecPriorityPanel({ disciplines, setDisciplines }) {
     </Card>
 
     <Card>
-      <div className="flex items-center justify-between gap-3 mb-3"><div><div className="text-sm font-bold">Ordem sugerida de estudo</div><p className="text-xs mt-1" style={{ color: C.muted }}>Tópicos não estudados aparecem primeiro.</p></div><span className="text-xs shrink-0" style={{ color: C.muted }}>{rows.filter((row) => !row.topic.studied).length} pendente(s)</span></div>
-      {rows.length === 0 ? <Empty msg="Nenhum filtro configurado. Escolha uma matéria e um tópico acima para começar." /> : <div className="space-y-1">{rows.map((row, index) => { const label = labelFor(row.score); const high = label === "Alta"; return <div key={row.topic.id} className="flex items-center gap-3 py-2.5 border-t first:border-0" style={{ borderColor: C.line, opacity: row.topic.studied ? 0.65 : 1 }}><span className="w-6 text-xs font-bold text-center" style={{ color: C.muted }}>{index + 1}</span><button onClick={() => editRow(row)} className="flex-1 min-w-0 text-left"><div className="text-sm font-semibold truncate">{row.topic.name}</div><div className="text-[11px] truncate" style={{ color: C.muted }}>{row.discipline.name} · {row.count} questões TEC{tecPeriod(row.topic)}{row.topic.studied ? " · já estudado" : ""}</div></button><span className="text-[10px] font-bold px-2 py-1 rounded-full" style={{ background: row.topic.studied ? C.greenSoft : high ? C.redSoft : C.goldSoft, color: row.topic.studied ? C.green : high ? C.red : C.ink }}>{row.topic.studied ? "Estudado" : label}</span>{row.topic.tecFilterUrl && <a href={row.topic.tecFilterUrl} target="_blank" rel="noreferrer" className="p-1.5" title="Abrir filtro no TecConcursos"><ExternalLink size={15} color={C.muted} /></a>}</div>; })}</div>}
+      <div className="flex items-center justify-between gap-3 mb-3 flex-wrap"><div><div className="text-sm font-bold">Questões mais recorrentes</div><p className="text-xs mt-1" style={{ color: C.muted }}>Ordenado pelo número de questões encontradas nos filtros. O status de estudo não altera a prioridade.</p></div><span className="text-xs shrink-0" style={{ color: C.muted }}>{rows.length} tópico(s) com filtro</span></div>
+      {rows.length === 0 ? <Empty msg="Nenhum filtro configurado. Escolha uma matéria e um tópico acima para começar." /> : <>
+        <div className="flex items-center justify-end gap-2 mb-2"><label htmlFor="recurrence-filter" className="text-xs" style={{ color: C.muted }}>Filtrar recorrência</label><select id="recurrence-filter" value={recurrenceFilter} onChange={(e) => setRecurrenceFilter(e.target.value)} className="px-2 py-1 rounded-lg text-xs" style={inputStyle(C)}><option value="todas">Todas</option><option value="alta">Alta recorrência</option><option value="media">Média recorrência</option><option value="baixa">Baixa recorrência</option></select></div>
+        {visibleRows.length === 0 ? <Empty msg="Nenhum tópico corresponde a este nível de recorrência." /> : <div className="space-y-1">{visibleRows.map((row, index) => { const level = recurrenceLevel(row.count); const high = level === "alta"; return <div key={row.topic.id} className="flex items-center gap-3 py-2.5 border-t first:border-0" style={{ borderColor: C.line }}><span className="w-6 text-xs font-bold text-center" style={{ color: C.muted }}>{index + 1}</span><button onClick={() => editRow(row)} className="flex-1 min-w-0 text-left"><div className="text-sm font-semibold truncate">{row.topic.name}</div><div className="text-[11px] truncate" style={{ color: C.muted }}>{row.discipline.name} · {row.count} questões no filtro{tecPeriod(row.topic)}</div></button><span className="text-[10px] font-bold px-2 py-1 rounded-full" style={{ background: high ? C.redSoft : C.goldSoft, color: high ? C.red : C.ink }}>{recurrenceLabel[level]}</span>{row.topic.tecFilterUrl && <a href={row.topic.tecFilterUrl} target="_blank" rel="noreferrer" className="p-1.5" title="Abrir filtro no TecConcursos"><ExternalLink size={15} color={C.muted} /></a>}</div>; })}</div>}
+      </>}
     </Card>
   </div>;
 }
