@@ -288,7 +288,8 @@ function buildDiscFromEdital(concursoId, edital) {
     topics: (s.topics || []).map((t, j) => ({
       id: `${concursoId}-d${i}-t${j}`, num: t.num, name: t.name, hits: t.hits,
       tecQuestions: t.tecQuestions, tecFilterUrl: t.tecFilterUrl,
-      tecYearStart: t.tecYearStart, tecYearEnd: t.tecYearEnd, studied: false,
+      tecYearStart: t.tecYearStart, tecYearEnd: t.tecYearEnd,
+      tecFilters: t.tecFilters, studied: false,
     })),
   }));
 }
@@ -300,6 +301,7 @@ function mergeTecFields(base, saved = {}) {
     delete next.tecFilterUrl;
     delete next.tecYearStart;
     delete next.tecYearEnd;
+    delete next.tecFilters;
     return next;
   }
   return {
@@ -308,8 +310,34 @@ function mergeTecFields(base, saved = {}) {
     tecFilterUrl: saved.tecFilterUrl ?? base.tecFilterUrl,
     tecYearStart: saved.tecYearStart ?? base.tecYearStart,
     tecYearEnd: saved.tecYearEnd ?? base.tecYearEnd,
+    tecFilters: saved.tecFilters ?? base.tecFilters,
     tecFilterCleared: false,
   };
+}
+
+function tecFiltersOf(topic) {
+  if (Array.isArray(topic?.tecFilters)) return topic.tecFilters;
+  if (topic?.tecQuestions !== undefined && topic?.tecQuestions !== null && topic?.tecQuestions !== "") {
+    return [{ id: `legacy-${topic.id}`, questions: topic.tecQuestions, yearStart: topic.tecYearStart, yearEnd: topic.tecYearEnd, url: topic.tecFilterUrl }];
+  }
+  return [];
+}
+
+function withTecFilters(topic, filters) {
+  const next = { ...topic, tecFilters: filters, tecFilterCleared: filters.length === 0 };
+  const first = filters[0];
+  if (first) {
+    next.tecQuestions = first.questions;
+    next.tecYearStart = first.yearStart;
+    next.tecYearEnd = first.yearEnd;
+    next.tecFilterUrl = first.url;
+  } else {
+    delete next.tecQuestions;
+    delete next.tecYearStart;
+    delete next.tecYearEnd;
+    delete next.tecFilterUrl;
+  }
+  return next;
 }
 
 async function fetchEdital(concursoId) {
@@ -369,6 +397,7 @@ function extractSharedProgress(disciplines) {
       tecFilterUrl: t.tecFilterUrl,
       tecYearStart: t.tecYearStart,
       tecYearEnd: t.tecYearEnd,
+      tecFilters: t.tecFilters,
       tecFilterCleared: t.tecFilterCleared || false,
     }; });
   });
@@ -2018,6 +2047,7 @@ function TecPriorityPanel({ disciplines, setDisciplines }) {
   const currentYear = new Date().getFullYear();
   const firstTopic = disciplines[0]?.topics?.[0];
   const [topicId, setTopicId] = useState(firstTopic?.id || "");
+  const [filterId, setFilterId] = useState(null);
   const [questions, setQuestions] = useState("");
   const [yearStart, setYearStart] = useState("");
   const [yearEnd, setYearEnd] = useState("");
@@ -2028,20 +2058,24 @@ function TecPriorityPanel({ disciplines, setDisciplines }) {
   const selectedDiscipline = disciplines.find((d) => d.id === disciplineId);
   const topics = selectedDiscipline?.topics || [];
   const selectedTopic = topics.find((t) => t.id === topicId);
+  const topicFilters = tecFiltersOf(selectedTopic);
 
   useEffect(() => {
-    setQuestions(selectedTopic?.tecQuestions ?? "");
-    setYearStart(selectedTopic?.tecYearStart ?? "");
-    setYearEnd(selectedTopic?.tecYearEnd ?? "");
-    setUrl(selectedTopic?.tecFilterUrl || "");
+    const filters = tecFiltersOf(selectedTopic);
+    const active = filters.find((f) => f.id === filterId) || filters[0];
+    setFilterId(active?.id || null);
+    setQuestions(active?.questions ?? "");
+    setYearStart(active?.yearStart ?? "");
+    setYearEnd(active?.yearEnd ?? "");
+    setUrl(active?.url || "");
     setYearError("");
-  }, [selectedTopic?.id, selectedTopic?.tecQuestions, selectedTopic?.tecYearStart, selectedTopic?.tecYearEnd, selectedTopic?.tecFilterUrl]);
+  }, [selectedTopic?.id, selectedTopic?.tecFilters, selectedTopic?.tecQuestions, selectedTopic?.tecYearStart, selectedTopic?.tecYearEnd, selectedTopic?.tecFilterUrl]);
 
   const rows = useMemo(() => {
     const configured = disciplines.flatMap((d) => d.topics.map((t) => {
-      const hasTec = t.tecQuestions !== undefined && t.tecQuestions !== null && t.tecQuestions !== "";
-      const count = hasTec ? Math.max(0, Number(t.tecQuestions) || 0) : 0;
-      return { discipline: d, topic: t, count, hasTec, score: count * (d.q > 0 ? d.peso / d.q : d.peso) };
+      const filters = tecFiltersOf(t);
+      const count = filters.reduce((sum, f) => sum + Math.max(0, Number(f.questions) || 0), 0);
+      return { discipline: d, topic: t, filters, count, hasTec: filters.length > 0, score: count * (d.q > 0 ? d.peso / d.q : d.peso) };
     })).filter((row) => row.hasTec);
     return configured.sort((a, b) => b.count - a.count || b.score - a.score || a.topic.name.localeCompare(b.topic.name));
   }, [disciplines]);
@@ -2049,7 +2083,6 @@ function TecPriorityPanel({ disciplines, setDisciplines }) {
   const recurrenceLevel = (count) => !maxCount ? "baixa" : count >= maxCount * 0.67 ? "alta" : count >= maxCount * 0.34 ? "media" : "baixa";
   const recurrenceLabel = { alta: "Alta recorrência", media: "Média recorrência", baixa: "Baixa recorrência" };
   const visibleRows = recurrenceFilter === "todas" ? rows : rows.filter((row) => recurrenceLevel(row.count) === recurrenceFilter);
-  const tecPeriod = (topic) => topic.tecYearStart && topic.tecYearEnd ? ` · ${topic.tecYearStart}–${topic.tecYearEnd}` : topic.tecYearStart ? ` · desde ${topic.tecYearStart}` : topic.tecYearEnd ? ` · até ${topic.tecYearEnd}` : "";
 
   function changeDiscipline(nextId) {
     const d = disciplines.find((item) => item.id === nextId);
@@ -2062,15 +2095,21 @@ function TecPriorityPanel({ disciplines, setDisciplines }) {
       topics: d.topics.map((t) => t.id === targetTopicId ? updater(t) : t),
     })));
   }
-  function removeTecFilter(targetDisciplineId, targetTopicId) {
-    updateTecTopic(targetDisciplineId, targetTopicId, (t) => {
-      const next = { ...t, tecFilterCleared: true };
-      delete next.tecQuestions;
-      delete next.tecYearStart;
-      delete next.tecYearEnd;
-      delete next.tecFilterUrl;
-      return next;
-    });
+  function selectFilter(filter) {
+    setFilterId(filter.id);
+    setQuestions(filter.questions ?? "");
+    setYearStart(filter.yearStart ?? "");
+    setYearEnd(filter.yearEnd ?? "");
+    setUrl(filter.url || "");
+    setYearError("");
+  }
+  function newFilter() {
+    setFilterId(null);
+    setQuestions(""); setYearStart(""); setYearEnd(""); setUrl(""); setYearError("");
+  }
+  function removeFilter(id) {
+    updateTecTopic(disciplineId, topicId, (t) => withTecFilters(t, tecFiltersOf(t).filter((f) => f.id !== id)));
+    if (filterId === id) newFilter();
   }
   function saveFilter() {
     if (!disciplineId || !topicId || questions === "") return;
@@ -2093,25 +2132,25 @@ function TecPriorityPanel({ disciplines, setDisciplines }) {
         if (parsed.protocol === "http:" || parsed.protocol === "https:") safeUrl = parsed.href;
       } catch { safeUrl = ""; }
     }
-    updateTecTopic(disciplineId, topicId, (t) => ({
-      ...t,
-      tecQuestions: Math.max(0, Math.round(Number(questions) || 0)),
-      tecYearStart: start,
-      tecYearEnd: end,
-      tecFilterUrl: safeUrl || undefined,
-      tecFilterCleared: false,
-    }));
+    const id = filterId || uid();
+    const nextFilter = { id, questions: Math.max(0, Math.round(Number(questions) || 0)), yearStart: start, yearEnd: end, url: safeUrl };
+    updateTecTopic(disciplineId, topicId, (t) => {
+      const filters = tecFiltersOf(t);
+      const next = filterId && filters.some((f) => f.id === filterId)
+        ? filters.map((f) => f.id === filterId ? nextFilter : f)
+        : [...filters, nextFilter];
+      return withTecFilters(t, next);
+    });
+    setFilterId(id);
   }
   function clearFilter() {
     if (!disciplineId || !topicId) return;
-    removeTecFilter(disciplineId, topicId);
-    setQuestions(""); setYearStart(""); setYearEnd(""); setUrl(""); setYearError("");
+    updateTecTopic(disciplineId, topicId, (t) => withTecFilters(t, []));
+    newFilter();
   }
   function clearRow(row) {
-    removeTecFilter(row.discipline.id, row.topic.id);
-    if (row.discipline.id === disciplineId && row.topic.id === topicId) {
-      setQuestions(""); setYearStart(""); setYearEnd(""); setUrl(""); setYearError("");
-    }
+    updateTecTopic(row.discipline.id, row.topic.id, (t) => withTecFilters(t, []));
+    if (row.discipline.id === disciplineId && row.topic.id === topicId) newFilter();
   }
   function editRow(row) {
     setDisciplineId(row.discipline.id);
@@ -2122,27 +2161,28 @@ function TecPriorityPanel({ disciplines, setDisciplines }) {
   return <div>
     <div ref={formRef}>
       <Card className="mb-4">
-        <div className="flex items-start gap-3 mb-4"><Target size={18} color={C.gold} className="shrink-0 mt-0.5" /><div><div className="text-sm font-bold">Configurar filtro TEC</div><p className="text-xs mt-1" style={{ color: C.muted }}>Informe o período e o total encontrado para um tópico. A ordem será definida pela quantidade de questões no filtro.</p></div></div>
-      <div className="grid md:grid-cols-2 gap-3">
-        <Field label="Matéria"><select value={disciplineId} onChange={(e) => changeDiscipline(e.target.value)} className={inputCls} style={inputStyle(C)}>{disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></Field>
-        <Field label="Tópico"><select value={topicId} onChange={(e) => setTopicId(e.target.value)} className={inputCls} style={inputStyle(C)}>{topics.map((t) => <option key={t.id} value={t.id}>{t.num ? `${t.num} · ` : ""}{t.name}</option>)}</select></Field>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Ano inicial"><input type="number" min="1900" max={currentYear} step="1" value={yearStart} onChange={(e) => { setYearStart(e.target.value); setYearError(""); }} className={inputCls} style={inputStyle(C)} placeholder="Ex.: 2020" /></Field>
-          <Field label="Ano final"><input type="number" min="1900" max={currentYear} step="1" value={yearEnd} onChange={(e) => { setYearEnd(e.target.value); setYearError(""); }} className={inputCls} style={inputStyle(C)} placeholder={`Ex.: ${currentYear}`} /></Field>
+        <div className="flex items-start gap-3 mb-4"><Target size={18} color={C.gold} className="shrink-0 mt-0.5" /><div><div className="text-sm font-bold">Configurar filtro TEC</div><p className="text-xs mt-1" style={{ color: C.muted }}>Adicione um ou mais cadernos TEC para cada tópico.</p></div></div>
+        <div className="grid md:grid-cols-2 gap-3">
+          <Field label="Matéria"><select value={disciplineId} onChange={(e) => changeDiscipline(e.target.value)} className={inputCls} style={inputStyle(C)}>{disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></Field>
+          <Field label="Tópico"><select value={topicId} onChange={(e) => setTopicId(e.target.value)} className={inputCls} style={inputStyle(C)}>{topics.map((t) => <option key={t.id} value={t.id}>{t.num ? `${t.num} · ` : ""}{t.name}</option>)}</select></Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Ano inicial"><input type="number" min="1900" max={currentYear} step="1" value={yearStart} onChange={(e) => { setYearStart(e.target.value); setYearError(""); }} className={inputCls} style={inputStyle(C)} placeholder="Ex.: 2020" /></Field>
+            <Field label="Ano final"><input type="number" min="1900" max={currentYear} step="1" value={yearEnd} onChange={(e) => { setYearEnd(e.target.value); setYearError(""); }} className={inputCls} style={inputStyle(C)} placeholder={`Ex.: ${currentYear}`} /></Field>
+          </div>
+          <Field label="Quantidade de questões no filtro"><input type="number" min="0" step="1" value={questions} onChange={(e) => setQuestions(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="Ex.: 248" /></Field>
+          <div className="md:col-span-2"><Field label="Link do filtro (opcional)"><input type="url" value={url} onChange={(e) => setUrl(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="https://www.tecconcursos.com.br/questoes/..." /></Field></div>
         </div>
-        <Field label="Quantidade de questões no filtro"><input type="number" min="0" step="1" value={questions} onChange={(e) => setQuestions(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="Ex.: 248" /></Field>
-        <div className="md:col-span-2"><Field label="Link do filtro (opcional)"><input type="url" value={url} onChange={(e) => setUrl(e.target.value)} className={inputCls} style={inputStyle(C)} placeholder="https://www.tecconcursos.com.br/questoes/..." /></Field></div>
-      </div>
-      {yearError && <p className="text-xs mb-3" style={{ color: C.red }}>{yearError}</p>}
-      <div className="flex justify-end gap-2 flex-wrap"><Btn variant="ghost" onClick={clearFilter} disabled={!selectedTopic || selectedTopic.tecQuestions === undefined}><Trash2 size={14} /> Limpar</Btn><Btn onClick={saveFilter} disabled={!topicId || questions === ""}><Check size={15} /> Salvar filtro</Btn></div>
+        {topicFilters.length > 0 && <div className="mb-3 rounded-xl p-3" style={{ background: C.surface2 }}><div className="text-xs font-bold mb-2" style={{ color: C.muted }}>Filtros deste tópico</div><div className="space-y-1">{topicFilters.map((f, i) => <div key={f.id} className="flex items-center gap-2 text-xs"><button onClick={() => selectFilter(f)} className="flex-1 text-left truncate" style={{ color: f.id === filterId ? C.gold : C.ink }}>{i + 1}. {f.questions} questões{f.yearStart || f.yearEnd ? ` · ${f.yearStart || "..."}–${f.yearEnd || "..."}` : ""}{f.url ? " · link" : ""}</button><button onClick={() => removeFilter(f.id)} className="p-1" title="Remover filtro"><Trash2 size={13} color={C.red} /></button></div>)}</div></div>}
+        {yearError && <p className="text-xs mb-3" style={{ color: C.red }}>{yearError}</p>}
+        <div className="flex justify-end gap-2 flex-wrap"><Btn variant="ghost" onClick={newFilter} disabled={!topicFilters.length}><Plus size={14} /> Novo filtro</Btn><Btn variant="ghost" onClick={clearFilter} disabled={!topicFilters.length}><Trash2 size={14} /> Limpar todos</Btn><Btn onClick={saveFilter} disabled={!topicId || questions === ""}><Check size={15} /> {filterId ? "Salvar alterações" : "Adicionar filtro"}</Btn></div>
       </Card>
     </div>
 
     <Card>
-      <div className="flex items-center justify-between gap-3 mb-3 flex-wrap"><div><div className="text-sm font-bold">Questões mais recorrentes</div><p className="text-xs mt-1" style={{ color: C.muted }}>Ordenado pelo número de questões encontradas nos filtros. O status de estudo não altera a prioridade.</p></div><span className="text-xs shrink-0" style={{ color: C.muted }}>{rows.length} tópico(s) com filtro</span></div>
+      <div className="flex items-center justify-between gap-3 mb-3 flex-wrap"><div><div className="text-sm font-bold">Questões mais recorrentes</div><p className="text-xs mt-1" style={{ color: C.muted }}>Somatório dos cadernos cadastrados por tópico. O status de estudo não altera a prioridade.</p></div><span className="text-xs shrink-0" style={{ color: C.muted }}>{rows.length} tópico(s) com filtro</span></div>
       {rows.length === 0 ? <Empty msg="Nenhum filtro configurado. Escolha uma matéria e um tópico acima para começar." /> : <>
         <div className="flex items-center justify-end gap-2 mb-2"><label htmlFor="recurrence-filter" className="text-xs" style={{ color: C.muted }}>Filtrar recorrência</label><select id="recurrence-filter" value={recurrenceFilter} onChange={(e) => setRecurrenceFilter(e.target.value)} className="px-2 py-1 rounded-lg text-xs" style={inputStyle(C)}><option value="todas">Todas</option><option value="alta">Alta recorrência</option><option value="media">Média recorrência</option><option value="baixa">Baixa recorrência</option></select></div>
-        {visibleRows.length === 0 ? <Empty msg="Nenhum tópico corresponde a este nível de recorrência." /> : <div className="space-y-1">{visibleRows.map((row, index) => { const level = recurrenceLevel(row.count); const high = level === "alta"; return <div key={row.topic.id} className="flex items-center gap-3 py-2.5 border-t first:border-0" style={{ borderColor: C.line }}><span className="w-6 text-xs font-bold text-center" style={{ color: C.muted }}>{index + 1}</span><button onClick={() => editRow(row)} className="flex-1 min-w-0 text-left"><div className="text-sm font-semibold truncate">{row.topic.name}</div><div className="text-[11px] truncate" style={{ color: C.muted }}>{row.discipline.name} · {row.count} questões no filtro{tecPeriod(row.topic)}</div></button><span className="text-[10px] font-bold px-2 py-1 rounded-full" style={{ background: high ? C.redSoft : C.goldSoft, color: high ? C.red : C.ink }}>{recurrenceLabel[level]}</span><button onClick={() => editRow(row)} className="p-1.5 shrink-0" title="Editar filtro" aria-label={`Editar filtro de ${row.topic.name}`}><Pencil size={15} color={C.muted} /></button><button onClick={() => clearRow(row)} className="p-1.5 shrink-0" title="Remover filtro" aria-label={`Remover filtro de ${row.topic.name}`}><Trash2 size={15} color={C.red} /></button>{row.topic.tecFilterUrl && <a href={row.topic.tecFilterUrl} target="_blank" rel="noreferrer" className="p-1.5 shrink-0" title="Abrir filtro no TecConcursos"><ExternalLink size={15} color={C.muted} /></a>}</div>; })}</div>}
+        {visibleRows.length === 0 ? <Empty msg="Nenhum tópico corresponde a este nível de recorrência." /> : <div className="space-y-1">{visibleRows.map((row, index) => { const level = recurrenceLevel(row.count); const high = level === "alta"; return <div key={row.topic.id} className="flex items-center gap-3 py-2.5 border-t first:border-0" style={{ borderColor: C.line }}><span className="w-6 text-xs font-bold text-center" style={{ color: C.muted }}>{index + 1}</span><button onClick={() => editRow(row)} className="flex-1 min-w-0 text-left"><div className="text-sm font-semibold truncate">{row.topic.name}</div><div className="text-[11px] truncate" style={{ color: C.muted }}>{row.discipline.name} · {row.count} questões em {row.filters.length} filtro(s)</div></button><span className="text-[10px] font-bold px-2 py-1 rounded-full" style={{ background: high ? C.redSoft : C.goldSoft, color: high ? C.red : C.ink }}>{recurrenceLabel[level]}</span><button onClick={() => editRow(row)} className="p-1.5 shrink-0" title="Editar filtros" aria-label={`Editar filtros de ${row.topic.name}`}><Pencil size={15} color={C.muted} /></button><button onClick={() => clearRow(row)} className="p-1.5 shrink-0" title="Remover filtros" aria-label={`Remover filtros de ${row.topic.name}`}><Trash2 size={15} color={C.red} /></button>{row.filters.map((f, i) => f.url && <a key={f.id} href={f.url} target="_blank" rel="noreferrer" className="p-1.5 shrink-0" title={`Abrir filtro ${i + 1}`}><ExternalLink size={15} color={C.muted} /></a>)}</div>; })}</div>}
       </>}
     </Card>
   </div>;
