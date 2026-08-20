@@ -1501,12 +1501,20 @@ function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, se
   const C = useC();
   const [erroForm, setErroForm] = useState({ disciplineId: disciplines[0]?.id || "", topicId: "", tema: "", motivo: MOTIVOS_ERRO[0], licao: "" });
   const [showForm, setShowForm] = useState(false);
+  const [erroFormError, setErroFormError] = useState("");
   const topicName = (discId, topId) => (topId ? discById[discId]?.topics?.find((t) => t.id === topId)?.name || "" : "");
+  useEffect(() => {
+    if (!erroForm.disciplineId && disciplines[0]?.id) {
+      setErroForm((p) => ({ ...p, disciplineId: disciplines[0].id }));
+    }
+  }, [disciplines, erroForm.disciplineId]);
 
   function addErro() {
-    if (!erroForm.tema.trim() || !erroForm.disciplineId) return;
+    if (!erroForm.disciplineId) { setErroFormError("Aguarde o carregamento das matérias."); return; }
+    if (!erroForm.tema.trim()) { setErroFormError("Informe questão ou tema do erro."); return; }
     const e = { id: uid(), disciplineId: erroForm.disciplineId, topicId: erroForm.topicId || null, tema: erroForm.tema.trim(), motivo: erroForm.motivo, licao: erroForm.licao.trim(), data: Date.now(), virouFicha: false, dominado: false };
     setErros((p) => [e, ...p]);
+    setErroFormError("");
     setErroForm({ disciplineId: erroForm.disciplineId, topicId: erroForm.topicId, tema: "", motivo: MOTIVOS_ERRO[0], licao: "" });
   }
   function removeErro(id) { setErros((p) => p.filter((e) => e.id !== id)); }
@@ -1774,14 +1782,15 @@ function ErrosView({ cards, setCards, erros, setErros, disciplines, discById, se
             </select>
           </Field>
         )}
-        <Field label="Questão / tema do erro"><textarea rows={2} value={erroForm.tema} onChange={(e) => setErroForm({ ...erroForm, tema: e.target.value })} className={inputCls} style={inputStyle(C)} placeholder="Ex.: Cálculo de broadcast em sub-rede /27" /></Field>
+        <Field label="Questão / tema do erro"><textarea rows={2} value={erroForm.tema} onChange={(e) => { setErroForm({ ...erroForm, tema: e.target.value }); setErroFormError(""); }} className={inputCls} style={inputStyle(C)} placeholder="Ex.: Cálculo de broadcast em sub-rede /27" /></Field>
         <Field label="Por que errei">
           <select value={erroForm.motivo} onChange={(e) => setErroForm({ ...erroForm, motivo: e.target.value })} className={inputCls} style={inputStyle(C)}>
             {MOTIVOS_ERRO.map((m) => <option key={m}>{m}</option>)}
           </select>
         </Field>
         <Field label="O que aprendi (vira a resposta do flashcard)"><textarea rows={3} value={erroForm.licao} onChange={(e) => setErroForm({ ...erroForm, licao: e.target.value })} className={inputCls} style={inputStyle(C)} placeholder="O conceito certo, com suas palavras." /></Field>
-        <div className="flex justify-end"><Btn onClick={addErro}><Plus size={16} /> Registrar erro</Btn></div>
+        {erroFormError && <p className="text-xs mb-3" style={{ color: C.red }}>{erroFormError}</p>}
+        <div className="flex justify-end"><Btn onClick={addErro} disabled={!erroForm.disciplineId}><Plus size={16} /> Registrar erro</Btn></div>
       </Card>
     ) : (
       <div className="flex justify-end mb-3"><Btn onClick={() => setShowForm(true)}><Plus size={16} /> Registrar erro</Btn></div>
